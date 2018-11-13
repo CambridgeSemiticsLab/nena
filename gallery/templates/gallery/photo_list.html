@@ -1,0 +1,35 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ view.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_1 %}
+    <div class="campl-column8 clearfix">
+        {% if photos %}
+            <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
+                <thead>
+                    <tr>
+                        <th>Dialect</th>
+                        <th>Title</th>
+                        <th>Preview</th>
+                    </tr>
+                </thead>
+            {% for photo in photos  %}
+                <tr>
+                    <td><a href={% url 'dialects:dialect-detail' photo.dialect.pk  %}>{{ photo.dialect }}</a></td>
+                    <td><a href={% url 'gallery:photo-detail' photo.pk  %}>{{ photo.title }}</a></td>
+                    <td><a href={% url 'gallery:photo-detail' photo.pk  %}><img src="{{ photo.thumbnail.url }}"></a></td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% else %}
+                No photos uploaded.
+        {% endif %}
+        {% if user.is_staff %}
+            <div class="clearfix"><a class="pill button" href="{% url 'gallery:photo-create' %}">New photo</a></div>
+        {% endif %}
+        </div>
+    {% endblock %}
+{% endblock %}

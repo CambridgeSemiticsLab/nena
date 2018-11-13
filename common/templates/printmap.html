@@ -1,0 +1,88 @@
+<div id="map" style='min-height: 500px'></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map').setView([37, 45], 7);
+    var dialectIcon = L.Icon.extend({
+        options: {
+            iconSize:     [7, 7],
+            iconAnchor:   [4, 4],
+            popupAnchor:  [0,0]
+        }
+    });
+    var jewishIcon = new dialectIcon({iconUrl:
+    '/static/images/smalldot.png', shadowUrl: '/static/images/smalldotshadow.png'}),
+        christianIcon = new dialectIcon({iconUrl:
+        '/static/images/smallsquare.png', shadowUrl: '/static/images/smallsquareshadow.png'});
+   
+    var dialects = [
+        { "name": "Sulemaniyya", "lat": 35.55, "long": 45.44, "community": "Jewish" }, { "name": "Qaraqosh", "lat": 36.267, "long": 43.383, "community": "Christian" },
+        { "name": "Alqosh", "lat": 36.735, "long": 43.096, "community": "Christian" }, { "name": "Peshabur", "lat": 37.068, "long": 42.458, "community": "Christian" },
+        { "name": "Dohok", "lat": 36.8658, "long": 42.9997, "community": "Jewish" }, { "name": "Koy Sanjaq", "lat": 36.084, "long": 44.628, "community": "Jewish" },
+        { "name": "BÄ“á¹£pÉ™n", "lat": 37.339, "long": 42.57, "community": "Christian" }, { "name": "Tisqopa", "lat": 36.5981, "long": 43.1039, "community": "Christian" },
+        { "name": "Aradhin", "lat": 37.11, "long": 43.318, "community": "Christian" }, { "name": "KarÉ™mlesh", "lat": 36.306, "long": 43.416, "community": "Christian" },
+        { "name": "Derabun", "lat": 37.086, "long": 42.488, "community": "Christian" }, { "name": "Ankawa", "lat": 36.225, "long": 43.995, "community": "Christian" },
+        { "name": "Billin", "lat": 37.48, "long": 43.42, "community": "Christian" }, { "name": "Ashitha", "lat": 37.3344, "long": 43.3833, "community": "Christian" },
+        { "name": "Umra d-Shish", "lat": 37.26, "long": 42.7994, "community": "Christian" }, { "name": "Arbel", "lat": 36.19, "long": 44.008, "community": "Jewish" },
+        { "name": "Baá¹­naya", "lat": 36.538, "long": 43.122, "community": "Christian" }, { "name": "ShÅsh-u-SharmÉ™n (nr. Aqra)", "lat": 36.802, "long": 43.727, "community": "Christian" },
+        { "name": "Sanandaj", "lat": 35.309, "long": 46.999, "community": "Jewish" }, { "name": "Harbole", "lat": 37.337, "long": 42.624, "community": "Christian" },
+        { "name": "Marga", "lat": 37.35, "long": 43.1, "community": "Christian" }, { "name": "Hertevin", "lat": 37.8667, "long": 42.5667, "community": "Christian" },
+        { "name": "Sardarid", "lat": 37.4, "long": 45.2333, "community": "Christian" }, { "name": "Bohtan", "lat": 37.7286, "long": 41.7781, "community": "Christian" },
+        { "name": "Sanandaj", "lat": 35.309, "long": 46.999, "community": "Christian" }, { "name": "Rustaqa", "lat": 36.705, "long": 44.765, "community": "Jewish" },
+        { "name": "Dobe", "lat": 36.5967, "long": 43.9956, "community": "Jewish" }, { "name": "Ruwanduz", "lat": 36.611, "long": 44.523, "community": "Jewish" },
+        { "name": "SaqÇz", "lat": 36.245, "long": 46.275, "community": "Jewish" }, { "name": "Telkepe", "lat": 36.483, "long": 43.133, "community": "Christian" },
+        { "name": "I&#7779;&#7779;in", "lat": 36.926, "long": 43.645, "community": "Christian" }, { "name": "Mar-Yaqo", "lat": 36.93, "long": 42.9, "community": "Christian" },
+        { "name": "TÉ™n", "lat": 37.0956, "long": 43.2624, "community": "Christian" }, { "name": "Barzan", "lat": 36.9281, "long": 44.0469, "community": "Jewish" },
+        { "name": "Betanure", "lat": 37.201, "long": 43.468, "community": "Jewish" }, { "name": "ShÇnno", "lat": 37.049, "long": 45.123, "community": "Jewish" },
+        { "name": "Bokan", "lat": 36.522, "long": 46.215, "community": "Jewish" }, { "name": "Amedia", "lat": 37.093, "long": 43.487, "community": "Jewish" },
+        { "name": "Zakho", "lat": 37.144, "long": 42.687, "community": "Christian" }, { "name": "Zakho", "lat": 37.1, "long": 42.68, "community": "Jewish" },
+        { "name": "Urmi", "lat": 37.585, "long": 45.103, "community": "Jewish" }, { "name": "Diyana-Zariwaw", "lat": 36.661, "long": 44.55, "community": "Christian" },
+        { "name": "Sablagh", "lat": 36.522, "long": 45.723, "community": "Jewish" }, { "name": "Jilu", "lat": 37.417, "long": 44.085, "community": "Christian" },
+        { "name": "Bersive", "lat": 37.193, "long": 42.857, "community": "Christian" }, { "name": "Sulemaniyya", "lat": 35.55, "long": 45.44, "community": "Christian" },
+        { "name": "Chall&#601;k", "lat": 37.048, "long": 43.676, "community": "Christian" }, { "name": "Darband", "lat": 37.5, "long": 45, "community": "Christian" },
+        { "name": "Bebede", "lat": 37.097, "long": 43.453, "community": "Christian" }, { "name": "Dere", "lat": 37.099, "long": 43.521, "community": "Christian" },
+        { "name": "NargÉ™zine-Xarjawa (nr. Aqra)", "lat": 36.674, "long": 43.896, "community": "Christian" }, { "name": "XÉ™rpa (nr. Aqra)", "lat": 36.769, "long": 43.869, "community": "Christian" },
+        { "name": "Aqra", "lat": 36.759, "long": 43.894, "community": "Christian" }, { "name": "Xarjawa", "lat": 36.666, "long": 43.878, "community": "Christian" },
+        { "name": "Mangesh", "lat": 37.035, "long": 43.096, "community": "Christian" }, { "name": "Bidaro", "lat": 37.148, "long": 42.656, "community": "Christian" },
+        { "name": "Hamziye", "lat": 37.094, "long": 43.427, "community": "Christian" }, { "name": "Barwar", "lat": 37.18, "long": 43.439, "community": "Christian" },
+        { "name": "Gargarnaye", "lat": 37.18, "long": 44.34, "community": "Christian" }, { "name": "Nerwa", "lat": 37.1192, "long": 43.7708, "community": "Jewish" },
+        { "name": "Salamas", "lat": 38.1975, "long": 44.7681, "community": "Christian" }, { "name": "Bne-Lagippa", "lat": 37.396, "long": 43.3833, "community": "Christian" },
+        { "name": "Kerend", "lat": 34.284, "long": 46.245, "community": "Jewish" }, { "name": "Koy Sanjaq", "lat": 36.084, "long": 44.628, "community": "Christian" },
+        { "name": "Tikab", "lat": 36.406, "long": 47.118, "community": "Jewish" }, { "name": "Qarah á¸¤asan", "lat": 34.667, "long": 47.1, "community": "Jewish" },
+        { "name": "Bijar", "lat": 35.866, "long": 47.609, "community": "Jewish" }, { "name": "Bartille", "lat": 36.3533, "long": 43.3811, "community": "Christian" },
+        { "name": "Baqopa", "lat": 36.5886, "long": 43.1308, "community": "Christian" }, { "name": "Solduz", "lat": 37.112, "long": 45.878, "community": "Jewish" },
+        { "name": "HÌ£alabja", "lat": 35.1778, "long": 45.986, "community": "Jewish" }, { "name": "Xanaqin", "lat": 34.347, "long": 45.401, "community": "Jewish" },
+        { "name": "Qaladeze", "lat": 36.185, "long": 45.119, "community": "Jewish" }, { "name": "Nerwa", "lat": 37.1192, "long": 43.7708, "community": "Christian" },
+        { "name": "Meze", "lat": 36.943, "long": 43.391, "community": "Christian" }, { "name": "Shaqlawa", "lat": 36.399, "long": 44.342, "community": "Christian" },
+        { "name": "Hassana", "lat": 37.342, "long": 42.407, "community": "Christian" }, { "name": "Challa", "lat": 37.291, "long": 43.846, "community": "Jewish" },
+        { "name": "SÄt", "lat": 37.318, "long": 44.174, "community": "Christian" }, { "name": "BÄz (Ma Xtaya)", "lat": 37.419, "long": 43.903, "community": "Christian" },
+        { "name": "TÌ£aÌ„l", "lat": 37.446, "long": 43.723, "community": "Christian" }, { "name": "Sarspido", "lat": 37.345, "long": 43.466, "community": "Christian" },
+        { "name": "Van", "lat": 38.494, "long": 43.38, "community": "Christian" }, { "name": "Halana", "lat": 37.17, "long": 44.45, "community": "Christian" },
+        { "name": "Walá¹­o (Upper Tiyari )", "lat": 37.464, "long": 43.632, "community": "Christian" }, { "name": "Txuma Gawaya", "lat": 37.35, "long": 43.77, "community": "Christian" },
+        { "name": "Txuma Mazá¹›a", "lat": 37.35, "long": 43.81, "community": "Christian" }, { "name": "Txuma GudÉ™kÎ¸a", "lat": 37.35, "long": 43.846, "community": "Christian" },
+        { "name": "Txuma GÉ™ssa", "lat": 37.35, "long": 43.74, "community": "Christian" }, { "name": "Txuma BÉ™rÉ™jnaye", "lat": 37.31, "long": 43.74, "community": "Christian" },
+        { "name": "ArbuÅ¡", "lat": 36.5667, "long": 40.5333, "community": "Christian" }, { "name": "Barwar of QoÄanÉ™á¹£", "lat": 37.6756, "long": 44.0675, "community": "Christian" },
+        { "name": "Urmi", "lat": 37.555, "long": 45.103, "community": "Christian" }, { "name": "Qasr Shirin", "lat": 34.512, "long": 45.68, "community": "Jewish" },
+        { "name": "Shahe", "lat": 36.8903, "long": 43.7917, "community": "Jewish" }, { "name": "BÉ™jil", "lat": 36.7283, "long": 44.0189, "community": "Jewish" }
+    ]
+
+//    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+}).addTo(map);
+    for (var i = 0; i < dialects.length; i++) {
+        var communityLabel = dialects[i]["name"] + "<br />" + dialects[i]["community"];
+        var communityIcon;
+        switch (dialects[i]["community"]) {
+            case "Jewish":
+                communityIcon = jewishIcon;
+                break;
+            case "Christian":
+                communityIcon = christianIcon;
+                break;
+        }
+        L.marker([dialects[i]["lat"],dialects[i]["long"]], {icon: communityIcon} ).addTo(map).bindPopup("<b>" +dialects[i]["name"] + "</b><br />" + dialects[i]["community"]);
+    }
+</script>

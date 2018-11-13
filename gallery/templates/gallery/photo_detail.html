@@ -1,0 +1,16 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ view.name }}: {{ object.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_4 %}
+        <div class='campl-column3'>
+            <img src="{{ object.original_image.url }}" />
+            <table>
+            <tr><td><b>Dialect:</b></td><td>{{ object.dialect }}</td></tr>
+            </table>
+        </div>
+    {% endblock %}
+{% endblock %}

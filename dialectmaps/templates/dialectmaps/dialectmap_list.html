@@ -1,0 +1,33 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ view.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_1 %}                                                                                                                                                               
+        <div class='campl-column8 clearfix'>
+        {% if maps %}
+            <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Author</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+            {% for map in maps %}
+                <tr>
+                    <td><a href="{% url 'dialectmaps:dialectmap-detail' map.pk %}">{{ map.name }}</a></td>
+                    <td>{{ map.author }}</td>
+                    <td>{{ map.created }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% else%}
+            No dialect maps have been created yet.
+        {% endif %}
+            {% include 'ucamprojectlight-pagination.html' %}
+        </div>
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ view.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_4 %}
+        <div class="campl-column8">
+            {% include "map.html" %}
+            <table class="campl-table">
+            <thead><th><b>Map</b></th><th>{{ dialectmap.name }}</th></thead>
+            <tr><td><b>Author:</b></td><td>{{ dialectmap.author }}</td></tr>
+            <tr><td><b>Public</b></td><td>{% if dialectmap.public %}yes{% else %}no{% endif %}</td></tr>
+            </table>
+        </div>
+    {% endblock %}
+{% endblock %}

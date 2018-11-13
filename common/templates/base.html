@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>		   <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js"><!--<![endif]-->
+<head>
+	{% block campl_block_head %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>{% block head_title %}A Project Light web site{% endblock %}</title>
+        <meta name="description" content="{% block head_description %}{% endblock %}" />
+        <meta name="author" content="{% block head_author %}{% endblock %}" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Place favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+        <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+        <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+        <!-- CSS : implied media="all" -->
+        <link rel="stylesheet" href="{% static 'stylesheets/full-stylesheet.css' %}" />
+        <link rel="stylesheet" href="{% static 'stylesheets/apps.css' %}" />
+
+        <!-- script type="text/javascript" src="//use.typekit.com/hyb5bko.js"></script>
+        <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+        <script type="text/javascript">  document.documentElement.className += " js";</script -->
+
+        <!-- script type="text/javascript" src="{% static 'javascripts/libs/jquery-min.js' %}"></script-->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script type="text/javascript" src="{% static 'javascripts/libs/modernizr.js' %}"></script>
+        <script type="text/javascript" src="{% static 'javascripts/apps-custom.js' %}"></script>
+
+        {% block additional_head %}
+            {# If you are using extensions to the base Project Light app template, in addition to your own app, #}
+            {# they will load their extra js and css here. #}
+        {% endblock %}
+        {% block app_head %}
+            {# If your application itself needs its own js and css, load it here. #}
+        {% endblock %}
+	{% endblock %}
+</head>
+<body class="campl-theme-6">
+	<a href="#nav" class="campl-skipTo" tabindex="1">skip to navigation</a>
+	<a href="#content" class="campl-skipTo" tabindex="2">skip to content</a>
+    {# Use campl-page-header-simple.html if you don't want a search bar. #}
+	{% block campl_page_header %}
+        <div class="campl-row campl-page-header global-page">
+            <div class="campl-wrap clearfix">
+                <div class="campl-column12">
+                    <div class="campl-content-container">
+                        {# Some sites (such as search) disable breadcrumbs completely. Override this block if you wish to do that. #}
+                        {% block all_breadcrumbs %}
+                            <div class="campl-breadcrumb" id="breadcrumb">
+                                <ul class="campl-unstyled-list campl-horizontal-navigation clearfix">
+                                    <li class='first-child'>
+                                        <a href="/" class="campl-home ir">Home</a>
+                                    </li>
+                                    {% block static_breadcrumbs %}
+                                        {% comment %}
+                                            Hard-code as many of these static breadcrumbs as you like.
+                                            They'll be displayed for every page in your app, before the dynamic
+                                            breadcrumbs you supply from your view, if any.
+                                        {% endcomment %}
+                                        {# My parent organisation #}
+                                        <li>
+                                            <a href="http://www.cam.ac.uk/">University of Cambridge</a>
+                                        </li>
+                                        {# My app name #}
+                                        <li>
+                                            <a href="http://www.cam.ac.uk/about-the-university/">My Django app</a>
+                                        </li>
+                                    {% endblock %}
+                                    {% comment %}
+                                        Application-specific breadcrumbs are handled by this little loop.
+                                        Pass a dictionary of any additional breadcrumbs as "breadcrumbs"
+                                        like:
+                                            breadcrumbs = {}
+                                            breadcrumbs[0] = dict(name='Page of my cool app', url='http://my.cool.app/page/')
+                                            breadcrumbs[1] = dict(name='Subpage of my cool app', url='http://my.cool.app/page/subthingy/')
+                                            ...
+                                            return render_to_response('campl.html', {'breadcrumbs':breadcrumbs, ...})
+                                    {% endcomment %}
+                                    {% for index, breadcrumb in breadcrumbs.items %}
+                                        <li>
+                                            <a href="{{ breadcrumb.url }}">{{ breadcrumb.name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <!--
+                            {# TODO check with IPG the logic for what to put here is correct #}
+                            <p class="campl-mobile-parent"><a href="{{ breadcrumbs.0.url }}"><span class="campl-back-btn campl-menu-indicator"></span>{{ breadcrumbs.0.name }}</a></p>
+                            -->
+                        {% endblock %}
+                        <p class="campl-page-title">{% block site_name %}A Django App for Project Light{% endblock %}</p>
+                        {% block search_bar %}
+                            <div class="campl-column6">
+                                <form action="{% block search_action %}#{% endblock %}" method="get" >
+                                    <fieldset>
+                                        <div class="campl-control-group">
+                                            <label for="query" class="visuallyhidden" onfocus="used=true;">query</label>
+                                            <div class="campl-search-input">
+                                                <input type="text" id="query" name="query" size="40" value="" />
+                                                <input class="campl-search-submit " type="image" src="{% static 'images/interface/btn-search-inpage.png' %}" />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+	{% endblock %}
+	<div class="campl-row campl-content"  id="content">
+		<div class="campl-wrap clearfix">
+            {# Make this block empty in your sub-template if you don't want tabs. #}
+			{% block campl_tabs_header %}
+                <div class="campl-column12 campl-main-content">
+                    {% block subtitle_div %}
+                        <div class="campl-column12">
+                            <div class="campl-content-container">
+                                <h1>{% block subtitle %}Subtitle of my Django app{% endblock %}</h1>
+                            </div>
+                        </div>
+                    {% endblock %}
+                    {% block tabs %}
+                        <div class="campl-content-container campl-no-padding">
+                            <div class="campl-column12">
+                                <ul id="campl-column12" class="campl-nav campl-nav-tabs campl-unstyled-list">
+                                {% for index, tab in tabs.items %}
+                                    <li{% ifequal active_tab_name tab.name %} class="active"{% endifequal %}>
+                                        <a href="{{ tab.url }}" data-toggle="tab">{{ tab.name }}</a>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endblock %}
+                </div>
+			{% endblock %}
+			<div class="campl-column12 campl-main-content">
+				{% block page_content %}    			
+                    {% block content_column_1 %}
+                        <div class="campl-column12 campl-main-content">
+                            <div class="campl-content-container">
+                                <h2>Some title</h2>
+                                <p>some content</p>
+                            </div>
+                        </div>
+                    {% endblock %}
+                    {% block content_column_2 %}
+                    {% endblock %}
+                    {% block content_column_3 %}
+                    {% endblock %}
+                    {% block content_column_4 %}
+                    {% endblock %}
+                    {% block content_column_5 %}
+                    {% endblock %}
+                    {% block content_column_6 %}
+                    {% endblock %}
+                    {% block content_column_7 %}
+                    {% endblock %}
+                    {% block content_column_8 %}
+                    {% endblock %}
+                    {% block content_column_9 %}
+                    {% endblock %}
+                    {% block content_column_10 %}
+                    {% endblock %}
+                    {% block content_column_11 %}
+                    {% endblock %}
+                    {% block content_column_12 %}
+                    {% endblock %}
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+	{% block local_footer %}
+        <div class="campl-row campl-local-footer campl-app-footer">
+			<div class="campl-wrap clearfix">
+				<div class="campl-column6 campl-footer-navigation">
+					<p class="campl-app-footer-content">
+                        {% block blurb %}
+                            This Django app is provided and managed by <a href="http://www.cam.ac.uk">somebody in Cambridge (probably)</a>.
+                        {% endblock %}
+                    </p>
+				</div>
+				<div class="campl-column3 campl-footer-navigation">
+					<div class="campl-content-container campl-navigation-list">
+						{% block footer1 %}<h3><a href="">footer1</a></h3>{% endblock %}
+					</div>
+				</div>
+				<div class="campl-column3 campl-footer-navigation last">
+					<div class="campl-content-container campl-navigation-list">
+						{% block footer2 %}<h3><a href="">footer2</a></h3>{% endblock %}
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endblock %}
+	{% block global_footer %}
+        <div class="campl-row campl-global-footer">
+            <div class="campl-wrap clearfix">
+                <div id="block-menu-menu-global-footer-with-logo" class="campl-column3 campl-footer-navigation" role="navigation" style="height: 221px;">
+                    <div class="campl-content-container campl-footer-logo">
+                        <a href="http://www.cam.ac.uk"><img class="campl-scale-with-grid" src="{% static 'images/interface/logo.png' %}" width="178" alt="Cambridge University"></a><p> © 2014 University of Cambridge</p>
+                        <ul class="campl-unstyled-list campl-global-footer-links">
+                            <li><a href="http://www.cam.ac.uk/university-a-z?ucam-ref=global-footer" title="">University A-Z</a></li>
+                            <li><a href="http://www.cam.ac.uk/contact-the-university?ucam-ref=global-footer" title="">Contact the University</a></li>
+                            <li><a href="http://www.cam.ac.uk/about-this-site/accessibility?ucam-ref=global-footer" title="">Accessibility</a></li>
+                            <li><a href="http://www.admin.cam.ac.uk/univ/information/foi/?ucam-ref=global-footer" title="">Freedom of information</a></li>
+                            <li><a href="http://www.cam.ac.uk/about-this-site/terms-and-conditions?ucam-ref=global-footer" title="">Terms and conditions</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="block-menu-menu-global-footer-study-at-camb" class="campl-column3 campl-footer-navigation" role="navigation" style="height: 221px;">
+                    <div class="campl-content-container campl-navigation-list">
+                        <div class="link-list">
+                            <h3><a href="http://www.cam.ac.uk/study-at-cambridge?ucam-ref=global-footer" title="">Study at Cambridge</a></h3>
+                            <ul class="campl-unstyled-list menu">
+                                <li><a href="http://www.study.cam.ac.uk/undergraduate/?ucam-ref=global-footer" title="">Undergraduate</a></li>
+                                <li><a href="http://www.admin.cam.ac.uk/students/gradadmissions/prospec/?ucam-ref=global-footer" title="">Graduate</a></li>
+                                <li><a href="http://www.ice.cam.ac.uk/?ucam-ref=global-footer" title="">Continuing education</a></li>
+                                <li><a href="http://www.epe.admin.cam.ac.uk/?ucam-ref=global-footer" title="">Executive and professional education</a></li>
+                                <li><a href="http://www.educ.cam.ac.uk/?ucam-ref=global-footer" title="">Courses in education</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="block-menu-menu-global-footer-about-uni" class="campl-column3 campl-footer-navigation" role="navigation" style="height: 221px;">
+                    <div class="campl-content-container campl-navigation-list">
+                        <div class="link-list">
+                            <h3><a href="http://www.cam.ac.uk/about-the-university?ucam-ref=global-footer" title="">About the University</a></h3>
+                            <ul class="campl-unstyled-list menu">
+                                <li><a href="http://www.cam.ac.uk/about-the-university/how-the-university-and-colleges-work?ucam-ref=global-footer" title="">How the University and Colleges work</a></li>
+                                <li><a href="http://www.cam.ac.uk/about-the-university/visiting-the-university?ucam-ref=global-footer" title="">Visiting the University</a></li>
+                                <li><a href="http://map.cam.ac.uk?ucam-ref=global-footer" title="">Maps</a></li>
+                                <li><a href="http://www.cam.ac.uk/news?ucam-ref=global-footer" title="">News</a></li>
+                                <li><a href="http://www.jobs.cam.ac.uk" title="">Jobs</a></li>
+                                <li><a href="http://www.philanthropy.cam.ac.uk/?ucam-ref=global-footer" title="">Giving to Cambridge</a></li>
+                                <li><a href="http://www.cam.ac.uk/global-cambridge?ucam-ref=global-footer" title="">Global Cambridge</a></li>
+                        </ul>
+                            </div>
+                        </div>
+                    </div>
+                <div id="block-menu-menu-global-footer-research" class="campl-column3 cam-footer-navigation" role="navigation" style="height: 221px;">
+                    <div class="campl-content-container campl-navigation-list">
+                        <div class="link-list">
+                            <h3><a href="http://www.cam.ac.uk/research?ucam-ref=global-footer" title="">Research at Cambridge</a></h3>
+                            <ul class="campl-unstyled-list menu">
+                                <li><a href="http://www.cam.ac.uk/research/news?ucam-ref=global-footer" title="">News</a></li>
+                                <li><a href="http://www.cam.ac.uk/research/features?ucam-ref=global-footer" title="">Features</a></li>
+                                <li><a href="http://www.cam.ac.uk/research/discussion?ucam-ref=global-footer" title="">Discussion</a></li>
+                                <li><a href="http://www.cam.ac.uk/research/spotlight-on?ucam-ref=global-footer" title="">Spotlight on...</a></li>
+                                <li><a href="http://www.cam.ac.uk/research/research-at-cambridge?ucam-ref=global-footer" title="">About research at Cambridge</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	{% endblock %}
+	{% block campl_foot_js %}
+        {# lazy js loader #}
+  	{% endblock %}
+</body>
+</html>

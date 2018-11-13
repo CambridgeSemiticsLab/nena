@@ -1,0 +1,36 @@
+{# Pagination for Project Light.  This uses the standard pagination support #}
+{# in MultipleObjectMixin.  It currently assumes that you want page         #}
+{# selection to use the query part of the URL, which is a bit ugly.         #}
+{% if is_paginated %}
+{% load ucamprojectlight %}  
+  <div class="campl-pagination campl-pagination-centered">
+    <ul>
+{% if page_obj.has_previous %}
+      <li class="campl-previous-li">
+	<a href="?page={{page_obj.previous_page_number}}"
+	   class="ir campl-pagination-btn campl-previous">
+	  <span class="campl-arrow-span">previous</span>
+	</a>
+      </li>
+{% endif %}
+{% for linked_pagenum in paginator.num_pages|elliptic_range:page_obj.number %}
+{% if linked_pagenum == page_obj.number %}
+      <li class="campl-active"><a href="?page={{page_obj.number}}">
+	  {{ page_obj.number }}</a></li>
+{% elif linked_pagenum == "..." %}
+      <span class="campl-elipsis">...</span>
+{% else %}
+      <li><a href="?page={{linked_pagenum}}">{{ linked_pagenum }}</a></li>
+{% endif %}
+{% endfor %}
+{% if page_obj.has_next %}
+      <li class="campl-next-li">
+	<a href="?page={{page_obj.next_page_number}}"
+	   class="ir campl-pagination-btn campl-next">
+	  <span class="campl-arrow-span">next</span>
+	</a>
+      </li>
+{% endif %}
+    </ul>
+  </div>
+{% endif %}

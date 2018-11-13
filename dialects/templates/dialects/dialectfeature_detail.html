@@ -1,0 +1,17 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ object.feature.fullheading }}&nbsp;{{ object.feature.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_4 %}
+        <div class='campl-column3'>
+            <ul class="campl-unstyled-list">
+                {% for e in object.dialectfeatureentry_set.all %}
+                    <li>{{ e.entry }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endblock %}
+{% endblock %}

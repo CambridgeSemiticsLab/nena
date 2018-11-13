@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+NENA
+{% endblock %}
+{% block all_breadcrumbs %}
+    {# block.super #}
+    <div>
+    {% if user.is_authenticated %}
+        <p style="color: white; text-align: right;">You are logged in as <b>{% if user.last_name %}{{ user.last_name }}, {% endif %} {% if user.first_name %}{{ user.first_name}}{% endif %}</b> (<b>{{ user }}</b>). <a href="/accounts/logout">Log out</a></p>
+    {% else %}
+        <p style="color: white; text-align: right;"><a href="/accounts/login">Log in</a> (<a href="/accounts/non-raven">without Raven account</a>)</p>
+    {% endif %}
+    </div>
+{% endblock %}
+{% block additional_head %}
+<link rel="stylesheet" href="{% static 'css/nena.css' %}" />
+{% endblock %}
+{% block site_name %}
+    <a href="{% url 'index' %}">The North Eastern Neo-Aramaic Database Project</a>
+{% endblock %}
+{% block subtitle %}
+    The North Eastern Neo-Aramaic Database Project
+{% endblock %}
+{% block tabs %}{% endblock %}
+{% block search_bar %}{% endblock %}
+{# block static_breadcrumbs %}
+<li><a href="http://www.ames.cam.ac.uk">Faculty of Asian and Middle Eastern Studies</a></li>
+<li><a href="http://localhost:8000">North Eastern Neo-Aramaic Database</a></li>
+{% endblock #}
+{% block campl_page_header %}
+    {{ block.super }}
+    {% include "menu.html" %}
+{% endblock %}
+{% block blurb %}
+<b>Copyright © 2016 Faculty of Asian & Middle Eastern Studies</b><br />
+Sidgwick Avenue, Cambridge, CB3 9DA<br />
+Telephone: +44(0)1223 335106<br />
+Fax: +44(0)1223 335110<br />
+Email: webmaster@ames.cam.ac.uk
+{% endblock %}
+{% block footer1 %}
+<!--div>
+developed by fixbork
+</div-->
+{% endblock %}
+{% block footer2 %}
+<div>
+<b>Page last updated</b><br />26 February 2017
+</div>
+{% endblock %}
+{% block global_footer %}{% endblock %}
+

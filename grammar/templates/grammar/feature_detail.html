@@ -1,0 +1,35 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ object.fullheading }}&nbsp;{{ object.name|safe }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_1 %}                                                                                                                                                               
+        <div class="campl-column8 clearfix" id="feature_detail">
+            <ol>
+                {% for id, d in dialects.items %}
+                    <table class="campl-table campl-table-condensed campl-table-striped">
+                <thead><tr><th>{{ d.name }}</th>{% if d.mappable  %}
+                    <th width="25%">
+                        <select name="select-{{ id }}">
+                            <option value="" selected>map group</option>
+                            <option value="group0" >not shown on map</option>
+                            {% for i in "x"|rjust:"12" %}
+                                {% with forloop.counter as c %}
+                            <option value="group{{ c }}">{{ c }}</option>
+                                {% endwith %}
+                            {% endfor %}
+                        </select>
+                    </th>{% else %}<th width="25%" style="text-align:right;">No coordinates for dialect</th>{% endif %}</tr></thead>
+                    <tr>
+                    {% if d.entries.primary %}<td colspan=2>{{ d.entries.primary|safe }}</li>{% endif %}
+                    {% if d.entries.marginal %}<tr><td colspan=2>{% for v in d.entries.marginal %}
+                        <i>{{ v|safe }}<br/><i>{% endfor %}</td></tr>{% endif %}
+                    </tr>
+                    </table>
+                {% endfor %}
+            </ol>
+        </div>
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'nena.html' %}
+{% load static %}
+{% block app_head %}
+<!-- script type="text/javascript" src="{% static 'js/tree.jquery.js' %}" /></script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+{% endblock %}
+
+{% block subtitle %}
+    {{ view.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_1 %}
+        <div class="campl-column4" id="feature_list" data-url="/api/v1/grammar/">
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                /* 6 create an instance when the DOM is ready */
+                $('#feature_list').jstree({
+                    'core' : {
+                        'data' : { 'url' : '/api/v1/grammar/'},
+                        'themes': { 'variant': 'large', 'icons': true}},
+                    'types': {
+                        "root": { "icon": false },
+                        "branch": {"icon" : false },
+                        "leaf": {"icon": false },
+                    },
+                    'plugins': ['wholerow', 'types', 'responsive']
+                 });
+            });
+            /*$('#feature_list').on("changed.jstree", function (e, data) {
+                  console.log(data.node.type);
+            });*/
+            $('#feature_list').on("activate_node.jstree", function (e, data) { document.location = data.instance.get_node(data.node, true).children('a').attr('href'); });
+        </script>
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ view.name }}
+{% endblock %}
+
+{% block page_content %}
+    {% block content_column_1 %}                                                                                                                                                               
+        <div class='campl-column8 clearfix'>
+        {% if clips %}
+            <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
+                <thead>
+                    <tr>
+                        <th>Dialect</th>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+            {% for clip in clips %}
+                <tr>
+                    <td><a href="{% url 'dialects:dialect-detail' clip.dialect.pk %}">{{ clip.dialect }}</a></td>
+                    <td><a href="{% url 'audio:audio-detail' clip.pk %}">{{ clip.title }}</a></td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% else%}
+            No audio has been uploaded yet.
+        {% endif %}
+        {% if user.is_staff %}
+            <div class="clearfix"><a class="pill button" href="{% url 'audio:audio-create' %}">New audio</a></div>
+        {% endif %}
+            {% include 'ucamprojectlight-pagination.html' %}
+        </div>
+    {% endblock %}
+{% endblock %}

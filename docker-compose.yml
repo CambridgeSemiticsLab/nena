@@ -1,0 +1,23 @@
+version: '3'
+services:
+  nena:
+    build:
+      context: .
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    links:
+      - db:db
+    volumes:
+      - ./:/usr/src/app
+    depends_on:
+      - db
+    environment:
+      - DJANGO_READ_DOT_ENV_FILE=True
+  db:
+    image: mariadb:10.1
+    expose:
+      - 3306
+    volumes:
+      - ./database:/var/lib/mysql

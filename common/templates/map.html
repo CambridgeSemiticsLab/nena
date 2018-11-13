@@ -1,0 +1,95 @@
+<div id="map" style='min-height: 500px'></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+<script src="/static/js/borders.js"></script>
+<script>
+    var dialectIcon = L.Icon.extend({
+        options: {
+            iconSize:     [7, 7],
+            iconAnchor:   [4, 4],
+            popupAnchor:  [0,0]
+        }
+    });
+    var jewishIcon = new dialectIcon({iconUrl:
+    '/static/images/smalldot.png', shadowUrl: '/static/images/smalldotshadow.png'}),
+        christianIcon = new dialectIcon({iconUrl:
+        '/static/images/smallsquare.png', shadowUrl: '/static/images/smallsquareshadow.png'});
+    var refcities = { "type": "FeatureCollection", "features": [
+        {"id": 1, "type": "Feature", "geometry": {"type": "Point", "coordinates": [43.3742567, 38.5084332]}, "properties": {"class": "refcity", "name": "Van"}},
+        {"id": 2, "type": "Feature", "geometry": {"type": "Point", "coordinates": [43.1291386, 36.3415843]}, "properties": {"class": "refcity", "name": "Mosul"}},
+        {"id": 3, "type": "Feature", "geometry": {"type": "Point", "coordinates": [44.0094652, 36.1911624]}, "properties": {"class": "refcity", "name": "Arbil"}},
+        {"id": 4, "type": "Feature", "geometry": {"type": "Point", "coordinates": [44.3964846, 35.4701099]}, "properties": {"class": "refcity", "name": "Kirkuk"}},
+        {"id": 5, "type": "Feature", "geometry": {"type": "Point", "coordinates": [46.2961952, 38.0739964]}, "properties": {"class": "refcity", "name": "Tabriz"}},
+        {"id": 6, "type": "Feature", "geometry": {"type": "Point", "coordinates": [47.0735891, 34.3239414]}, "properties": {"class": "refcity", "name": "Kermanshah"}},
+        {"id": 7, "type": "Feature", "geometry": {"type": "Point", "coordinates": [44.5125849, 40.1776121]}, "properties": {"class": "refcity", "name": "Yerevan"}},
+        {"id": 8, "type": "Feature", "geometry": {"type": "Point", "coordinates": [44.8014495, 41.6934591]}, "properties": {"class": "refcity", "name": "Tbilisi"}}]
+    };
+    var normalmap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.{ext}', {
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    //        subdomains: 'abcd',
+            minZoom: 6,
+            maxZoom: 11,
+            ext: 'png' }),
+        printmap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    //        subdomains: 'abcd',
+            minZoom: 6,
+            maxZoom: 11 });
+    var baseLayers = {
+        "Print view": printmap,
+        "Normal view": normalmap
+    };
+    function getclass(feature) {
+        if ("class" in feature.properties) {
+            var myClassName = feature.properties.class }
+        else {
+            var myClassName = "default-icon" };
+        return myClassName};
+        
+    function createCustomIcon (feature, latlng) { 
+        let myIcon = L.divIcon({iconSize: new L.Point(7, 7), className: getclass(feature) });
+        var myMarker =  L.marker(latlng, { icon: myIcon });
+        myMarker.bindTooltip(feature.properties.name, {pane: "tooltipPane"});
+        myMarker.on("click", function() { if (feature.properties.url) {window.location = feature.properties.url}});
+        return myMarker;
+    };
+    let myLayerOptions = {pointToLayer: createCustomIcon};
+    var map = L.map('map',{layers: [normalmap, printmap], center: [37, 45], zoom: 6, maxBoundsViscosity: 0.9});
+    var cities = L.geoJSON(refcities, myLayerOptions).addTo(map);
+    var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: getclass(feature) }} }).addTo(map);
+    var data = L.geoJSON(null,myLayerOptions).addTo(map);
+/*    $.getJSON('/api/v1'+window.location.pathname, function(json) {data.addData(json);});*/
+    $.ajax({
+        type: "GET",
+        url: '/api/v1'+window.location.pathname,
+        dataType: 'json',
+        success: function (response) {
+            data.addData(response);
+              map.setMaxBounds(data.getBounds().pad(.1));
+            }
+    });
+    var overlays = {
+        "Data": data,
+        "Country borders" : borders,
+        "Reference cities": cities
+    };
+    L.control.layers(baseLayers, overlays).addTo(map);
+var show_label_zoom = 3; // zoom level threshold for showing/hiding labels
+var labels_visible = true;
+function show_hide_labels() {
+    var cur_zoom = map.getZoom();
+    if(labels_visible && cur_zoom < show_label_zoom) {          
+        labels_visible = false;
+        map.eachLayer(function (layer) { 
+            layer.hideLabel && layer.hideLabel();
+        });             
+    }
+    else if(!labels_visible && cur_zoom >= show_label_zoom) {           
+        labels_visible = true;
+        map.eachLayer(function (layer) { 
+            layer.showLabel && layer.showLabel();
+        });             
+    }
+}
+map.on('zoomend', show_hide_labels);
+</script>

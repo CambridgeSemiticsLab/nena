@@ -1,0 +1,6 @@
+AddHandler wsgi-script .py
+Options FollowSymlinks ExecCGI MultiViews Indexes
+MultiviewsMatch Handlers
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ nena/common/mws.py/$1 [QSA,PT,L]
