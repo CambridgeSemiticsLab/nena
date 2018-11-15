@@ -1,7 +1,8 @@
 from rest_framework import viewsets
-from .serializers import DialectListSerializer, DialectDetailSerializer
+from .serializers import DialectListSerializer, DialectDetailSerializer, GrammarFeatureSerializer
 
 from dialects.models import Dialect
+from grammar.models import Feature
 
 
 class DialectViewSet(viewsets.ModelViewSet):
@@ -16,3 +17,10 @@ class DialectViewSet(viewsets.ModelViewSet):
         """
         return DialectListSerializer if self.action == 'list' else DialectDetailSerializer
 
+
+class GrammarFeatureViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows grammar features to be viewed or edited.
+    """
+    queryset = Feature.objects.all()
+    serializer_class = GrammarFeatureSerializer

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from dialects.models import Dialect
-
+from grammar.models import Feature
 
 class DialectListSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -27,4 +27,13 @@ class DialectDetailSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Dialect
+        fields = '__all__'
+
+
+class GrammarFeatureSerializer(serializers.ModelSerializer):
+    """
+    Serialise grammar feature objects
+    """
+    class Meta:
+        model = Feature
         fields = '__all__'
