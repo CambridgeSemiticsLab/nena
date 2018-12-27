@@ -31,3 +31,14 @@ class Feature(MP_Node):
     def save(self, force_insert=False, force_update=False):
         self.fullheading = self.full_heading()
         super(Feature, self).save(force_insert, force_update)
+
+    def children(self):
+        return None if self.get_children_count() == 0 else self.get_children()
+
+    def nodetype(self):
+        if self.id in [1, 41, 2236, 2289]:
+            return 'root'
+        elif self.get_children_count() > 0:
+            return 'branch'
+        else:
+            return 'leaf'

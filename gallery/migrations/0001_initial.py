@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('longitude', models.FloatField(null=True, blank=True)),
                 ('description', models.CharField(max_length=255, blank=True)),
                 ('original_image', models.ImageField(upload_to=b'galleries')),
-                ('dialect', models.ForeignKey(to='dialects.Dialect')),
+                ('dialect', models.ForeignKey(to='dialects.Dialect', on_delete=models.CASCADE)),
             ],
         ),
     ]

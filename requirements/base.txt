@@ -14,5 +14,6 @@ whitenoise
 Pillow
 boto3
 djangorestframework
+djangorestframework-recursive
 markdown
 django-filter

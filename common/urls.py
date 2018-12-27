@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from legacy.admin import legacyadmin
 from django.views.generic import TemplateView, RedirectView
+from django.conf import settings
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -42,3 +43,8 @@ urlpatterns = [
     url(r'^audio/', include(('audio.urls'), namespace='audio')),
     url(r'^gallery/', include(('gallery.urls'), namespace='gallery')),
 ]
+
+if settings.DEBUG:
+    urlpatterns = [
+        url(r'^silk/', include('silk.urls', namespace='silk')),
+    ] + urlpatterns

@@ -5,6 +5,10 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='^_xe!zh^)(7qi^qzzkl&m1ifhwtv==a2t
 
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
+if DEBUG:
+    THIRD_PARTY_APPS += ('silk', )
+    INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -47,6 +51,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE = ['silk.middleware.SilkyMiddleware',] + MIDDLEWARE
 
 UCAMWEBAUTH_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://demo.raven.cam.ac.uk/auth/logout.html'

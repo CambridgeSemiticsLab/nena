@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from dialects.models import Dialect
 from grammar.models import Feature
+from rest_framework_recursive.fields import RecursiveField
 
 class DialectListSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -30,10 +31,27 @@ class DialectDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class GrammarFeatureSerializer(serializers.ModelSerializer):
+class GrammarFeatureListSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialise grammar feature objects
     """
+    url = serializers.HyperlinkedIdentityField(view_name="api:feature-detail", read_only=True)
+    type = serializers.CharField(source='nodetype', read_only=True)
+
     class Meta:
         model = Feature
-        fields = '__all__'
+        fields = ('id', 'type', 'fullheading','name', 'url', )
+        read_only_fields = ('id', 'type', 'fullheading','name', 'url', )
+
+
+class GrammarFeatureDetailSerializer(serializers.ModelSerializer):
+    """
+    Serialise grammar feature objects
+    """
+    children = GrammarFeatureListSerializer(many=True, read_only=True)
+    type = serializers.CharField(source='nodetype', read_only=True)
+
+    class Meta:
+        model = Feature
+        fields = ("id", "type", "name", "heading", "fullheading", "children", )
+        read_only_fields = ("id", "type", "name", "heading", "fullheading", "children", )
