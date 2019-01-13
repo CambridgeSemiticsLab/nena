@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets, filters, Response
+from rest_framework import viewsets, filters
 from django_filters import rest_framework as dfilters
 
 from .serializers import DialectListSerializer, DialectDetailSerializer, GrammarFeatureListSerializer, GrammarFeatureDetailSerializer
