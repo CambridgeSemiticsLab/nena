@@ -26,9 +26,29 @@ class DialectDetailSerializer(serializers.ModelSerializer):
     """
     Serialize dialect objects for detail views, including all fields.
     """
+
     class Meta:
         model = Dialect
         fields = '__all__'
+
+#    def to_representation(self, instance):
+#        return {
+#            'id': instance.id,
+#            'type': 'Feature',
+#            'geometry': {
+#                'type': 'Point',
+#                'coordinates': [
+#                    instance.latitude,
+#                    instance.longitude,
+#                ]
+#            },
+#            'properties': {
+#                'name': instance.name,
+#                'url': '#',
+#                'community': instance.community,
+#                'class': 'group1' if instance.community == 'C' else 'group2',
+#            },
+#        } #if instance.latitude and instance.longitude else {}
 
 
 class GrammarFeatureListSerializer(serializers.HyperlinkedModelSerializer):
