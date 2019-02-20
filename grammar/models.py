@@ -24,7 +24,7 @@ class Feature(MP_Node):
             fullheading = [str(a.heading) for a in self.get_ancestors() if a.depth > 1] + [str(self.heading)]
         #fullheading = [str(a.heading) for a in self.get_ancestors()]+ [h+'.' for h in str(self.heading)]
             return '.'.join(fullheading)+'.'
-    
+
     def __str__(self):
         return "{} {}".format(self.fullheading, self.name)
 
@@ -36,7 +36,7 @@ class Feature(MP_Node):
         return None if self.get_children_count() == 0 else self.get_children()
 
     def nodetype(self):
-        if self.id in [1, 41, 2236, 2289]:
+        if self.id in [1, 41, 2236, 2289]: # this seems to be hard-coding ids for rows with depth=1
             return 'root'
         elif self.get_children_count() > 0:
             return 'branch'

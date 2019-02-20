@@ -1,43 +1,41 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
-    {{ view.name }}: {{ object.name }}
+    {{ object.name }}
 {% endblock %}
 
 {% block page_content %}
-    {% block content_column_4 %}
-        <div class='campl-column6'>
-            <table class="campl-table">
-            <thead><th><b>Dialect:</b></th><th>{{ object.name }}</th></thead>
-            <tr><td><b>Community:</b></td><td>{{ object.get_community_display }}</td></tr>
-            <tr><td><b>Location:</b></td><td>{{ object.get_location_display }}</td></tr>
-            <tr><td><b>Source:</b></td><td>{{ object.source|safe }}</td></tr>
-            </table>
-            {% if object.information %}
-            <h4>Further information about {{ object.name }}</h4>
-            <p>{{ object.information|safe }}</p>
-            {% endif %}
-            {% if object.remarks %}
-            <h4>General remarks about the dialect</h4>
-            <p>{{ object.remarks|safe }}</p>
-            {% endif %}
-            <ul class="campl-unstyled-list">
-                <li><a href="{% url 'dialects:dialect-gallery' object.pk %}">Images</a></li>
-                <li><a href="{% url 'dialects:dialect-audio' object.pk %}">Audio recordings and transcripts</a></li>
-                <li><a href="{% url 'dialects:dialect-grammar' object.pk %}">Grammatical description</a></li>
-            </ul>
-        {% if user.is_staff %}
-            <div><a class="button pill" href="{% url 'dialects:dialect-edit' object.pk %}">Edit dialect details</a>
-            <a class="button pill" href="{% url 'dialects:dialect-edit' object.pk %}">Edit grammatical description</a>
-            <a class="button pill" href="{% url 'dialects:dialect-delete' object.pk %}">Delete dialect</a></div>
-        {% endif %}
-        </div>
-    {% endblock %}
-    {% if object.latitude and object.longitude %}
-        {% block content_column_7 %}
-            <div class="campl-column4">
-             {% include "map.html" %}
-            </div>
-        {% endblock %}
-    {% endif %}
+  <div class='campl-column6'>
+      <table class="campl-table">
+      <thead><th><b>Dialect:</b></th><th>{{ object.name }}</th></thead>
+      <tr><td><b>Community:</b></td><td>{{ object.get_community_display }}</td></tr>
+      <tr><td><b>Location:</b></td><td>{{ object.get_location_display }}</td></tr>
+      <tr><td><b>Source:</b></td><td>{{ object.source|safe }}</td></tr>
+      </table>
+      {% if object.information %}
+      <h4>Further information about {{ object.name }}</h4>
+      <p>{{ object.information|safe }}</p>
+      {% endif %}
+      {% if object.remarks %}
+      <h4>General remarks about the dialect</h4>
+      <p>{{ object.remarks|safe }}</p>
+      {% endif %}
+      <ul class="campl-unstyled-list">
+          <li><a href="{% url 'dialects:dialect-gallery' object.pk %}">Images</a></li>
+          <li><a href="{% url 'dialects:dialect-audio' object.pk %}">Audio recordings and transcripts</a></li>
+          <li><a href="{% url 'dialects:dialect-grammar' object.pk %}">Grammatical description</a></li>
+      </ul>
+  {% if user.is_staff %}
+      <div style="margin-top: 100px;">
+        <a class="button pill" href="{% url 'dialects:dialect-edit' object.pk %}">Edit dialect details</a>
+        <a class="button pill" href="{% url 'dialects:dialect-edit' object.pk %}">Edit grammatical description</a>
+        <a class="button pill" href="{% url 'dialects:dialect-delete' object.pk %}">Delete dialect</a>
+      </div>
+  {% endif %}
+  </div>
+  {% if object.latitude and object.longitude %}
+    <div class="campl-column6" style="padding: 0 10px 40px; box-sizing: border-box; position: relative; top: -80px;">
+     {% include "map.html" %}
+    </div>
+  {% endif %}
 {% endblock %}

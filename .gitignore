@@ -87,5 +87,5 @@ database
 
 # static files
 media/
-static/
+/static/
 staticfiles/

@@ -1,17 +1,23 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
-    {{ object.feature.fullheading }}&nbsp;{{ object.feature.name }}
+    {{ object.feature.fullheading }} {{ object.feature.name|safe }} in {{object.dialect}}
 {% endblock %}
 
 {% block page_content %}
-    {% block content_column_4 %}
-        <div class='campl-column3'>
-            <ul class="campl-unstyled-list">
-                {% for e in object.dialectfeatureentry_set.all %}
-                    <li>{{ e.entry }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endblock %}
+  <div class='campl-column3'>
+    <p>introduction:{{object.introduction}}</p>
+    <p>comment:{{object.comment}}</p>
+
+    <ul class="campl-unstyled-list">
+      {% for example in examples %}
+          <li>
+            {{ example.entry|safe }} [{{ example.frequency }}]<br>
+            {{ example.comment|safe }}
+          </li>
+      {% empty %}
+          <li><i>No examples recorded</i></li>
+      {% endfor %}
+    </ul>
+  </div>
 {% endblock %}

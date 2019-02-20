@@ -2,12 +2,12 @@
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>		   <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9"> <![endif]-->
+<!--[if IE 8]>       <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js"><!--<![endif]-->
 <head>
-	{% block campl_block_head %}
+  {% block campl_block_head %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>{% block head_title %}A Project Light web site{% endblock %}</title>
+        <title>{% block head_title %}NENA{% endblock %}</title>
         <meta name="description" content="{% block head_description %}{% endblock %}" />
         <meta name="author" content="{% block head_author %}{% endblock %}" />
 
@@ -37,13 +37,13 @@
         {% block app_head %}
             {# If your application itself needs its own js and css, load it here. #}
         {% endblock %}
-	{% endblock %}
+  {% endblock %}
 </head>
 <body class="campl-theme-6">
-	<a href="#nav" class="campl-skipTo" tabindex="1">skip to navigation</a>
-	<a href="#content" class="campl-skipTo" tabindex="2">skip to content</a>
-    {# Use campl-page-header-simple.html if you don't want a search bar. #}
-	{% block campl_page_header %}
+  <a href="#nav" class="campl-skipTo" tabindex="1">skip to navigation</a>
+  <a href="#content" class="campl-skipTo" tabindex="2">skip to content</a>
+  {# Use campl-page-header-simple.html if you don't want a search bar. #}
+  {% block campl_page_header %}
         <div class="campl-row campl-page-header global-page">
             <div class="campl-wrap clearfix">
                 <div class="campl-column12">
@@ -112,11 +112,11 @@
                 </div>
             </div>
         </div>
-	{% endblock %}
-	<div class="campl-row campl-content"  id="content">
-		<div class="campl-wrap clearfix">
-            {# Make this block empty in your sub-template if you don't want tabs. #}
-			{% block campl_tabs_header %}
+  {% endblock %}
+  <div class="campl-row campl-content"  id="content">
+    <div class="campl-wrap clearfix">
+      {# Make this block empty in your sub-template if you don't want tabs. #}
+      {% block campl_tabs_header %}
                 <div class="campl-column12 campl-main-content">
                     {% block subtitle_div %}
                         <div class="campl-column12">
@@ -139,9 +139,9 @@
                         </div>
                     {% endblock %}
                 </div>
-			{% endblock %}
-			<div class="campl-column12 campl-main-content">
-				{% block page_content %}    			
+      {% endblock %}
+      <div class="campl-column12 campl-main-content">
+        {% block page_content %}
                     {% block content_column_1 %}
                         <div class="campl-column12 campl-main-content">
                             <div class="campl-content-container">
@@ -172,34 +172,34 @@
                     {% endblock %}
                     {% block content_column_12 %}
                     {% endblock %}
-				{% endblock %}
-			</div>
-		</div>
-	</div>
-	{% block local_footer %}
-        <div class="campl-row campl-local-footer campl-app-footer">
-			<div class="campl-wrap clearfix">
-				<div class="campl-column6 campl-footer-navigation">
-					<p class="campl-app-footer-content">
-                        {% block blurb %}
-                            This Django app is provided and managed by <a href="http://www.cam.ac.uk">somebody in Cambridge (probably)</a>.
-                        {% endblock %}
-                    </p>
-				</div>
-				<div class="campl-column3 campl-footer-navigation">
-					<div class="campl-content-container campl-navigation-list">
-						{% block footer1 %}<h3><a href="">footer1</a></h3>{% endblock %}
-					</div>
-				</div>
-				<div class="campl-column3 campl-footer-navigation last">
-					<div class="campl-content-container campl-navigation-list">
-						{% block footer2 %}<h3><a href="">footer2</a></h3>{% endblock %}
-					</div>
-				</div>
-			</div>
-		</div>
-	{% endblock %}
-	{% block global_footer %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+  {% block local_footer %}
+    <div class="campl-row campl-local-footer campl-app-footer">
+      <div class="campl-wrap clearfix">
+        <div class="campl-column6 campl-footer-navigation">
+          <p class="campl-app-footer-content">
+              {% block blurb %}
+                  This Django app is provided and managed by <a href="http://www.cam.ac.uk">somebody in Cambridge (probably)</a>.
+              {% endblock %}
+          </p>
+        </div>
+        <div class="campl-column3 campl-footer-navigation">
+          <div class="campl-content-container campl-navigation-list">
+            {% block footer1 %}<h3><a href="">footer1</a></h3>{% endblock %}
+          </div>
+        </div>
+        <div class="campl-column3 campl-footer-navigation last">
+          <div class="campl-content-container campl-navigation-list">
+            {% block footer2 %}<h3><a href="">footer2</a></h3>{% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endblock %}
+  {% block global_footer %}
         <div class="campl-row campl-global-footer">
             <div class="campl-wrap clearfix">
                 <div id="block-menu-menu-global-footer-with-logo" class="campl-column3 campl-footer-navigation" role="navigation" style="height: 221px;">
@@ -260,9 +260,9 @@
                 </div>
             </div>
         </div>
-	{% endblock %}
-	{% block campl_foot_js %}
+  {% endblock %}
+  {% block campl_foot_js %}
         {# lazy js loader #}
-  	{% endblock %}
+  {% endblock %}
 </body>
 </html>
