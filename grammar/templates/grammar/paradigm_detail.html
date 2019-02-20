@@ -1,22 +1,21 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
-    {{ feature.fullheading }}&nbsp;{{ feature.name|safe }}
+    {{ object.fullheading }}&nbsp;{{ object.name|safe }}
 {% endblock %}
 
 {% block page_content %}
     {% block content_column_1 %}
         <div class="campl-column8 clearfix" id="feature_detail">
             <ol>
-                {% for dialect_feature in dialect_features %}
-                {% with dialect=dialect_feature.dialect entries=dialect_feature.entries %}
+                {% for id, d in dialects.items %}
                     <table class="campl-table campl-table-condensed campl-table-striped">
                 <thead>
                   <tr>
-                    <th><a href="{% url 'dialects:dialect-detail' dialect.id %}">{{ dialect.name }}</a></th>
-                    {% if dialect.latitude and dialect.longitude %}
+                    <th>{{ d.name }}</th>
+                    {% if d.mappable  %}
                     <th width="25%">
-                        <select name="select-{{ dialect.id }}">
+                        <select name="select-{{ id }}">
                             <option value="" selected>map group</option>
                             <option value="group0" >not shown on map</option>
                             {% for i in "x"|rjust:"12" %}
@@ -31,13 +30,12 @@
                     {% endif %}
                   </tr>
                 </thead>
-                    {% for entry in dialect_feature.entries.all %}
                     <tr>
-                      <td colspan=2>{{ entry.entry }}</td>
+                    {% if d.entries.primary %}<td colspan=2>{{ d.entries.primary|safe }}</li>{% endif %}
+                    {% if d.entries.marginal %}<tr><td colspan=2>{% for v in d.entries.marginal %}
+                        <i>{{ v|safe }}<br/><i>{% endfor %}</td></tr>{% endif %}
                     </tr>
-                    {% endfor %}
                     </table>
-                {% endwith %}
                 {% endfor %}
             </ol>
         </div>
