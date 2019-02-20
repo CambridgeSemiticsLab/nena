@@ -20,4 +20,12 @@ services:
     expose:
       - 3306
     volumes:
-      - ./database:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d  # Place init .sql file(s) here.
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=True
+
+
+volumes:
+  mariadb_data:
+    external: true
