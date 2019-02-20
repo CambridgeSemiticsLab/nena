@@ -1,13 +1,13 @@
 {% extends 'nena.html' %}
+
+{% block subtitle_div %}{% endblock %}
+
 {% block page_content %}
-    {% block content_column_3 %}
-        <div class="campl-column3">
-            {% include "project.html" %}
-        </div>
-    {% endblock %}
-    {% block content_column_5 %}
-        <div class="campl-column6">
-            {% include "map.html" %}
-        </div>
-    {% endblock %}
+  <br>
+  <div class="campl-column4">
+      {% include "project.html" %}
+  </div>
+  <div class="campl-column8">
+      {% include "map.html" %}
+  </div>
 {% endblock %}
