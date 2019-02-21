@@ -1,9 +1,31 @@
-
+/* basic reset*/
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
+/* overrides for campl theme stuff */
+.campl-theme-6 .campl-page-header {
+    background-image: url(/static/images/bg.jpg);
+    background-size: 200px;
+    }
+.campl-theme-6 .campl-page-header:nth-of-type(1) {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5) inset;
+}
+.campl-theme-6 .campl-page-header:nth-of-type(2) {
+    box-shadow: 0 -20px 40px rgba(0,0,0,0.5) inset;
+}
+body .campl-page-title {
+    display: inline-block;
+    padding: 10px;
+    margin: -10px 0 0 -20px;
+    font-size: 26px;
+    line-height: 22px;
+    font-weight: bold;
+    background: #01010166;
+    text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+    }
 
 /* use Charis SIL - Regular in .woff format */
 @font-face {
