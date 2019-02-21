@@ -2,8 +2,10 @@
 {% load static %}
 
 {% block subtitle %}
-  {% if section %}
+  {% if section and dialect %}
     {{section}} in {{dialect.name}}
+  {% elif section %}
+    {{section}}
   {% elif dialect %}
     Grammatical description of {{dialect.name}}
   {% else %}
@@ -45,7 +47,7 @@
 
   </p>
   <ul id="grammar_tree" class="show_entries show_empties {{dialect|yesno:',grammar_only'}}">
-    {% for item, info in feature_list %}
+    {% for feature, info in feature_list %}
       {% if info.open and not forloop.first %}
         <div class='folder'></div>
         <input type="checkbox" class="pop_open" id="pop_open_{{forloop.counter}}" {%if feature_list|length < 100%}checked{%endif%}>
@@ -59,9 +61,15 @@
                    {% if info.has_empty or num_features == 0 %} has_empty {% endif %}{% endspaceless %}">
 
         <label for="pop_open_{{forloop.counter|add:'1'}}">
-          {{item|safe}}
-          {% if item.fullheading %}
-          <a class="section_link" href="?section={{item.fullheading}}" title="show just this section">§</a>
+          {{feature|safe}}
+          {% if feature.fullheading %}
+          <a class="section_link" href="{% spaceless %}
+              {% if dialect %}
+                {% url 'dialects:dialect-grammar-section' dialect.id feature.fullheading %}
+              {% else %}
+                {% url 'grammar:feature-list-section' feature.fullheading %}
+              {% endif %}
+              {% endspaceless %}" title="show just this section">§</a>
           {% endif %}
         </label>
 
@@ -71,6 +79,15 @@
           <a class="details_link" href="{% url 'dialects:dialect-feature' dialect.id info.df_id %}">
             details &raquo;
           </a>
+        </div>
+        {% elif info.dialect_count %}
+        <div class="example">
+          {% with n=info.dialect_count %}
+          <a href="{% url 'grammar:feature-detail' feature.id %}">
+            {{n}} dialect{{n|pluralize}}
+          </a>
+          {{n|pluralize:'has,have'}} this feature
+          {% endwith %}
         </div>
         {% endif %}
 

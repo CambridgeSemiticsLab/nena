@@ -73,15 +73,22 @@ class DialectDeleteView(DeleteView):
     model = Dialect
     success_url = reverse_lazy('dialects:dialect-list')
 
+def get_section_root(section):
+    if section:
+        # Make trailing dots consistent and workaround "x.0" inconsistency
+        section = section.rstrip('.')
+        section = section if section[-1] == '0' else section + '.'
+
+    root = Feature.objects.filter(fullheading=section).first()
+    if section and not root:
+        raise Http404('No sections match \'{}\''.format(section))
+    return root
 
 @staff_member_required
-def features_of_dialect(request, dialect_id):
+def features_of_dialect(request, dialect_id, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
     dialect     = Dialect.objects.get(pk=dialect_id)
-    section     = request.GET.get('section')
-    chosen_root = Feature.objects.filter(fullheading=section).first()
-    if section and not chosen_root:
-        raise Http404('No sections match \'{}\''.format(section))
+    chosen_root = get_section_root(section)
 
     # annotated lists are an efficient way of getting a big chunk of a treebeard tree
     # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
@@ -149,10 +156,10 @@ def features_of_dialect(request, dialect_id):
                     feature_list[j][1]['has_empty'] = True
 
     context = {
-        'dialect':        dialect,
-        'section':        chosen_root,
+        'dialect':      dialect,
+        'section':      chosen_root,
         'feature_list': feature_list,
-        'num_features':   num_features,
+        'num_features': num_features,
     }
 
     if chosen_root:

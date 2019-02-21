@@ -4,19 +4,37 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.urls import reverse_lazy
 from django.shortcuts import render
 
 from grammar.models import Feature
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry, DialectFeatureExample
-
+from dialects.views import get_section_root
 
 @staff_member_required
-def features(request):
+def features(request, section=None):
     '''The grammar feature list page with the main categories.'''
+    chosen_root = get_section_root(section)
+
+    base_path      = chosen_root.path if chosen_root else ''
+    dialect_counts = Feature.objects.filter(path__startswith=base_path) \
+                                    .annotate(num_dialects=Count('dialectfeature__id')) \
+                                    .values_list('num_dialects') \
+                                    .order_by('path')
+
+    # force list conversion else dialect_counts[i] lookup below is *slow*
+    dialect_counts = list(dialect_counts)
+
+    feature_list = Feature.get_annotated_list(parent=chosen_root)
+
+    for i in range(0, len(feature_list)):
+        feature_list[i][1]['dialect_count'] = dialect_counts[i][0]
+
     context = {
-        'feature_list': Feature.get_annotated_list()
+        'section': chosen_root,
+        'feature_list': feature_list,
+        'dialect_counts': dialect_counts,
     }
     return render(request, 'grammar/feature_list.html', context)
 
