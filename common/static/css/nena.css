@@ -23,8 +23,17 @@ body .campl-page-title {
     font-size: 26px;
     line-height: 22px;
     font-weight: bold;
-    background: #01010166;
-    text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+}
+.login_status {
+    color: white;
+    float: right;
+    padding: 3px 6px;
+}
+.login_status,
+body .campl-page-title {
+    background: #557d;
+    text-shadow: 0 0 10px rgba(0,0,0,1);
+    box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
     }
 
 /* use Charis SIL - Regular in .woff format */
@@ -200,13 +209,12 @@ img {
 #grammar_tree ul {
         max-height:0;
         overflow:hidden;
-        margin: 0;
+        margin: 0 0 0 40px;
         transition: max-height 1s;
         }
 #grammar_tree li {
         position: relative;
-        padding: 12px 0 6px 40px;
-        margin: 2px;
+        padding: 2px 2px 8px 2px;
         background-color: white;
         color: #ccc;
         }
@@ -219,9 +227,10 @@ img {
             }
 /* li contents */
 #grammar_tree label {
-        font-size:16px;
-        display:inline-block;
-        margin-left: 8px;
+        font-size: 1em;
+        display: inline-block;
+        margin: 0;
+        padding: 12px 0 5px 48px;
         line-height: 1.4em;
         }
 #grammar_tree .section_link {
@@ -237,6 +246,7 @@ img {
             }
 #grammar_tree .example {
         display: inline-block;
+        padding: 12px 5px 5px 5px;
         max-width: 550px;
         line-height: 1.4em;
         vertical-align: top;
@@ -254,6 +264,7 @@ img {
         text-align: center;
         font-size: 15px;
         font-weight: bold;
+        pointer-events: none;
         }
 #grammar_tree .folder:before {
             content:'{';

@@ -8,10 +8,11 @@ NENA
     {# block.super #}
     <div>
     {% if user.is_authenticated %}
-        <p style="color: white; text-align: right;">You are logged in as <b>{% if user.last_name %}{{ user.last_name }}, {% endif %} {% if user.first_name %}{{ user.first_name}}{% endif %}</b> (<b>{{ user }}</b>). <a href="/accounts/logout">Log out</a></p>
+        <p class="login_status">You are logged in as <b>{% if user.last_name %}{{ user.last_name }}, {% endif %} {% if user.first_name %}{{ user.first_name}}{% endif %}</b> (<b>{{ user }}</b>). <a href="/accounts/logout">Log out</a></p>
     {% else %}
-        <p style="color: white; text-align: right;"><a href="/accounts/login">Log in</a> (<a href="/accounts/non-raven">without Raven account</a>)</p>
+        <p class="login_status"><a href="/accounts/login">Log in</a> (<a href="/accounts/non-raven">without Raven account</a>)</p>
     {% endif %}
+      <div class="clearfix" style="height: 28px;"></div>
     </div>
 {% endblock %}
 {% block additional_head %}
