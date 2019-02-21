@@ -25,7 +25,7 @@ class FeatureListView(ListView):
 
 
 @staff_member_required
-def feature(request, pk):
+def dialects_with_feature(request, pk):
     ''' Faster way to list all dialects with corresponding entries for a given feature '''
     ''' todo - replace FeatureDetailView and FeatureParadigmView with this or similar '''
     feature = Feature.objects.get(pk=pk)
