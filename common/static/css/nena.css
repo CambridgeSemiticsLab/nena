@@ -177,11 +177,171 @@ ul{
 
 .aramaic {
     font-family: CharisSILW, Arial, liberation-sans, sans-serif !important;
-/*    background: lime;
-    padding: .1em .5em;
-*/
+    font-size: 120%;
+    font-weight: bold;
+    background-color: #fec4;
+    padding: 0.1em 0.2em;
+    margin: -0.1em -0.2em;
 }
 
 img {
     max-width:600px;
 }
+
+.ilb { display: inline-block }
+
+/* padding enough to get off the side of a grid container */
+.p-3 { padding: 0.5em 1em; }
+
+/* list setup and expanding */
+#grammar_tree {
+    min-height:600px;
+    }
+#grammar_tree ul {
+        max-height:0;
+        overflow:hidden;
+        margin: 0;
+        transition: max-height 1s;
+        }
+#grammar_tree li {
+        position: relative;
+        padding: 12px 0 6px 40px;
+        margin: 2px;
+        background-color: white;
+        color: #ccc;
+        }
+#grammar_tree .pop_open {
+        display:none
+        }
+#grammar_tree .pop_open:checked + ul {
+            max-height:50000px;
+            transition: max-height 5s;
+            }
+/* li contents */
+#grammar_tree label {
+        font-size:16px;
+        display:inline-block;
+        margin-left: 8px;
+        line-height: 1.4em;
+        }
+#grammar_tree .section_link {
+        color: #ccc;
+        text-decoration: none;
+        display: none;
+        }
+#grammar_tree label:hover .section_link {
+            display: inline-block;
+            }
+#grammar_tree .section_link:hover {
+            color: #a51137;
+            }
+#grammar_tree .example {
+        display: inline-block;
+        max-width: 550px;
+        line-height: 1.4em;
+        vertical-align: top;
+        }
+/* folder is the big stripe down the LHS of an expanded section */
+#grammar_tree .folder{
+        padding: 9px 5px;
+        background-color: #ccc;
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        bottom:2px;
+        width: 29px;
+        color: white;
+        text-align: center;
+        font-size: 15px;
+        font-weight: bold;
+        }
+#grammar_tree .folder:before {
+            content:'{';
+            position: absolute;
+            top: 9px;
+            left: 4px;
+            width: 10px;
+            height:20px;
+            color:white;
+            }
+#grammar_tree .folder:after {
+            content:'}';
+            position: absolute;
+            bottom: 8px;
+            right: 4px;
+            color:white;
+            width: 10px;
+            height:20px;
+            }
+
+/* show and hide based on having entries or not */
+#grammar_tree li { display: none; }
+#grammar_tree.grammar_only li{ display: block; color: black; }
+#grammar_tree.show_entries li.has_entry { display: block }
+#grammar_tree.show_empties li.has_empty { display: block }
+#grammar_tree.show_empties:not(.show_entries) .folder{ background-color: #ccc; } /* when only showing empties make folders faded */
+#grammar_tree .has_entry { color: black; } /* if a node has entries beneath it don't fade it */
+#grammar_tree.grammar_only .folder,
+#grammar_tree .has_entry>.folder { background-color: #a51137; } /* if we're just showing grammar, or folder has entries show colours */
+
+/* entry content */
+#grammar_tree .details_link { visibility: hidden }
+#grammar_tree li:hover > .details_link { visibility: visible }
+
+/* make the folders fade out as you go deeper */
+#grammar_tree .level_0>.folder { opacity: 1; }
+#grammar_tree .level_1>.folder { opacity: 0.8; }
+#grammar_tree .level_2>.folder { opacity: 0.6; }
+#grammar_tree .level_3>.folder { opacity: 0.4; }
+#grammar_tree .level_4>.folder { opacity: 0.3; }
+#grammar_tree .level_5>.folder { opacity: 0.2; }
+
+/* make labels same width without a bounding box */
+#grammar_tree .level_0>label { width: 542px; }
+#grammar_tree .level_1>label { width: 500px; }
+#grammar_tree .level_2>label { width: 458px; }
+#grammar_tree .level_3>label { width: 416px; }
+#grammar_tree .level_4>label { width: 374px; }
+#grammar_tree .level_5>label { width: 332px; }
+
+/* checkbox replacement */
+input[type=checkbox].chex {
+    position:relative;
+    height:0;
+    width:2.3em;
+    }
+input[type=checkbox].chex:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: -1.2em;
+    left: 0.25em;
+    width: 1.2em;
+    height: 1.2em;
+    border: 0.1em solid #aaa;
+    border-radius: 25%;
+    background-color: #fff;
+    }
+input[type=checkbox].chex:hover:before {
+    box-shadow: 0 0 4px rgba(0,0,0,0.3) inset;
+    }
+input[type=checkbox].chex:after{
+    content: '';
+    color: red;
+    position: relative;
+    top: -0.6em;
+    font-size: 2em;
+    padding: 0.2em;
+    }
+input[type=checkbox].chex:checked:after {
+    content: '✔';
+    position: relative;
+    top: -0.6em;
+    font-size: 2em;
+    padding: 4px;
+    color: #a51137;
+    text-shadow: 1px 2px 2px rgba(0,0,0,0.3);
+    }
+input[type=checkbox].chex:hover:after {
+    color: #d61746;
+    }

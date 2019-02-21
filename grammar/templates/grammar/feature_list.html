@@ -1,38 +1,82 @@
 {% extends 'nena.html' %}
 {% load static %}
-{% block app_head %}
-<!-- script type="text/javascript" src="{% static 'js/tree.jquery.js' %}" /></script -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
-{% endblock %}
 
 {% block subtitle %}
-    {{ view.name }}
+    {% if section %}
+      {{section}} in {{dialect.name}}
+    {% elif dialect %}
+      Grammatical description of {{dialect.name}}
+    {% else %}
+      {{ view.name|safe }}
+    {% endif %}
 {% endblock %}
 
 {% block page_content %}
-    {% block content_column_1 %}
-        <div class="campl-column4" id="feature_list" data-url="/api/v1/grammar/">
+  {% if dialect %}
+  <p class="p-3">
+    {% if section %}
+    This section has {{num_features}} of the
+    <a href="{% url 'dialects:dialect-grammar' dialect.id %}">{{total_features}} total features</a>
+    detailed for the dialect
+    {% else %}
+    This dialect has {{num_features}} features
+    {% endif %}
+  </p>
+  {% endif %}
+
+  <p class="p-3">
+    <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', true)">
+      Open all
+    </button>
+    <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', false)">
+      Close all
+    </button>
+
+    {% if dialect %}
+    <label class="ilb">
+      <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_entries')">
+      Show with entries
+    </label>
+    <label class="ilb">
+      <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_empties')">
+      Show without entries
+    </label>
+    {% endif %}
+
+  </p>
+  <ul id="grammar_tree" class="show_entries show_empties {{dialect|yesno:',grammar_only'}}">
+    {% for item, info in feature_list %}
+      {% if info.open and not forloop.first %}
+        <div class='folder'></div>
+        <input type="checkbox" class="pop_open" id="pop_open_{{forloop.counter}}" {%if feature_list|length < 100%}checked{%endif%}>
+        <ul>
+      {% elif not forloop.first %}
+      </li>
+      {% endif %}
+
+      <li class="level_{{info.level}} {% spaceless %}
+                   {% if info.has_entry or info.entry %} has_entry {% endif %}
+                   {% if info.has_empty or num_features == 0 %} has_empty {% endif %}{% endspaceless %}">
+
+        <label for="pop_open_{{forloop.counter|add:'1'}}">
+          {{item|safe}}
+          {% if item.fullheading %}
+          <a class="section_link" href="?section={{item.fullheading}}" title="show just this section">§</a>
+          {% endif %}
+        </label>
+
+        {% if info.entry %}
+        <div class="example">
+          {{info.entry|safe}}
+          <a class="details_link" href="{% url 'dialects:dialect-feature' dialect.id info.df_id %}">
+            details &raquo;
+          </a>
         </div>
-        <script type="text/javascript">
-            $(function () {
-                /* 6 create an instance when the DOM is ready */
-                $('#feature_list').jstree({
-                    'core' : {
-                        'data' : { 'url' : '/api/v1/grammar/'},
-                        'themes': { 'variant': 'large', 'icons': true}},
-                    'types': {
-                        "root": { "icon": false },
-                        "branch": {"icon" : false },
-                        "leaf": {"icon": false },
-                    },
-                    'plugins': ['wholerow', 'types', 'responsive']
-                 });
-            });
-            /*$('#feature_list').on("changed.jstree", function (e, data) {
-                  console.log(data.node.type);
-            });*/
-            $('#feature_list').on("activate_node.jstree", function (e, data) { document.location = data.instance.get_node(data.node, true).children('a').attr('href'); });
-        </script>
-    {% endblock %}
+        {% endif %}
+
+      {% for close in info.close %}
+      </li></ul>
+      {% endfor %}
+    {% endfor %}
+  </ul>
 {% endblock %}

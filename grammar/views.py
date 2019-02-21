@@ -20,7 +20,7 @@ class FeatureListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeatureListView, self).get_context_data(**kwargs)
-        context['annotated_list'] = Feature.get_annotated_list(max_depth=2)
+        context['feature_list'] = Feature.get_annotated_list()
         return context
 
 
