@@ -2,13 +2,13 @@
 {% load static %}
 
 {% block subtitle %}
-    {% if section %}
-      {{section}} in {{dialect.name}}
-    {% elif dialect %}
-      Grammatical description of {{dialect.name}}
-    {% else %}
-      {{ view.name|safe }}
-    {% endif %}
+  {% if section %}
+    {{section}} in {{dialect.name}}
+  {% elif dialect %}
+    Grammatical description of {{dialect.name}}
+  {% else %}
+    Grammatical description
+  {% endif %}
 {% endblock %}
 
 {% block page_content %}

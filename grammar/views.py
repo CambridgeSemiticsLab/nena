@@ -11,17 +11,14 @@ from django.shortcuts import render
 from grammar.models import Feature
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry, DialectFeatureExample
 
-class FeatureListView(ListView):
+
+@staff_member_required
+def features(request):
     '''The grammar feature list page with the main categories.'''
-    model = Feature
-    name = "Grammatical description"
-
-    context_object_name = 'feature_list'
-
-    def get_context_data(self, **kwargs):
-        context = super(FeatureListView, self).get_context_data(**kwargs)
-        context['feature_list'] = Feature.get_annotated_list()
-        return context
+    context = {
+        'feature_list': Feature.get_annotated_list()
+    }
+    return render(request, 'grammar/feature_list.html', context)
 
 
 @staff_member_required
