@@ -7,7 +7,6 @@
 {% block page_content %}
   <div class='campl-column6'>
       <table class="campl-table">
-      <thead><th><b>Dialect:</b></th><th>{{ object.name }}</th></thead>
       <tr><td><b>Community:</b></td><td>{{ object.get_community_display }}</td></tr>
       <tr><td><b>Location:</b></td><td>{{ object.get_location_display }}</td></tr>
       <tr><td><b>Source:</b></td><td>{{ object.source|safe }}</td></tr>

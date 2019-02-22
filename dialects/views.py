@@ -44,7 +44,18 @@ class DialectListJSONView(ListView):
         data = {'type': 'FeatureCollection', 'features': []}
         for d in context['object_list']:
             if d.latitude and d.longitude:
-                data['features'].append({"id": d.pk, "type": "Feature", "geometry": {"type": "Point", "coordinates": [d.longitude, d.latitude]}, "properties": {"name": d.name, "community": d.community, "url": d.get_absolute_url(), "class": "group1" if d.community == "C"  else "group2"}})
+                data['features'].append({
+                    "id": d.pk,
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [d.longitude, d.latitude]},
+                        "properties": {
+                            "name": d.name,
+                            "community": d.community,
+                            "url": d.get_absolute_url(),
+                        }
+                    })
         return JsonResponse(data, safe=False)
 
 class DialectDetailJSONView(DetailView):
@@ -57,7 +68,7 @@ class DialectDetailJSONView(DetailView):
 
     def render_to_response(self, context):
         for d in [context['dialect']]:
-            data = {"id": d.pk, "type": "Feature", "geometry": {"type": "Point", "coordinates": [d.longitude, d.latitude]}, "properties": {"name": d.name, "community": d.community, "url": d.get_absolute_url(), "class": "group1" if d.community == "C"  else "group2"}}
+            data = {"id": d.pk, "type": "Feature", "geometry": {"type": "Point", "coordinates": [d.longitude, d.latitude]}, "properties": {"name": d.name, "community": d.community, "url": d.get_absolute_url(), 'focus': True}}
             return JsonResponse(data, safe=False)
 
 class DialectCreateView(CreateView):
