@@ -1,8 +1,9 @@
+import json
+
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
-
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
@@ -11,6 +12,38 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
 from grammar.models import Feature
+
+
+def homepage(request):
+    dialects = Dialect.objects.filter(longitude__isnull=False, latitude__isnull=False) \
+                              .values('id', 'name', 'community', 'longitude', 'latitude')
+
+    map_data = [dialect_to_map_point(d) for d in dialects]
+    context = {
+        'map_data_json': json.dumps(map_data, indent=2)
+    }
+    return render(request, 'index.html', context)
+
+def object_to_map_point(object, lon=None, lat=None, properties={}):
+    return {
+        'id': object['id'],
+        'type': 'Feature',
+        'geometry': {
+            'type': 'Point',
+            'coordinates': [lon or object['longitude'], lat or object['latitude']],
+        },
+        'properties': properties,
+    }
+
+def dialect_to_map_point(dialect, focus=False):
+    properties = {
+        'type':      'dialect',
+        'dialect':   dialect['name'],
+        'community': dialect['community'],
+        'url':       reverse('dialects:dialect-detail', args=[dialect['id']]),
+        'focus':     focus,
+    }
+    return object_to_map_point(dialect, properties=properties)
 
 class DialectListView(ListView):
 
@@ -28,7 +61,15 @@ class DialectDetailView(DetailView):
     model = Dialect
 
     def get_context_data(self, **kwargs):
+        dialects = Dialect.objects.filter(longitude__isnull=False, latitude__isnull=False) \
+                                  .values('id', 'name', 'community', 'longitude', 'latitude')
+        map_data = [dialect_to_map_point(d, (d['id']==self.object.id)) for d in dialects]
+
         context = super(DialectDetailView, self).get_context_data(**kwargs)
+        context.update({
+            'map_data_json': json.dumps(map_data, indent=2),
+            'map_center': [self.object.longitude, self.object.latitude]
+        })
         return context
 
 class DialectListJSONView(ListView):

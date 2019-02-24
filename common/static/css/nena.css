@@ -110,13 +110,17 @@ ul{
 #map .icon_base:hover:before {
     background: #851735;
 }
-
 #map .icon_C:before {
     content: '✝';
 }
-
 #map .icon_J:before {
     content: '✡';
+}
+#map .icon_focus:before {
+    background: #557d;
+}
+#map .icon_focus:hover:before {
+    background: #557;
 }
 
 .group0 {

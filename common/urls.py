@@ -20,7 +20,10 @@ from django.views.generic import TemplateView, RedirectView
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
+import dialects.views
+
 urlpatterns = [
+    url(r'^$', dialects.views.homepage , name='index'),
     url(r'', include('ucamwebauth.urls')),
     url(r'^admin/login/$', RedirectView.as_view(pattern_name='raven_login', permanent=True, query_string=True)),
     url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='index', permanent=True, query_string=True)),
@@ -28,7 +31,6 @@ urlpatterns = [
 #    url(r'^accounts/logout$', auth_views., {'next_page': '/'}, name='logout'),
     url(r'^admin/', admin.site.urls),
     url(r'^legacy/', legacyadmin.urls),
-    url(r'^$', TemplateView.as_view(template_name="index.html"), name='index'),
     url(r'^dialects/', include(('dialects.urls'), namespace='dialects')),
     url(r'^dialectmaps/', include(('dialectmaps.urls'), namespace='dialectmaps')),
     url(r'^grammar/', include(('grammar.urls'), namespace='grammar')),

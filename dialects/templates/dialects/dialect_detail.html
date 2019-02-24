@@ -34,7 +34,7 @@
   </div>
   {% if object.latitude and object.longitude %}
     <div class="campl-column6" style="padding: 0 10px 40px; box-sizing: border-box; position: relative; top: -80px;">
-     {% include "map.html" %}
+     {% include "map.html" with map_data_json=map_data_json map_center=map_center %}
     </div>
   {% endif %}
 {% endblock %}

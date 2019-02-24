@@ -1,3 +1,7 @@
+{#  optional parameters taken by this template:                                                       #}
+{#  - `map_data_json` is a json string containing a plottable set of data consumed by `L.geoJSON()`   #}
+{#  - `map_center` is a two value list (longitude, latitude)                                          #}
+
 <div id="map"></div>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
@@ -27,7 +31,14 @@
     };
 
     dataLayerOptions = {pointToLayer: function (feature, latlng) {
-        class_list = feature.properties.community ? 'icon_base icon_' + feature.properties.community : 'default-icon';
+        props = feature.properties;
+        class_list = props.community ? 'icon_base icon_' + props.community : 'default-icon';
+        if(props.focus){
+            class_list += ' icon_focus';
+        }
+        if(props.group){
+          class_list += ' group_'+props.group;
+        }
         myIcon   = L.divIcon({iconSize: L.point(7, 7), className: class_list });
         myMarker = L.marker(latlng, { icon: myIcon });
 
@@ -35,28 +46,27 @@
             offset: L.point(0, -10),
             direction: 'top',
             className: 'map_tooltip',
-            permanent: feature.properties.focus ? true : false,
+            permanent: props.focus ? true : false,
         }
-        myMarker.bindTooltip(feature.properties.name, tooltip_options);
+        if( props.type == 'entry' ){
+          tooltip_content = props.entry + '<br><span style="font-size:60%">'+props.dialect+'</span>';
+        }else{
+          tooltip_content = props.dialect;
+        }
+        myMarker.bindTooltip(tooltip_content, tooltip_options);
 
-        if(feature.properties.url){
-            myMarker.on("click", function(){window.location = feature.properties.url});
+        if(props.url){
+            myMarker.on("click", function(){window.location = props.url});
         }
         return myMarker;
     }};
-    var map     = L.map('map',{layers: [cities_and_terrain /*, printmap*/], center: [37, 45], zoom: 7, maxBoundsViscosity: 0.9});
+    var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
+    var map     = L.map('map',{layers: [cities_and_terrain /*, printmap*/], center: center, zoom: 7, maxBoundsViscosity: 0.9});
     var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
     var data    = L.geoJSON(null, dataLayerOptions).addTo(map);
 
-    $.ajax({
-        type: "GET",
-        url: '/api/v1'+window.location.pathname,
-        dataType: 'json',
-        success: function (response) {
-            data.addData(response);
-            map.setMaxBounds(data.getBounds().pad(.1));
-            }
-    });
+    data.addData({{map_data_json|safe}});
+    map.setMaxBounds(data.getBounds().pad(.2));
 
     /* {# may keep to re-introduce print mode #}
     var overlays = {
