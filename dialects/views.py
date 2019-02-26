@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
@@ -12,6 +13,65 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
 from grammar.models import Feature
+
+def problems(request):
+    context = {}
+
+    types = [
+        ('simple_span',      '^\<span class=aramaic\>.*?\<\/span\>$'),
+        ('span_suffix',      '^\<span class=aramaic\>.*?\<\/span\>[^\<]+$'),
+        ('span_prefix',      '^[^\<]+\<span class=aramaic\>.*?\<\/span\>$'),
+        ('span_prepost',     '^[^\<]+\<span class=aramaic\>.*?\<\/span\>[^\<]+$'),
+        ('span_exemplified', '^Exemplified by (the verb )?<span class=aramaic\>.*?\<\/span\>[^\<]*?$'),
+        ('span_cropl',       '^ *span class=aramaic\>.*?\<\/span\> *$'),
+        ('span_extral',      '^\>\<span class=aramaic\>.*?\<\/span$'),
+        ('span_cropr',       '^ *\<span class=aramaic\>.*?\<\/span[^\>]*$'),
+        ('span_span',        '^ *\<span class=aramaic\>.*?\<span\> *$'),
+        ('spana_spana',      '^\<span class=aramaic\>.*?\<span class=aramaic\>$'),
+        ('span_incomplete',  '^\<span class=aramaic\>[^\<]+$'),
+        ('double_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
+        ('triple_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
+        ('quad_span',        '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
+        ('sup_x',            '\<sup\>\+\<\/sup\>'),
+        ('sup_y',            '\<sup\>\y\<\/sup\>'),
+        ('yes',              '^ *Yes *$'),
+        ('yes_see_eg',       '^ *Yes \(see examples\) *$'),
+        ('yes_loanwords',    '^ *Yes \(mostly loanwords\) *$'),
+        ('yes_eg',           '^ *Yes \(\<span class=aramaic\>.*?\<\/span\> *\)*$'),
+        ('no',               '^ *No *$'),
+        ('no_past_base',     '^ *No, general past base only *$'),
+        ('no_stative',       '^ *No: General stative participle only *$'),
+        ('no_loanwords',     '^ *No, restricted to loanwords *$'),
+        ('not_present',      '^ *XXX *$'),
+        ('blank',            '^ *$'),
+        ('unsure',           '^\?*$'),
+        ('none',             '^ *None *$'),
+        ('none_attested',    '^ *None attested\.? *$'),
+        ('dash',             '^ *- *$'),
+        ('test',             '^ *test *$'),
+        ('as_usual',         '^ *As usual *$'),
+        ('penultiamte',      '^ *Penultimate *$'),
+        ('penultiamte',      '^ *Regular assimilation of L-suffix and resulting gemination of \/[rn]\/\. *$'),
+    ]
+    os = DialectFeatureEntry.objects
+    canfix = [
+        (type,
+         os.filter(entry__iregex=regex).count(),
+         os.filter(entry__iregex=regex) \
+           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:3]
+        ) for type, regex in types
+    ]
+
+    cantfix = DialectFeatureEntry.objects
+    for type, regex in types:
+        cantfix = cantfix.exclude(entry__iregex=regex)
+    cantfix = cantfix.values_list('entry', 'feature__dialect_id', 'feature_id')
+    context = {
+        'canfix': canfix,
+        'cantfix': cantfix[0:1000],
+        'cantfix_count': cantfix.count(),
+    }
+    return render(request, 'dialects/problems.html', context)
 
 
 def homepage(request):

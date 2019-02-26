@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^(?P<dialect>[0-9]+)/feature/(?P<pk>[0-9]+)$', dialects.views.DialectFeatureDetailView.as_view(), name='dialect-feature'),
     url(r'^(?P<dialect>[0-9]+)/gallery$', gallery.views.DialectPhotoView.as_view(), name='dialect-gallery'),
     url(r'^(?P<dialect>[0-9]+)/audio$', audio.views.DialectAudioView.as_view(), name='dialect-audio'),
+    url('problems', dialects.views.problems, name='problems'),
 ]

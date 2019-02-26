@@ -1,7 +1,7 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
-    {{ view.name }}
+    {{ view.name|safe }}
 {% endblock %}
 
 {% block page_content %}

@@ -1,0 +1,30 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    Data quality issues
+{% endblock %}
+
+{% block page_content %}
+    <div class="campl-column12">
+    <div class="campl-content-container">
+
+      <h3>Examples we can't automatically fix ({{cantfix_count}} total)</h3>
+      <p>
+      {% for i in cantfix %}
+          {{i.0}} <a href="{% url 'dialects:dialect-feature' i.1 i.2 %}">view &raquo;</a><br>
+      {% endfor %}
+      </p>
+
+      <h3>Examples we should be able to automatically fix</h3>
+      {% for type, num, examples in canfix %}
+      <p>
+        <b>{{type}} appears {{num}} times</b>, eg:<br>
+        {% for example in examples %}
+          {{example.0}} <a href="{% url 'dialects:dialect-feature' example.1 example.2 %}">view &raquo;</a><br>
+        {% endfor %}
+      </p>
+      {% endfor %}
+
+    </div>
+    </div>
+{% endblock %}

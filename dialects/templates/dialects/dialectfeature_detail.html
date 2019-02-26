@@ -14,8 +14,9 @@
     <ul class="campl-unstyled-list">
       {% for example in examples %}
           <li>
-            {{ example.entry|safe }} [{{ example.frequency }}]<br>
-            {{ example.comment|safe }}
+            Example: "{{ example.entry }}"<br>
+            Frequency: {{ example.frequency }}<br>
+            Comment: {{ example.comment }}
           </li>
       {% empty %}
           <li><i>No examples recorded</i></li>
