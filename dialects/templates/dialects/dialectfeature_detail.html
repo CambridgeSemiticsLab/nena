@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block page_content %}
-  <div class='campl-column3'>
+  <div class='campl-column12'>
   <div class="campl-content-container">
 
     <p>introduction:{{object.introduction}}</p>
@@ -22,6 +22,14 @@
       {% endfor %}
     </ul>
 
+    <p>
+      <br>
+      <br>
+      <br>
+      <a href="{% url 'grammar:feature-detail' object.feature.id %}">
+        Compare this feature across other dialects &raquo;
+      </a>
+    </p>
   </div>
   </div>
 {% endblock %}

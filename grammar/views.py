@@ -1,10 +1,12 @@
+import json
+
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Prefetch, Count
+from django.db.models import Prefetch, Count, F
 from django.urls import reverse_lazy
 from django.shortcuts import render
 
@@ -53,6 +55,31 @@ def dialects_with_feature(request, pk):
                                           .order_by('dialect__name'),
     }
     return render(request, 'grammar/feature_detail.html', context)
+
+
+@staff_member_required
+def map_of_feature(request, pk):
+    '''  '''
+    from dialectmaps.views import entry_to_map_point
+    entries = DialectFeatureEntry.objects.filter(feature__feature_id=pk) \
+                                         .filter(feature__dialect__longitude__isnull=False,
+                                                 feature__dialect__latitude__isnull=False) \
+                                         .values('id', 'entry', 'feature_id',
+                                                 dialect=F('feature__dialect__name'),
+                                                 community=F('feature__dialect__community'),
+                                                 longitude=F('feature__dialect__longitude'),
+                                                 latitude=F('feature__dialect__latitude'),
+                                                 group=F('mapitem__group_id'))
+
+    feature = Feature.objects.get(pk=pk)
+    map_data = [entry_to_map_point(e) for e in entries]
+    context = {
+        'feature': feature,
+        'map_data_json': json.dumps(map_data, indent=2),
+        'view': {'name': feature}
+    }
+
+    return render(request, 'dialectmaps/dialectmap_detail.html', context)
 
 
 class FeatureParadigmView(DetailView):
