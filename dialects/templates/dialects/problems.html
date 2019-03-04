@@ -7,15 +7,20 @@
 {% block page_content %}
     <div class="campl-column12">
     <div class="campl-content-container">
+      <p>
+          The text we're looking at is in the 'entry' field of an example of a dilect's feature.
+          This should only contain aramaic text. Any definition should be moved to the example's comment.
+          If it's not an example it should be moved to a new field on the entry proper (rather than as one if it's examples).
+      </p>
 
-      <h3>Examples we can't automatically fix ({{cantfix_count}} total)</h3>
+      <h2>Examples we can't automatically fix ({{cantfix_count}} total)</h2>
       <p>
       {% for i in cantfix %}
           {{i.0}} <a href="{% url 'dialects:dialect-feature' i.1 i.2 %}">view &raquo;</a><br>
       {% endfor %}
       </p>
 
-      <h3>Examples we should be able to automatically fix</h3>
+      <h2>Examples we should be able to automatically fix</h2>
       {% for type, num, examples in canfix %}
       <p>
         <b>{{type}} appears {{num}} times</b>, eg:<br>

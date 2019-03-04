@@ -2,7 +2,7 @@ import json
 from collections import OrderedDict
 
 from django.shortcuts import render
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.db.models import Case, When
 
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
 from grammar.models import Feature
@@ -128,7 +129,7 @@ class DialectDetailView(DetailView):
         context = super(DialectDetailView, self).get_context_data(**kwargs)
         context.update({
             'map_data_json': json.dumps(map_data, indent=2),
-            'map_center': [self.object.longitude, self.object.latitude]
+            'map_center': [self.object.latitude, self.object.longitude]
         })
         return context
 
@@ -196,10 +197,29 @@ def get_section_root(section):
         raise Http404('No sections match \'{}\''.format(section))
     return root
 
-@staff_member_required
-def features_of_dialect(request, dialect_id, section=None):
+# @staff_member_required
+def features_of_dialect(request, dialect_id_string, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
-    dialect     = Dialect.objects.get(pk=dialect_id)
+    dialect_ids = [int(x) for x in dialect_id_string.split(',')]
+
+    # Clean the request url by adding or removing dialects
+    compare_id = request.GET.get('compare_with')
+    remove_id  = request.GET.get('remove_compare')
+    if compare_id or remove_id:
+        if compare_id:
+            dialect_ids.append(int(compare_id))
+        if remove_id:
+            dialect_ids.remove(int(remove_id))
+        id_string = ','.join([str(x) for x in dialect_ids])
+        view_name = 'dialects:dialect-grammar'
+        args = [id_string]
+        if section:
+            view_name = 'dialects:dialect-grammar-section'
+            args.append(section)
+        return HttpResponseRedirect(reverse(view_name, args=args))
+
+    preserved   = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
+    dialects    = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved)
     chosen_root = get_section_root(section)
 
     # annotated lists are an efficient way of getting a big chunk of a treebeard tree
@@ -207,13 +227,10 @@ def features_of_dialect(request, dialect_id, section=None):
     feature_list = Feature.get_annotated_list(parent=chosen_root)
 
     base_path = chosen_root.path if chosen_root else ''
-    feature_examples = DialectFeature.objects.filter(dialect=dialect) \
+    feature_examples = DialectFeature.objects.filter(dialect__in=dialect_ids) \
                                              .filter(feature__path__startswith=base_path) \
-                                             .values('id', 'feature_id', 'feature__path', 'entries__entry') \
+                                             .values('id', 'dialect_id', 'feature_id', 'feature__path', 'entries__entry') \
                                              .order_by('feature__path')
-
-    # todo - entries__entry can bring in multiple rows per dialect feature, consider how to use below
-
 
     # Step *backwards* through the list of features `feature_list` trying to join in matching
     # DialectFeature details from `feature_examples`.
@@ -248,19 +265,25 @@ def features_of_dialect(request, dialect_id, section=None):
                 feature_list[j][1]['has_empty'] = True
                 empty_level = level
 
-            id = feature_examples[i]['feature_id']
-            if feature_list[j][0].id == id:
+            feature_id = feature_examples[i]['feature_id']
+            if feature_list[j][0].id == feature_id:
                 num_features += 1
                 entry_level = level
 
-                feature_list[j][1].update({
-                    'entry': feature_examples[i]['entries__entry'] or '-',
-                    'df_id': feature_examples[i]['id'],
-                })
-
-                while i > 0:  # skip over additional examples of same feature
+                examples = OrderedDict((x, []) for x in dialect_ids)
+                while True:  # Loop through all examples of this feature
+                   # example_dialect_id = feature_examples[i]['dialect_id']
+                    examples[feature_examples[i]['dialect_id']].append({
+                        'text': feature_examples[i]['entries__entry'] or '-',
+                        'df_id': feature_examples[i]['id'],
+                   #     'dialect_id': example_dialect_id,
+                    })
                     i -= 1
-                    if feature_examples[i]['feature_id'] != id:
+                    if i < 0 or feature_examples[i]['feature_id'] != feature_id:
+                        feature_list[j][1].update({
+                            'dialects': examples
+                        })
+                        i = max(0, i)  # stop i from going negative
                         break
             else:
                 if 'has_entry' not in feature_list[j][1]:
@@ -268,14 +291,18 @@ def features_of_dialect(request, dialect_id, section=None):
                     feature_list[j][1]['has_empty'] = True
 
     context = {
-        'dialect':      dialect,
+        'dialect_ids':  dialect_ids,
+        'dialects':     dialects,
         'section':      chosen_root,
         'feature_list': feature_list,
         'num_features': num_features,
+        'all_dialects': Dialect.objects.all() \
+                                       .exclude(id__in=dialect_ids) \
+                                       .values_list('id', 'name'),
     }
 
     if chosen_root:
-        context['total_features'] = DialectFeature.objects.filter(dialect=dialect).count()
+        context['total_features'] = DialectFeature.objects.filter(dialect__in=dialect_ids).count()
 
     return render(request, 'grammar/feature_list.html', context)
 

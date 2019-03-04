@@ -1,7 +1,8 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
-    {{ object.feature.fullheading }} {{ object.feature.name|safe }} in {{object.dialect}}
+    {{ object.feature.fullheading }} {{ object.feature.name|safe }}
+    in <a href="{% url 'dialects:dialect-detail' object.dialect_id %}">{{object.dialect}}</a>
 {% endblock %}
 
 {% block page_content %}

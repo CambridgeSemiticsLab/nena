@@ -2,23 +2,29 @@
 {% load static %}
 
 {% block subtitle %}
-  {% if section and dialect %}
-    {{section}} in {{dialect.name}}
+  {% if section and dialects %}
+    {{section|safe}} in
+    {% for dialect in dialects %}
+      {{dialect.name}}{% if not forloop.last %},{% endif %}
+    {% endfor %}
   {% elif section %}
-    {{section}}
-  {% elif dialect %}
-    Grammatical description of {{dialect.name}}
+    {{section|safe}}
+  {% elif dialects %}
+    Grammatical description of
+    {% for dialect in dialects %}
+      {{dialect.name}}{% if not forloop.last %},{% endif %}
+    {% endfor %}
   {% else %}
     Grammatical description
   {% endif %}
 {% endblock %}
 
 {% block page_content %}
-  {% if dialect %}
+  {% if dialects|length < 2 %}
   <p class="p-3">
     {% if section %}
     This section has {{num_features}} of the
-    <a href="{% url 'dialects:dialect-grammar' dialect.id %}">{{total_features}} total features</a>
+    <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
     detailed for the dialect
     {% else %}
     This dialect has {{num_features}} features
@@ -26,27 +32,48 @@
   </p>
   {% endif %}
 
-  <p class="p-3">
-    <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', true)">
-      Open all
-    </button>
-    <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', false)">
-      Close all
-    </button>
+  <div id="grammar_tree_heading" class="p-3">
+    <div class="controls">
+      <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', true)">
+        Open all
+      </button>
+      <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', false)">
+        Close all
+      </button>
 
-    {% if dialect %}
-    <label class="ilb">
-      <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_entries')">
-      Show with entries
-    </label>
-    <label class="ilb">
-      <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_empties')">
-      Show without entries
-    </label>
+      {% if dialects %}
+      <label class="ilb">
+        <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_entries')">
+        Show with entries
+      </label>
+      <label class="ilb">
+        <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_empties')">
+        Show without entries
+      </label>
+      {% endif %}
+    </div>
+
+    {% if dialects|length > 1 %}
+    {% for d in dialects %}
+    <span class="dialect_header">
+      <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
+      <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}?remove_compare={{d.id}}">&times;</a>
+    </span>
+    {% endfor %}
+    {% else %}
+    <form id="compare_form" action="" method="GET">
+      Compare with
+      <select name="compare_with" onchange="$('#compare_form').submit()">
+        <option>-- choose dialect --</option>
+        {% for id, name in all_dialects %}
+        <option value="{{id}}">{{name}}</option>
+        {% endfor %}
+      </select>
+    </form>
     {% endif %}
+  </div>
 
-  </p>
-  <ul id="grammar_tree" class="show_entries show_empties {{dialect|yesno:',grammar_only'}}">
+  <ul id="grammar_tree" class="show_entries show_empties {{dialects|yesno:',grammar_only'}}">
     {% for feature, info in feature_list %}
       {% if info.open and not forloop.first %}
         <div class='folder'></div>
@@ -57,15 +84,15 @@
       {% endif %}
 
       <li class="level_{{info.level}} {% spaceless %}
-                   {% if info.has_entry or info.entry %} has_entry {% endif %}
+                   {% if info.has_entry or info.dialects %} has_entry {% endif %}
                    {% if info.has_empty or num_features == 0 %} has_empty {% endif %}{% endspaceless %}">
 
         <label for="pop_open_{{forloop.counter|add:'1'}}">
           {{feature|safe}}
           {% if feature.fullheading %}
           <a class="section_link" href="{% spaceless %}
-              {% if dialect %}
-                {% url 'dialects:dialect-grammar-section' dialect.id feature.fullheading %}
+              {% if dialects %}
+                {% url 'dialects:dialect-grammar-section' dialect_ids|join:',' feature.fullheading %}
               {% else %}
                 {% url 'grammar:feature-list-section' feature.fullheading %}
               {% endif %}
@@ -73,14 +100,16 @@
           {% endif %}
         </label>
 
-        {% if info.entry %}
+        {% for dialect_id, entries in info.dialects.items %}
         <div class="example">
-          {{info.entry|safe}}
-          <a class="details_link" href="{% url 'dialects:dialect-feature' dialect.id info.df_id %}">
-            details &raquo;
-          </a>
+          {% for entry in entries %}
+          <a class="plain" href="{% url 'dialects:dialect-feature' dialect_id entry.df_id %}">
+          {{entry.text|safe}}
+          </a><br>
+          {% endfor %}
         </div>
-        {% elif info.dialect_count %}
+        {% endfor %}
+        {% if info.dialect_count %}
         <div class="example">
           {% with n=info.dialect_count %}
           <a href="{% url 'grammar:feature-detail' feature.id %}">

@@ -116,6 +116,9 @@ ul{
 #map .icon_J:before {
     content: '✡';
 }
+#map .icon_focus {
+    z-index: 10000!important;
+}
 #map .icon_focus:before {
     background: #557d;
 }
@@ -230,6 +233,34 @@ img {
 /* padding enough to get off the side of a grid container */
 .p-3 { padding: 0.5em 1em; }
 
+a.plain {
+    color: inherit;
+    text-decoration: none;
+}
+
+#grammar_tree_heading {
+    display: inline-block;
+    margin: 0.5em 0;
+    padding: 0.5em 1em 0;
+    position: sticky;
+    top: -2px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(255,255,255,0.5);
+}
+#grammar_tree_heading .controls {
+    display: inline-block;
+    width: 543px;
+}
+#compare_form {
+    display: inline-block;
+}
+#grammar_tree_heading .dialect_header {
+    font-size: 2em;
+    padding-top: 0!important;
+    margin-top: -6px;
+}
+
 /* list setup and expanding */
 #grammar_tree {
     min-height:600px;
@@ -272,13 +303,15 @@ img {
 #grammar_tree .section_link:hover {
             color: #a51137;
             }
+#grammar_tree_heading .dialect_header,
 #grammar_tree .example {
         display: inline-block;
         padding: 12px 5px 5px 5px;
-        max-width: 550px;
+        width: 280px;
         line-height: 1.4em;
         vertical-align: top;
         }
+
 /* folder is the big stripe down the LHS of an expanded section */
 #grammar_tree .folder{
         padding: 9px 5px;
@@ -324,7 +357,7 @@ img {
 #grammar_tree .has_entry>.folder { background-color: #a51137; } /* if we're just showing grammar, or folder has entries show colours */
 
 /* entry content */
-#grammar_tree .details_link { margin-left: 20px; visibility: hidden }
+#grammar_tree .details_link { margin-left: 20px; visibility: hidden; float: right; }
 #grammar_tree li:hover > * > .details_link { visibility: visible }
 
 /* make the folders fade out as you go deeper */
