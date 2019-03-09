@@ -10,69 +10,12 @@ from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.db.models import Case, When
+from django.db.models import Case, When, F
+from django.forms import modelform_factory, inlineformset_factory
 
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
 from grammar.models import Feature
-
-def problems(request):
-    context = {}
-
-    types = [
-        ('simple_span',      '^\<span class=aramaic\>.*?\<\/span\>$'),
-        ('span_suffix',      '^\<span class=aramaic\>.*?\<\/span\>[^\<]+$'),
-        ('span_prefix',      '^[^\<]+\<span class=aramaic\>.*?\<\/span\>$'),
-        ('span_prepost',     '^[^\<]+\<span class=aramaic\>.*?\<\/span\>[^\<]+$'),
-        ('span_exemplified', '^Exemplified by (the verb )?<span class=aramaic\>.*?\<\/span\>[^\<]*?$'),
-        ('span_cropl',       '^ *span class=aramaic\>.*?\<\/span\> *$'),
-        ('span_extral',      '^\>\<span class=aramaic\>.*?\<\/span$'),
-        ('span_cropr',       '^ *\<span class=aramaic\>.*?\<\/span[^\>]*$'),
-        ('span_span',        '^ *\<span class=aramaic\>.*?\<span\> *$'),
-        ('spana_spana',      '^\<span class=aramaic\>.*?\<span class=aramaic\>$'),
-        ('span_incomplete',  '^\<span class=aramaic\>[^\<]+$'),
-        ('double_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
-        ('triple_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
-        ('quad_span',        '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
-        ('sup_x',            '\<sup\>\+\<\/sup\>'),
-        ('sup_y',            '\<sup\>\y\<\/sup\>'),
-        ('yes',              '^ *Yes *$'),
-        ('yes_see_eg',       '^ *Yes \(see examples\) *$'),
-        ('yes_loanwords',    '^ *Yes \(mostly loanwords\) *$'),
-        ('yes_eg',           '^ *Yes \(\<span class=aramaic\>.*?\<\/span\> *\)*$'),
-        ('no',               '^ *No *$'),
-        ('no_past_base',     '^ *No, general past base only *$'),
-        ('no_stative',       '^ *No: General stative participle only *$'),
-        ('no_loanwords',     '^ *No, restricted to loanwords *$'),
-        ('not_present',      '^ *XXX *$'),
-        ('blank',            '^ *$'),
-        ('unsure',           '^\?*$'),
-        ('none',             '^ *None *$'),
-        ('none_attested',    '^ *None attested\.? *$'),
-        ('dash',             '^ *- *$'),
-        ('test',             '^ *test *$'),
-        ('as_usual',         '^ *As usual *$'),
-        ('penultiamte',      '^ *Penultimate *$'),
-        ('penultiamte',      '^ *Regular assimilation of L-suffix and resulting gemination of \/[rn]\/\. *$'),
-    ]
-    os = DialectFeatureEntry.objects
-    canfix = [
-        (type,
-         os.filter(entry__iregex=regex).count(),
-         os.filter(entry__iregex=regex) \
-           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:3]
-        ) for type, regex in types
-    ]
-
-    cantfix = DialectFeatureEntry.objects
-    for type, regex in types:
-        cantfix = cantfix.exclude(entry__iregex=regex)
-    cantfix = cantfix.values_list('entry', 'feature__dialect_id', 'feature_id')
-    context = {
-        'canfix': canfix,
-        'cantfix': cantfix[0:1000],
-        'cantfix_count': cantfix.count(),
-    }
-    return render(request, 'dialects/problems.html', context)
+from gallery.models import Photo
 
 
 def homepage(request):
@@ -128,6 +71,7 @@ class DialectDetailView(DetailView):
 
         context = super(DialectDetailView, self).get_context_data(**kwargs)
         context.update({
+            'photos': Photo.objects.filter(dialect=self.object)[0:5],
             'map_data_json': json.dumps(map_data, indent=2),
             'map_center': [self.object.latitude, self.object.longitude]
         })
@@ -306,6 +250,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
 
     return render(request, 'grammar/feature_list.html', context)
 
+
 class DialectFeatureDetailView(DetailView):
 
     name = 'DialectFeatureDetail'
@@ -318,3 +263,128 @@ class DialectFeatureDetailView(DetailView):
         })
         return context
 
+
+def dialect_feature_pane(request, dialect_id, feature_heading):
+    """ renders just a snippet of html that contains details of the DialectFeature, for ajaxing
+    """
+    df = DialectFeature.objects.filter(dialect=dialect_id, feature__fullheading=feature_heading) \
+                               .annotate(fullheading=F('feature__fullheading')) \
+                               .first()
+    context = {
+        'dialect_id':      dialect_id,
+        'feature_heading': feature_heading,
+    }
+    if df:
+        # todo make feature_pane template expect dict in format of [Feature].entries to avoid
+        # having to annotate for consistency with the data built in features_of_dialect() above
+        # (which will also need changed!)
+        context.update({
+            'entries': df.entries.annotate(df_id=F('feature_id'), text=F('entry')),
+        })
+    return render(request, 'dialects/_dialectfeature_pane.html', context)
+
+
+def dialect_feature_edit(request, dialect_id, feature_heading):
+    """ and edit page for DialectFeature details as well as adding, changing and removing its examples
+    """
+    feature = Feature.objects.get(fullheading=feature_heading)
+    dialect = Dialect.objects.get(id=dialect_id)
+    df      = DialectFeature.objects.filter(dialect=dialect_id,
+                                            feature__fullheading=feature_heading) \
+                                    .first()
+
+    if request.POST.get('delete'):
+        if df:
+            df.delete()
+        return HttpResponseRedirect(reverse('dialects:dialect-detail', args=(dialect_id,)))
+
+    if not df:
+        df = DialectFeature(dialect=dialect, feature=feature)
+
+    shared_kwargs = {
+        'initial': [{'frequency': 'M' if df and df.entries.count() > 0 else 'P'}],
+        'instance': df,
+    }
+    df_form_class     = modelform_factory(DialectFeature, fields=('introduction', 'comment'))
+    dfe_formset_class = inlineformset_factory(DialectFeature, DialectFeatureEntry,
+                                              fields=('entry', 'frequency', 'comment'), extra=1)
+
+    postvars    = request.POST or None
+    df_form     = df_form_class(postvars, instance=df)
+    dfe_formset = dfe_formset_class(postvars, **shared_kwargs)
+
+    if request.method == 'POST' and dfe_formset.is_valid():
+        df_form.save()
+        dfe_formset.save()
+        return HttpResponseRedirect(reverse('dialects:dialect-feature', args=(dialect.id, df.id)))
+
+    context = {
+        'dialect':     dialect,
+        'feature':     feature,
+        'df':          df,
+        'df_form':     df_form,
+        'dfe_formset': dfe_formset,
+    }
+    return render(request, 'dialects/dialectfeature_edit.html', context)
+
+
+def problems(request):
+    """ a staff-only page detailing data issues that we think we can fix automatically, and some we can't
+    """
+    context = {}
+
+    types = [
+        ('simple_span',      '^\<span class=aramaic\>.*?\<\/span\>$'),
+        ('span_suffix',      '^\<span class=aramaic\>.*?\<\/span\>[^\<]+$'),
+        ('span_prefix',      '^[^\<]+\<span class=aramaic\>.*?\<\/span\>$'),
+        ('span_prepost',     '^[^\<]+\<span class=aramaic\>.*?\<\/span\>[^\<]+$'),
+        ('span_exemplified', '^Exemplified by (the verb )?<span class=aramaic\>.*?\<\/span\>[^\<]*?$'),
+        ('span_cropl',       '^ *span class=aramaic\>.*?\<\/span\> *$'),
+        ('span_extral',      '^\>\<span class=aramaic\>.*?\<\/span$'),
+        ('span_cropr',       '^ *\<span class=aramaic\>.*?\<\/span[^\>]*$'),
+        ('span_span',        '^ *\<span class=aramaic\>.*?\<span\> *$'),
+        ('spana_spana',      '^\<span class=aramaic\>.*?\<span class=aramaic\>$'),
+        ('span_incomplete',  '^\<span class=aramaic\>[^\<]+$'),
+        ('double_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
+        ('triple_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
+        ('quad_span',        '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
+        ('sup_x',            '\<sup\>\+\<\/sup\>'),
+        ('sup_y',            '\<sup\>\y\<\/sup\>'),
+        ('yes',              '^ *Yes *$'),
+        ('yes_see_eg',       '^ *Yes \(see examples\) *$'),
+        ('yes_loanwords',    '^ *Yes \(mostly loanwords\) *$'),
+        ('yes_eg',           '^ *Yes \(\<span class=aramaic\>.*?\<\/span\> *\)*$'),
+        ('no',               '^ *No *$'),
+        ('no_past_base',     '^ *No, general past base only *$'),
+        ('no_stative',       '^ *No: General stative participle only *$'),
+        ('no_loanwords',     '^ *No, restricted to loanwords *$'),
+        ('not_present',      '^ *XXX *$'),
+        ('blank',            '^ *$'),
+        ('unsure',           '^\?*$'),
+        ('none',             '^ *None *$'),
+        ('none_attested',    '^ *None attested\.? *$'),
+        ('dash',             '^ *- *$'),
+        ('test',             '^ *test *$'),
+        ('as_usual',         '^ *As usual *$'),
+        ('penultiamte',      '^ *Penultimate *$'),
+        ('penultiamte',      '^ *Regular assimilation of L-suffix and resulting gemination of \/[rn]\/\. *$'),
+    ]
+    os = DialectFeatureEntry.objects
+    canfix = [
+        (type,
+         os.filter(entry__iregex=regex).count(),
+         os.filter(entry__iregex=regex) \
+           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:3]
+        ) for type, regex in types
+    ]
+
+    cantfix = DialectFeatureEntry.objects
+    for type, regex in types:
+        cantfix = cantfix.exclude(entry__iregex=regex)
+    cantfix = cantfix.values_list('entry', 'feature__dialect_id', 'feature_id')
+    context = {
+        'canfix': canfix,
+        'cantfix': cantfix[0:1000],
+        'cantfix_count': cantfix.count(),
+    }
+    return render(request, 'dialects/problems.html', context)

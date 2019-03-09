@@ -1,0 +1,15 @@
+{# expects `dialect_id`, `feature_heading` and `entries` to be set #}
+{% if entries %}
+  {% for entry in entries %}
+    <a class="plain" href="{% url 'dialects:dialect-feature' dialect_id entry.df_id %}">
+    {{entry.text|safe}}
+    </a>
+
+    {% if user.is_staff and forloop.last %}
+    <a class="edit" href="{% url 'dialects:dialect-feature-edit' dialect_id feature_heading %}" title="edit">&#x270D;</a>
+    {% endif %}
+    <br>
+  {% endfor %}
+{% elif user.is_staff %}
+  <a class="edit" href="{% url 'dialects:dialect-feature-edit' dialect_id feature_heading %}" title="add">+ add</a>
+{% endif %}

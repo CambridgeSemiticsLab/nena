@@ -17,3 +17,4 @@ djangorestframework
 djangorestframework-recursive
 markdown
 django-filter
+django-widget-tweaks

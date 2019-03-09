@@ -24,6 +24,11 @@
       {% endfor %}
     </ul>
 
+    {% if user.is_staff %}
+      <div style="margin-top: 100px;">
+        <a class="button pill" href="{% url 'dialects:dialect-feature-edit' object.dialect.id object.feature.fullheading %}">Edit details</a>
+      </div>
+    {% endif %}
     <p>
       <br>
       <br>

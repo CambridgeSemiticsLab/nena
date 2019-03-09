@@ -101,13 +101,17 @@
         </label>
 
         {% for dialect_id, entries in info.dialects.items %}
-        <div class="example">
-          {% for entry in entries %}
-          <a class="plain" href="{% url 'dialects:dialect-feature' dialect_id entry.df_id %}">
-          {{entry.text|safe}}
-          </a><br>
-          {% endfor %}
+        <div class="example {% if dialects|length > 1 %}multiple{% endif %}"
+          {% if dialects|length < 2 %}data-src="{% url 'dialects:dialect-feature-pane' dialect_id feature.fullheading %}"{% endif%}>
+            {% include 'dialects/_dialectfeature_pane.html' with feature_heading=feature.fullheading%}
         </div>
+        {% empty %}
+          {% if feature.fullheading %}
+          <div class="example {% if dialects|length > 1 %}multiple{% endif %}"
+            {% if dialects|length < 2 %}data-src="{% url 'dialects:dialect-feature-pane' dialects.0.id feature.fullheading %}"{% endif%}>
+            {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialects.0.id feature_heading=feature.fullheading%}
+          </div>
+          {% endif %}
         {% endfor %}
         {% if info.dialect_count %}
         <div class="example">
@@ -125,4 +129,49 @@
       {% endfor %}
     {% endfor %}
   </ul>
+
+  {% if dialects|length < 2 %}
+  {# only allow inline editing for single-language selection #}
+  <script>
+  $(function(){
+    $(document)
+    .on('click', '.example .edit', function(e){
+      $(this).parent()
+        .addClass('loading')
+        .load($(this).attr('href') + ' #form_holder form', function(response, status, xhr){
+          $(this).removeClass('loading');
+        })
+      return false;
+    })
+    .on('submit', '.df_form', function(e){
+      form_data = $(this).serializeArray();
+      button = $(this).find("input[type=submit]:focus")
+      form_data.push({ name: button.attr('name'), value: button.attr('value') });
+
+      $(this).addClass('loading')
+      $.ajax({
+        type: "POST",
+        url: $(this).attr('action'),
+        data: form_data,
+        context: this,
+        success: function(data){
+          $example = $(this).parents('.example');
+          $example.load($example.attr('data-src'));
+        }
+      });
+      return false;
+    })
+    .on('click', '.example .cancel', function(e){
+      $example = $(this).parents('.example');
+      $example.addClass('loading')
+              .load($example.attr('data-src'), function(){ $(this).removeClass('loading')});
+      e.preventDefault();
+      return false;
+    })
+
+
+  })
+  </script>
+  {% endif %}
+
 {% endblock %}

@@ -5,30 +5,30 @@
 {% endblock %}
 
 {% block page_content %}
-    {% block content_column_1 %}
-        <div class='campl-column8 clearfix'>
-            <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Community</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-            {% for dialect in object_list  %}
-                <tr>
-                    <td><a href={% url 'dialects:dialect-detail' dialect.pk %}>{{ dialect.name }}</a></td>
-                    <td>{{ dialect.get_community_display }}</td>
-                    <td>{{ dialect.get_location_display }}</td>
-                </tr>
-            {% empty %}
-                No dialects.
-            {% endfor %}
-            </table>
-        {% if user.is_staff %}
-            <div class="clearfix"><a class="pill button" href="{% url 'dialects:dialect-new' %}">New dialect</a></div>
-        {% endif %}
-            {% include 'ucamprojectlight-pagination.html' %}
-        </div>
-    {% endblock %}
+  <div class='campl-column8 clearfix'>
+  <div class="campl-content-container">
+      <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Community</th>
+                  <th>Location</th>
+              </tr>
+          </thead>
+      {% for dialect in object_list  %}
+          <tr>
+              <td><a href={% url 'dialects:dialect-detail' dialect.pk %}>{{ dialect.name }}</a></td>
+              <td>{{ dialect.get_community_display }}</td>
+              <td>{{ dialect.get_location_display }}</td>
+          </tr>
+      {% empty %}
+          No dialects.
+      {% endfor %}
+      </table>
+  {% if user.is_staff %}
+      <div class="clearfix"><a class="pill button" href="{% url 'dialects:dialect-new' %}">New dialect</a></div>
+  {% endif %}
+      {% include 'ucamprojectlight-pagination.html' %}
+  </div>
+  </div>
 {% endblock %}

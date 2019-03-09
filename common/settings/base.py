@@ -53,6 +53,7 @@ THIRD_PARTY_APPS = (
     'storages',
     'rest_framework',
     'django_filters',
+    'widget_tweaks',
 )
 
 LOCAL_APPS = (

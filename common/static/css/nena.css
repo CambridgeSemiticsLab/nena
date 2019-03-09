@@ -62,6 +62,26 @@ h3 {
     margin-top: 1.5em;
 }
 
+.loading {
+  opacity: 0.3;
+}
+
+.thumbnail {
+  display: inline-block;
+  vertical-align: top;
+  width: 100px;
+  height: 100px;
+  margin: 4px;
+  background: no-repeat #ccc;
+  background-size: cover;
+}
+.thumbnail.add {
+  color: white;
+  font-size: 70px;
+  line-height: 90px;
+  text-align:center;
+}
+
 .campl-page-title {
     font-size: 22px;
     line-height: 22px;
@@ -285,7 +305,7 @@ a.plain {
             transition: max-height 5s;
             }
 /* li contents */
-#grammar_tree label {
+#grammar_tree li > label {
         font-size: 1em;
         display: inline-block;
         margin: 0;
@@ -307,10 +327,18 @@ a.plain {
 #grammar_tree .example {
         display: inline-block;
         padding: 12px 5px 5px 5px;
-        width: 280px;
         line-height: 1.4em;
         vertical-align: top;
         }
+#grammar_tree .example.multiple {
+        width: 280px;
+}
+#grammar_tree .example .edit {
+        display: none;
+}
+#grammar_tree li:hover > .example .edit {
+        display: inline-block;
+}
 
 /* folder is the big stripe down the LHS of an expanded section */
 #grammar_tree .folder{
@@ -376,7 +404,75 @@ a.plain {
 #grammar_tree .level_4>label { width: 374px; }
 #grammar_tree .level_5>label { width: 332px; }
 
+/* DialectFeature edit form */
+.df_form {
+  position: relative;
+}
+.df_form input[type=text]{
+  padding: 1em 0.2em;
+}
+.df_form input,
+.df_form textarea,
+.df_form select
+{
+  vertical-align: top;
+  border-radius: 0.2em;
+}
+.df_form label{
+  padding: 0;
+  vertical-align: top;
+  display: inline-block;
+}
+.df_form select[id$="-frequency"]{
+  width: 84px;
+  height: 26px;
+}
+
+.df_form textarea {
+  width: 300px;
+  min-height: 40px;
+}
+.df_form .controls {
+  text-align: right;
+  padding: 3px 6px;
+}
+.df_form .controls > * {
+  vertical-align: baseline;
+}
+.df_form [id$="-DELETE"] {
+  float: right;
+  margin-right: -26px;
+}
+.df_form [id$="-DELETE"]:checked + div {
+  height: 1.8em;
+  overflow-y: hidden;
+}
+.df_form [id$="-DELETE"]:checked + div * {
+  text-decoration: line-through red;
+  opacity: 0.6;
+}
+.df_form .cancel {
+  cursor: pointer;
+}
+.df_form .add_new {
+  height: 0px;
+}
+.df_form .add_new:before {
+  content: '+ add another example';
+  position: absolute;
+}
+.df_form .add_new:checked {
+  display:none;
+}
+.df_form .add_new+* {
+  display:none;
+}
+.df_form .add_new:checked+* {
+  display: block;
+}
+
 /* checkbox replacement */
+/*   .chex is a styled up version of a normal checkbox */
 input[type=checkbox].chex {
     position:relative;
     height:0;
@@ -416,4 +512,33 @@ input[type=checkbox].chex:checked:after {
     }
 input[type=checkbox].chex:hover:after {
     color: #d61746;
+    }
+
+/*   .chex_delete turns checkbox into an `x` for inline deletion, with optional tooltip taken attribute `data-chex` */
+input[type=checkbox].chex_delete {
+    position:relative;
+    height:0;
+    width:2.3em;
+    }
+input[type=checkbox].chex_delete:before {
+    content: '🗙';
+    display: block;
+    position: absolute;
+    color: #ccc;
+    font-size: 1.6em;
+    }
+input[type=checkbox].chex_delete:hover:after {
+    content: attr(data-chex);
+    display: block;
+    position: absolute;
+    left: 100%;
+    color: #ccc;
+    font-size: 1em;
+    }
+input[type=checkbox].chex_delete:hover:before {
+    content: '🗙';
+    color: red;
+    }
+input[type=checkbox].chex_delete:checked:before {
+    color: #f44;
     }

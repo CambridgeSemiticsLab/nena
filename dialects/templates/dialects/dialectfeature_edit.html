@@ -1,0 +1,43 @@
+{% extends 'nena.html' %}
+{% load widget_tweaks %}
+
+{% block subtitle %}
+    Edit {{ feature.fullheading }} {{ feature.name|safe }}
+    in <a href="{% url 'dialects:dialect-detail' dialect.id %}">{{dialect.name}}</a>
+{% endblock %}
+
+{% block page_content %}
+  <div class='campl-column12'>
+  <div id="form_holder" class="campl-content-container" style="width: 350px;">
+    <form class="df_form" action="{% url 'dialects:dialect-feature-edit' dialect.id feature.fullheading %}" method="POST">
+    {% csrf_token %}
+    <div style="display:none">{{ df_form }}</div>
+
+    {{ dfe_formset.management_form }}
+    {% for form in dfe_formset %}
+      {% if forloop.last and not forloop.first %}
+      <input class="add_new" type="checkbox">
+      <div>
+      {% endif %}
+
+        {# hidden fields: #} {{form.id}} {{form.feature}}
+        {{form.DELETE|add_class:"chex_delete"|attr:"data-chex:remove example"}}
+        <div>
+          {{form.entry|attr:"placeholder:example text"}} {{form.frequency}}<br>
+          {{form.comment|attr:"placeholder:definition or further comment"}} <br>
+        </div>
+
+      {% if forloop.last and not forloop.first %}
+      </div>
+      {% endif %}
+    {% endfor %}
+    <div class="controls">
+      <a class="cancel" href="{% url 'dialects:dialect-feature' dialect.id feature.id %}">Cancel</a>
+      <input class="button pill" type="submit" value="Delete" name="delete" onclick="return confirm('Are you sure you want to permanently remove this entry?')"/>
+      <input class="button pill" type="submit" value="Save"/>
+    </div>
+    </form>
+  </div>
+  </div>
+
+{% endblock %}
