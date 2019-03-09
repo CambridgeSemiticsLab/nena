@@ -54,33 +54,33 @@
     </div>
 
     {% if dialects|length > 1 %}
-    {% for d in dialects %}
-    <span class="dialect_header">
-      <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
-      <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}?remove_compare={{d.id}}">&times;</a>
-    </span>
-    {% endfor %}
-    {% else %}
-    <form id="compare_form" action="" method="GET">
-      Compare with
-      <select name="compare_with" onchange="$('#compare_form').submit()">
-        <option>-- choose dialect --</option>
-        {% for id, name in all_dialects %}
-        <option value="{{id}}">{{name}}</option>
-        {% endfor %}
-      </select>
-    </form>
+      {% for d in dialects %}
+      <span class="dialect_header">
+        <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
+        <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}?remove_compare={{d.id}}">&times;</a>
+      </span>
+      {% endfor %}
+    {% elif dialects %}
+      <form id="compare_form" action="" method="GET">
+        Compare with
+        <select name="compare_with" onchange="$('#compare_form').submit()">
+          <option>-- choose dialect --</option>
+          {% for id, name in all_dialects %}
+          <option value="{{id}}">{{name}}</option>
+          {% endfor %}
+        </select>
+      </form>
     {% endif %}
   </div>
 
-  <ul id="grammar_tree" class="show_entries show_empties {{dialects|yesno:',grammar_only'}}">
+  <ul id="grammar_tree" class="show_entries show_empties {{dialects|yesno:',grammar_only'}} {% if dialects|length > 1 %}multi_dialect{% endif %}">
     {% for feature, info in feature_list %}
       {% if info.open and not forloop.first %}
         <div class='folder'></div>
         <input type="checkbox" class="pop_open" id="pop_open_{{forloop.counter}}" {%if feature_list|length < 100%}checked{%endif%}>
         <ul>
       {% elif not forloop.first %}
-      </li>
+        </li>
       {% endif %}
 
       <li class="level_{{info.level}} {% spaceless %}
@@ -100,28 +100,27 @@
           {% endif %}
         </label>
 
-        {% for dialect_id, entries in info.dialects.items %}
-        <div class="example {% if dialects|length > 1 %}multiple{% endif %}"
-          {% if dialects|length < 2 %}data-src="{% url 'dialects:dialect-feature-pane' dialect_id feature.fullheading %}"{% endif%}>
-            {% include 'dialects/_dialectfeature_pane.html' with feature_heading=feature.fullheading%}
-        </div>
-        {% empty %}
-          {% if feature.fullheading %}
-          <div class="example {% if dialects|length > 1 %}multiple{% endif %}"
-            {% if dialects|length < 2 %}data-src="{% url 'dialects:dialect-feature-pane' dialects.0.id feature.fullheading %}"{% endif%}>
-            {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialects.0.id feature_heading=feature.fullheading%}
-          </div>
-          {% endif %}
-        {% endfor %}
-        {% if info.dialect_count %}
-        <div class="example">
+        {% if dialects %}
+          {% for dialect_id, entries in info.dialects.items %}
+            <div class="example" data-src="{% url 'dialects:dialect-feature-pane' dialect_id feature.fullheading %}">
+                {% include 'dialects/_dialectfeature_pane.html' with feature_heading=feature.fullheading%}
+            </div>
+          {% empty %}
+            {% if feature.fullheading %}
+            <div class="example" data-src="{% url 'dialects:dialect-feature-pane' dialects.0.id feature.fullheading %}">
+              {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialects.0.id feature_heading=feature.fullheading%}
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% elif info.dialect_count %}
+          <div class="example">
           {% with n=info.dialect_count %}
-          <a href="{% url 'grammar:feature-detail' feature.id %}">
-            {{n}} dialect{{n|pluralize}}
-          </a>
-          {{n|pluralize:'has,have'}} this feature
+            <a href="{% url 'grammar:feature-detail' feature.id %}">
+              {{n}} dialect{{n|pluralize}}
+            </a>
+            {{n|pluralize:'has,have'}} this feature
           {% endwith %}
-        </div>
+          </div>
         {% endif %}
 
       {% for close in info.close %}

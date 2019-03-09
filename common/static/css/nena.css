@@ -330,7 +330,7 @@ a.plain {
         line-height: 1.4em;
         vertical-align: top;
         }
-#grammar_tree .example.multiple {
+#grammar_tree.multi_dialect .example {
         width: 280px;
 }
 #grammar_tree .example .edit {
