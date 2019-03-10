@@ -26,7 +26,7 @@
       {% endfor %}
       </table>
   {% if user.is_staff %}
-      <div class="clearfix"><a class="pill button" href="{% url 'dialects:dialect-new' %}">New dialect</a></div>
+      <div class="clearfix"><a class="button" href="{% url 'dialects:dialect-new' %}">New dialect</a></div>
   {% endif %}
       {% include 'ucamprojectlight-pagination.html' %}
   </div>

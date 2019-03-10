@@ -35,8 +35,8 @@
 
     {% if user.is_staff %}
       <div style="margin-top: 100px;">
-        <a class="button pill" href="{% url 'dialects:dialect-edit' object.pk %}">Edit dialect details</a>
-        <a class="button pill" href="{% url 'dialects:dialect-delete' object.pk %}">Delete dialect</a>
+        <a class="button" href="{% url 'dialects:dialect-edit' object.pk %}">Edit dialect details</a>
+        <a class="button" href="{% url 'dialects:dialect-delete' object.pk %}">Delete dialect</a>
       </div>
     {% endif %}
   </div>

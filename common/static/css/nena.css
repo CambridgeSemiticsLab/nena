@@ -205,6 +205,7 @@ ul{
 
 .button {
     font-size: 1em;
+    line-height: 1.3em;
     display: inline-block;
     border: 0;
     margin: 0 2px;
@@ -212,6 +213,9 @@ ul{
     cursor: pointer;
     text-align: center;
     transition: color 0.1s linear;
+    border-radius: 0.2em;
+    background: #a51137;
+    color: #f0f0f0;
 }
 
 .button,
@@ -223,16 +227,24 @@ ul{
     color: #fff;
 }
 
+.button:hover {
+    background: #d61746;
+}
+
+.button.dull {
+    background: #ccc;
+    color: #fff;
+}
+.button.dull:hover {
+    background: #ddd;
+}
+
 .round {
     border-radius: 0.6em;
 }
-.pill {
-    border-radius: 0.2em;
-    background: #a51137;
-    color: #f0f0f0;
-}
-.pill:hover {
-    background: #d61746;
+
+.utf8-text {
+    font-family: CharisSILW, Arial, liberation-sans, sans-serif !important;
 }
 
 .aramaic {
@@ -250,8 +262,14 @@ img {
 
 .ilb { display: inline-block }
 
+.fr { float: right; }
+
+.ar { text-align: right; }
+
+
 /* padding enough to get off the side of a grid container */
 .p-3 { padding: 0.5em 1em; }
+
 
 a.plain {
     color: inherit;
@@ -259,12 +277,12 @@ a.plain {
 }
 
 #grammar_tree_heading {
-    display: inline-block;
+    display: block;
     margin: 0.5em 0;
-    padding: 0.5em 1em 0;
+    padding: 0.5em 0 0 1em;
     position: sticky;
     top: -2px;
-    z-index: 2;
+    z-index: 3;
     background-color: white;
     box-shadow: 0 2px 5px rgba(255,255,255,0.5);
 }
@@ -284,6 +302,7 @@ a.plain {
 /* list setup and expanding */
 #grammar_tree {
     min-height:600px;
+    margin-bottom: 100px;
     }
 #grammar_tree ul {
         max-height:0;
@@ -297,6 +316,11 @@ a.plain {
         background-color: white;
         color: #ccc;
         }
+#grammar_tree.bulk_edit li.level_1 {
+        max-height: 3.018em;
+        white-space: nowrap;
+        border-bottom: 1px solid #ccc;
+}
 #grammar_tree .pop_open {
         display:none
         }
@@ -330,6 +354,7 @@ a.plain {
         line-height: 1.4em;
         vertical-align: top;
         }
+#grammar_tree_heading .dialect_header,
 #grammar_tree.multi_dialect .example {
         width: 280px;
 }

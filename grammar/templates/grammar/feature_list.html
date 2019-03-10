@@ -3,6 +3,7 @@
 
 {% block subtitle %}
   {% if section and dialects %}
+    {% if bulk_edit %}Edit {% endif %}
     {{section|safe}} in
     {% for dialect in dialects %}
       {{dialect.name}}{% if not forloop.last %},{% endif %}
@@ -20,7 +21,7 @@
 {% endblock %}
 
 {% block page_content %}
-  {% if dialects|length < 2 %}
+  {% if dialects|length < 2 and not bulk_edit %}
   <p class="p-3">
     {% if section %}
     This section has {{num_features}} of the
@@ -32,12 +33,17 @@
   </p>
   {% endif %}
 
+  {% if bulk_edit %}
+  <form action="" method="POST">
+  {% csrf_token %}
+  {% endif %}
+
   <div id="grammar_tree_heading" class="p-3">
-    <div class="controls">
-      <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', true)">
+    <div class="controls" {% if bulk_edit %}style="visibility: hidden"{% endif %}>
+      <button class="button" onclick="$('#grammar_tree .pop_open').prop('checked', true)">
         Open all
       </button>
-      <button class="button pill" onclick="$('#grammar_tree .pop_open').prop('checked', false)">
+      <button class="button" onclick="$('#grammar_tree .pop_open').prop('checked', false)">
         Close all
       </button>
 
@@ -60,6 +66,10 @@
         <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}?remove_compare={{d.id}}">&times;</a>
       </span>
       {% endfor %}
+    {% elif bulk_edit %}
+      eg. &nbsp; <span class="utf8-text" style="font-size:1.5em">{{example_text}}</span>
+      <input class="button fr" type="submit" value="Save all">
+      <a class="button dull fr" href="?" style="float:right">Cancel</a>
     {% elif dialects %}
       <form id="compare_form" action="" method="GET">
         Compare with
@@ -70,10 +80,15 @@
           {% endfor %}
         </select>
       </form>
+      {% if user.is_staff and section %}
+        <a class="button fr" href="?edit=1">
+          Bulk edit
+        </a>
+      {% endif %}
     {% endif %}
   </div>
 
-  <ul id="grammar_tree" class="show_entries show_empties {{dialects|yesno:',grammar_only'}} {% if dialects|length > 1 %}multi_dialect{% endif %}">
+  <ul id="grammar_tree" class="show_entries show_empties {{dialects|yesno:',grammar_only'}} {{bulk_edit|yesno:'bulk_edit,'}} {% if dialects|length > 1 %}multi_dialect{% endif %}">
     {% for feature, info in feature_list %}
       {% if info.open and not forloop.first %}
         <div class='folder'></div>
@@ -100,7 +115,11 @@
           {% endif %}
         </label>
 
-        {% if dialects %}
+        {% if bulk_edit %}
+          {% if forloop.first %}
+          <textarea class="df_edit_bulk utf8-text" name="bulk_edit" rows="{{feature_list|length|add:'-1'}}">{{raw_text}}</textarea>
+          {% endif %}
+        {% elif dialects %}
           {% for dialect_id, entries in info.dialects.items %}
             <div class="example" data-src="{% url 'dialects:dialect-feature-pane' dialect_id feature.fullheading %}">
                 {% include 'dialects/_dialectfeature_pane.html' with feature_heading=feature.fullheading%}
@@ -128,6 +147,11 @@
       {% endfor %}
     {% endfor %}
   </ul>
+
+  {% if bulk_edit %}
+
+  </form>
+  {% endif %}
 
   {% if dialects|length < 2 %}
   {# only allow inline editing for single-language selection #}
@@ -172,5 +196,37 @@
   })
   </script>
   {% endif %}
+
+  <script>
+  $(function(){
+    var rows = {{feature_list|length|add:'-1'}}
+    $('.df_edit_bulk').on('keyup', function(e){
+      // prevent more rows in textbox than features in list
+      var val = $(this).val().split("\n")
+      if( val.length > rows ) {
+        txt = $(this).get(0);
+        cursor_position = txt.selectionStart;
+        $(this).val(val.slice(0, rows).join("\n"));
+        txt.setSelectionRange(cursor_position, cursor_position);
+      }
+    })
+  })
+  </script>
+
+  <style>
+  .df_edit_bulk {
+    position:absolute;
+    top: 1.5em;
+    right:0;
+    width: 50%;
+    height: initial;
+    background-color: #fec;
+    line-height: 201%;
+    font-size: 1.5em;
+    z-index: 2;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  </style>
 
 {% endblock %}

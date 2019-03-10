@@ -1,5 +1,7 @@
 import json
+import re
 from collections import OrderedDict
+from itertools import zip_longest
 
 from django.shortcuts import render
 from django.http import JsonResponse, Http404, HttpResponseRedirect
@@ -141,7 +143,8 @@ def get_section_root(section):
         raise Http404('No sections match \'{}\''.format(section))
     return root
 
-# @staff_member_required
+
+@staff_member_required
 def features_of_dialect(request, dialect_id_string, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
     dialect_ids = [int(x) for x in dialect_id_string.split(',')]
@@ -162,19 +165,49 @@ def features_of_dialect(request, dialect_id_string, section=None):
             args.append(section)
         return HttpResponseRedirect(reverse(view_name, args=args))
 
-    preserved   = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
-    dialects    = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved)
-    chosen_root = get_section_root(section)
+    preserved    = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
+    dialects     = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved)
+    chosen_root  = get_section_root(section)
+    is_bulk_edit = request.GET.get('edit') or False
 
     # annotated lists are an efficient way of getting a big chunk of a treebeard tree
     # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
-    feature_list = Feature.get_annotated_list(parent=chosen_root)
+    max_depth    = chosen_root.depth + 1 if is_bulk_edit else None
+    feature_list = Feature.get_annotated_list(parent=chosen_root, max_depth=max_depth)
+
+    bulk_text = request.POST.get('bulk_edit', None)
+    if bulk_text is not None:
+        regex = r'^\s*(?P<entry>.+?)\s*(?P<frequency>\b[MPmp]\b){0,1}\s*(?P<comment>\'.+\')?\s*$'
+        text_matches = [re.match(regex, x.strip('\r')) for x in bulk_text.split('\n')]
+        text_groups  = [x.groupdict() if x else None for x in text_matches]
+
+        #raise Exception(text_groups)
+        for groups, feature in zip_longest(text_groups, feature_list[1:], fillvalue=None):  # skip first feature as it matches the top-level group
+            df = DialectFeature.objects.filter(dialect=dialects[0].id, feature=feature[0].id).first() \
+                 or DialectFeature(dialect_id=dialects[0].id, feature_id=feature[0].id)
+            if not groups or len(groups['entry'].strip(' ')) < 1:
+                if df.id:
+                    df.delete()
+                continue
+
+            df.entries.all().delete()  # clear any existing entries
+            groups['frequency'] = groups['frequency'].upper() if groups['frequency'] else 'P'
+            groups['comment']   = groups['comment'].strip("'") if groups['comment'] else None
+            dfe = DialectFeatureEntry(**groups)
+            df.save()
+            df.entries.add(dfe, bulk=False)
+        return HttpResponseRedirect(reverse('dialects:dialect-grammar-section', args=(dialects[0].id, section)))
+
 
     base_path = chosen_root.path if chosen_root else ''
     feature_examples = DialectFeature.objects.filter(dialect__in=dialect_ids) \
                                              .filter(feature__path__startswith=base_path) \
-                                             .values('id', 'dialect_id', 'feature_id', 'feature__path', 'entries__entry') \
+                                             .values('id', 'dialect_id', 'feature_id', 'feature__path',
+                                                     'entries__entry', 'entries__frequency', 'entries__comment') \
                                              .order_by('feature__path')
+
+    if is_bulk_edit:  # Only provide examples at one level for bulk edit (can't bulk edit in subfolders)
+        feature_examples = feature_examples.filter(feature__depth=max_depth)
 
     # Step *backwards* through the list of features `feature_list` trying to join in matching
     # DialectFeature details from `feature_examples`.
@@ -216,11 +249,11 @@ def features_of_dialect(request, dialect_id_string, section=None):
 
                 examples = OrderedDict((x, []) for x in dialect_ids)
                 while True:  # Loop through all examples of this feature
-                   # example_dialect_id = feature_examples[i]['dialect_id']
                     examples[feature_examples[i]['dialect_id']].append({
                         'text': feature_examples[i]['entries__entry'] or '-',
+                        'frequency': feature_examples[i]['entries__frequency'],
+                        'comment': feature_examples[i]['entries__comment'] or '',
                         'df_id': feature_examples[i]['id'],
-                   #     'dialect_id': example_dialect_id,
                     })
                     i -= 1
                     if i < 0 or feature_examples[i]['feature_id'] != feature_id:
@@ -243,8 +276,27 @@ def features_of_dialect(request, dialect_id_string, section=None):
         'all_dialects': Dialect.objects.all() \
                                        .exclude(id__in=dialect_ids) \
                                        .values_list('id', 'name'),
+        'bulk_edit':    is_bulk_edit,
     }
 
+    if context['bulk_edit']:
+        raw_rows = []
+        for feature, info in feature_list[1:]:
+            if 'dialects' in info:
+                entry = info['dialects'][dialects[0].id][0]
+                raw_row = entry['text']
+                if entry['frequency'] is not 'P':
+                    raw_row += ' {}'.format(entry['frequency'])
+                if entry['comment']:
+                    raw_row += " '{}'".format(entry['comment'])
+                raw_rows.append(raw_row)
+            else:
+                raw_rows.append(' ')
+        raw_text = '\n'.join(raw_rows)
+        context.update({
+            'raw_text':     raw_text,
+            'example_text': "kaθu  P 'he writes'",
+        })
     if chosen_root:
         context['total_features'] = DialectFeature.objects.filter(dialect__in=dialect_ids).count()
 
@@ -284,6 +336,7 @@ def dialect_feature_pane(request, dialect_id, feature_heading):
     return render(request, 'dialects/_dialectfeature_pane.html', context)
 
 
+@staff_member_required
 def dialect_feature_edit(request, dialect_id, feature_heading):
     """ and edit page for DialectFeature details as well as adding, changing and removing its examples
     """
