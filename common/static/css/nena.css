@@ -146,55 +146,30 @@ ul{
     background: #557;
 }
 
-.group0 {
-    visibility: hidden;
+#map .leaflet-control-layers label {
+   padding: 3px;
 }
 
-.group1 {
-    background: #f33;
-    border: 1px solid #333;
-}
 
-.group1-print {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
+#map .icon_base.group_0:before,
+#map .leaflet-control-layers-overlays label:nth-child(1) {background: hsla(  0, 80%, 40%, 0.5)}
+#map .icon_base.group_1:before,
+#map .leaflet-control-layers-overlays label:nth-child(2) {background: hsla( 40, 80%, 40%, 0.5)}
+#map .icon_base.group_2:before,
+#map .leaflet-control-layers-overlays label:nth-child(3) {background: hsla( 80, 80%, 40%, 0.5)}
+#map .icon_base.group_3:before,
+#map .leaflet-control-layers-overlays label:nth-child(4) {background: hsla(120, 80%, 40%, 0.5)}
+#map .icon_base.group_4:before,
+#map .leaflet-control-layers-overlays label:nth-child(5) {background: hsla(160, 80%, 40%, 0.5)}
+#map .icon_base.group_5:before,
+#map .leaflet-control-layers-overlays label:nth-child(6) {background: hsla(200, 80%, 40%, 0.5)}
+#map .icon_base.group_6:before,
+#map .leaflet-control-layers-overlays label:nth-child(7) {background: hsla(240, 80%, 40%, 0.5)}
+#map .icon_base.group_7:before,
+#map .leaflet-control-layers-overlays label:nth-child(8) {background: hsla(280, 80%, 40%, 0.5)}
+#map .icon_base.group_8:before,
+#map .leaflet-control-layers-overlays label:nth-child(9) {background: hsla(320, 80%, 40%, 0.5)}
 
-  border-bottom: 5px solid black;
-}
-
-.group2 {
-    background: #ff3;
-    border: 1px solid #333;
-}
-
-.group3 {
-    background: #f3f;
-    border: 1px solid #333;
-}
-.group4 {
-    background: #3f3;
-    border: 1px solid #333;
-}
-.group5 {
-    background: #3ff;
-    border: 1px solid #333;
-}
-.group6 {
-    background: #fff;
-    border: 1px solid #333;
-}
-
-.group7 {
-    background: #333;
-    border: 1px solid #333;
-}
-
-.default-icon {
-    background: #fff;
-    border: 1px solid #000;
-}
 
 .country1 {
     stroke: #999;

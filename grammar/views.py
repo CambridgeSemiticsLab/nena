@@ -82,7 +82,7 @@ def map_of_feature(request, pk):
                                                  community=F('feature__dialect__community'),
                                                  longitude=F('feature__dialect__longitude'),
                                                  latitude=F('feature__dialect__latitude'),
-                                                 group=F('mapitem__group_id'))
+                                                 group=F('entry'))
 
     feature = Feature.objects.get(pk=pk)
     map_data = [entry_to_map_point(e) for e in entries]

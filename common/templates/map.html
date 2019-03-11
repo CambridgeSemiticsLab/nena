@@ -13,31 +13,32 @@
             minZoom: 6,
             maxZoom: 11,
             ext: 'png' });
-    /*
-    var printmap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-            minZoom: 6,
-            maxZoom: 11 });
-    */
     var cities = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
             minZoom: 6,
             maxZoom: 11,
             ext: 'png' });
     var cities_and_terrain = new L.LayerGroup([normalmap, cities])
+
+    var printmap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+            minZoom: 6,
+            maxZoom: 11 });
+
     var baseLayers = {
+        "Print view": printmap,
         "Normal view": cities_and_terrain,
-        //"Print view": printmap,
     };
 
+    // This provides a lookup function to convert from a geoJSON item to a Leaflet Marker
     dataLayerOptions = {pointToLayer: function (feature, latlng) {
         var props = feature.properties;
         class_list = props.community ? 'icon_base icon_' + props.community : 'default-icon';
         if(props.focus){
             class_list += ' icon_focus';
         }
-        if(props.group){
-          class_list += ' group_'+props.group;
+        if(typeof props.group_number !== 'undefined'){
+          class_list += ' group_'+props.group_number;
         }
         myIcon   = L.divIcon({iconSize: L.point(7, 7), className: class_list });
         myMarker = L.marker(latlng, { icon: myIcon });
@@ -60,21 +61,42 @@
         }
         return myMarker;
     }};
+
     var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
-    var map     = L.map('map',{layers: [cities_and_terrain /*, printmap*/], center: center, zoom: 7, maxBoundsViscosity: 0.9});
+    var map     = L.map('map',{layers: [printmap, cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
     var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
-    var data    = L.geoJSON(null, dataLayerOptions).addTo(map);
 
-    data.addData({{map_data_json|safe}});
-    map.setMaxBounds(data.getBounds().pad(.2));
+    // Process our map data points, grouping into layers by point.properties.group
+    // if this doesn't exist stick them in a single layer called "points"
+    json_data = {{map_data_json|safe}};
+    all_names = json_data.map(point => point.properties.group)
+                         .filter(x => typeof x !== 'undefined')
+    group_names = Array.from(new Set(all_names))
 
-    /* {# may keep to re-introduce print mode #}
-    var overlays = {
-        "Data": data,
-        "Country borders" : borders,
-    };
-    L.control.layers(baseLayers, overlays).addTo(map);
-    */
+    if( !group_names.length ){
+      group_names = ['points']
+    }
+    console.log(group_names)
+
+    groups = {}
+    for(i in group_names){
+      var group = L.featureGroup();
+      group.addTo(map);
+      groups[group_names[i]] = group;
+    }
+
+    for(i in json_data){
+      marker_data = json_data[i]
+      group_name = marker_data.properties.group || 'points';
+      marker_data['properties']['group_number'] = group_names.indexOf(group_name);
+      marker = L.geoJSON(marker_data, dataLayerOptions)
+      marker.addTo(groups[group_name]);
+    }
+
+    markers = L.geoJSON(json_data, dataLayerOptions)
+    map.setMaxBounds(markers.getBounds().pad(.2));
+
+    L.control.layers(baseLayers, groups).addTo(map);
 
     /* {# not sure this is doing anything, to remove if we don't implement label culling on zoom #}
     var show_label_zoom = 3; // zoom level threshold for showing/hiding labels
