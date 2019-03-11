@@ -57,8 +57,24 @@ class DialectListView(ListView):
     model = Dialect
     # paginate_by = 20
 
+    def get_queryset(self):
+        queryset = Dialect.objects.all()
+        if self.request.GET.get('community'):
+            queryset = queryset.filter(community=self.request.GET.get('community'))
+
+        if self.request.GET.get('location'):
+            queryset = queryset.filter(location=self.request.GET.get('location'))
+
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super(DialectListView, self).get_context_data(**kwargs)
+        context.update({
+            'communities':      Dialect.COMMUNITIES,
+            'chosen_community': self.request.GET.get('community'),
+            'locations':        Dialect.LOCATIONS,
+            'chosen_location':  self.request.GET.get('location'),
+        })
         return context
 
 class DialectDetailView(DetailView):
