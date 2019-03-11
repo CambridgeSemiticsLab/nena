@@ -5,20 +5,26 @@
 {% endblock %}
 
 {% block page_content %}
-    {% block content_column_1 %}
-        <div class='campl-column3'>
-            <audio controls>
-              <source src="{{ clip.data.url }}" type="{{ clip.data.type}}">
-                Your browser does not support the audio element.
-            </audio>
-            <div>
-                <h2>Transcript</h2>
-                {{ clip.transcript|safe }}
-            </div>
-            <div>
-                <h2>Translation</h2>
-                {{ clip.translation|safe }}
-            </div>
-        </div>
-    {% endblock %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+      <audio controls>
+        <source src="{{ clip.data.url }}" type="{{ clip.data.type}}">
+        Your browser does not support the audio element.
+      </audio>
+  </div>
+  </div>
+
+  <div class='campl-column6'>
+  <div class="campl-content-container">
+      <h2>Transcript</h2>
+      {{ clip.transcript|safe }}
+  </div>
+  </div>
+
+  <div class='campl-column6'>
+  <div class="campl-content-container">
+      <h2>Translation</h2>
+      {{ clip.translation|safe }}
+ </div>
+ </div>
 {% endblock %}

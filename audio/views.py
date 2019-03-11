@@ -18,9 +18,11 @@ class AudioListView(ListView):
     model = Audio
     context_object_name = 'clips'
 
-    def get_context_data(self, **kwargs):
-        context = super(AudioListView, self).get_context_data(**kwargs)
-        return context
+    def get_queryset(self):
+        return Audio.objects.all().values('id', 'title', 'transcript', 'translation',
+                                          'dialect__id', 'dialect__name') \
+                                  .order_by('dialect__name', 'title')
+
 
 class AudioDetailView(DetailView):
 
