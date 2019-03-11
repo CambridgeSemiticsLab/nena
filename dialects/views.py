@@ -18,6 +18,7 @@ from django.forms import modelform_factory, inlineformset_factory
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
 from grammar.models import Feature
 from gallery.models import Photo
+from audio.models import Audio
 
 
 def homepage(request):
@@ -90,6 +91,8 @@ class DialectDetailView(DetailView):
         context = super(DialectDetailView, self).get_context_data(**kwargs)
         context.update({
             'photos': Photo.objects.filter(dialect=self.object)[0:5],
+            'audio':  Audio.objects.filter(dialect=self.object)[0:5],
+            'feature_count': DialectFeature.objects.filter(dialect=self.object).count(),
             'map_data_json': json.dumps(map_data, indent=2),
             'map_center': [self.object.latitude, self.object.longitude]
         })

@@ -20,25 +20,37 @@
       <h4>General remarks about the dialect</h4>
       <p>{{ object.remarks|safe }}</p>
     {% endif %}
-    {% for photo in photos %}
-      <a class="thumbnail" href="{% url 'gallery:photo-detail' photo.pk  %}" title="photo.title"
-         style="background-image:url({{ photo.thumbnail.url }})"></a>
-    {% endfor %}
-    {% if user.is_staff %}
-      <a class="thumbnail add" href="{% url 'gallery:photo-create'%}" title="add new image">+</a>
+
+    {% if photos %}
+    <p>
+      {% for photo in photos %}
+        <a class="thumbnail" href="{% url 'gallery:photo-detail' photo.pk  %}" title="{{photo.title}}"
+           style="background-image:url({{ photo.thumbnail.url }})"></a>
+      {% endfor %}
+    </p>
     {% endif %}
 
-    <ul class="campl-unstyled-list">
-      <li><a href="{% url 'dialects:dialect-audio' object.pk %}">Audio recordings and transcripts</a></li>
-      <li><a href="{% url 'dialects:dialect-grammar' object.pk %}">Grammatical description</a></li>
-    </ul>
-
-    {% if user.is_staff %}
-      <div style="margin-top: 100px;">
-        <a class="button" href="{% url 'dialects:dialect-edit' object.pk %}">Edit dialect details</a>
-        <a class="button" href="{% url 'dialects:dialect-delete' object.pk %}">Delete dialect</a>
-      </div>
+    {% if audio %}
+    <p>
+      {% for clip in audio %}
+        <a class="audio" href="{% url 'audio:audio-detail' clip.pk  %}">&#128266; {{clip.title}}</a><br>
+      {% endfor %}
+      <a class="fr" href="{% url 'dialects:dialect-audio' object.pk %}">Browse audio and transcripts &raquo;</a>
+    </p>
+    <br>
+    <br>
     {% endif %}
+
+    <p>
+      {% if feature_count %}
+      There are currently {{feature_count}} documented feature{{feature_count|pluralize}} of this dialect -
+      <a class="fr" href="{% url 'dialects:dialect-grammar' object.pk %}">Browse grammatical description &raquo;</a>
+      <br>
+      {% else %}
+      No features of this dialect are currently documented
+      {% endif %}
+    </p>
+
   </div>
   </div>
 
@@ -47,4 +59,18 @@
    {% include "map.html" with map_data_json=map_data_json map_center=map_center %}
   </div>
   {% endif %}
+
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+    {% if user.is_staff %}
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'dialects:dialect-edit' object.pk %}">Edit dialect details</a>
+        <a class="button" href="{% url 'dialects:dialect-delete' object.pk %}">Delete dialect</a>
+        <a class="button" href="{% url 'audio:audio-create'%}">Add audio</a>
+        <a class="button" href="{% url 'gallery:photo-create'%}">Add image</a>
+      </div>
+    {% endif %}
+  </div>
+  </div>
 {% endblock %}
