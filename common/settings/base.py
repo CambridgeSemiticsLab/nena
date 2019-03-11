@@ -30,6 +30,8 @@ if READ_DOT_ENV_FILE:
 
 DEBUG = env.bool('DJANGO_DEBUG', False)
 
+USE_AWS_S3 = env.bool('DJANGO_USE_AWS_S3', False)
+
 ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', default='').split(',')
 
 # Application definition
@@ -50,11 +52,14 @@ THIRD_PARTY_APPS = (
     'ucamprojectlight',
     'ucamwebauth',
     'ckeditor',
-    'storages',
+
     'rest_framework',
     'django_filters',
     'widget_tweaks',
 )
+
+if USE_AWS_S3:
+    THIRD_PARTY_APPS = THIRD_PARTY_APPS + ('storages',)
 
 LOCAL_APPS = (
     'common',
@@ -151,6 +156,7 @@ STATICFILES_FINDERS = (
 )
 MEDIA_URL = '/media/'
 MEDIA_ROOT = str(APPS_DIR('media'))
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

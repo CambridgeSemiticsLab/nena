@@ -19,6 +19,7 @@ from legacy.admin import legacyadmin
 from django.views.generic import TemplateView, RedirectView
 from django.conf import settings
 from django.contrib.auth import views as auth_views
+from django.conf.urls.static import static
 
 import dialects.views
 
@@ -45,6 +46,9 @@ urlpatterns = [
     url(r'^audio/', include(('audio.urls'), namespace='audio')),
     url(r'^gallery/', include(('gallery.urls'), namespace='gallery')),
 ]
+
+if not settings.USE_AWS_S3:
+    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns = [

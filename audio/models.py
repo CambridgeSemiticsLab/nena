@@ -7,8 +7,8 @@ class Audio(models.Model):
     title = models.CharField(max_length=50, null=False)
     dialect = models.ForeignKey(Dialect, on_delete=models.CASCADE)
     description = models.CharField(max_length=255, blank=True, null=False)
-    data = models.FileField(upload_to='media/')
-    annotations = models.FileField(upload_to='media/annotations/',  null=True, blank=True)
+    data = models.FileField(upload_to='audio/')
+    annotations = models.FileField(upload_to='annotations/', null=True, blank=True)
     transcript = RichTextField(null=True, blank=True)
     translation = RichTextField(null=True, blank=True)
 

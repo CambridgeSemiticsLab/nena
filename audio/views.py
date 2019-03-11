@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from audio.models import Audio
 from dialects.models import Dialect
 
+
 class AudioListView(ListView):
 
     name = 'Audio'

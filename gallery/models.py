@@ -11,7 +11,7 @@ class Photo(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     description = models.CharField(max_length=255, blank=True, null=False)
-    original_image = models.ImageField(upload_to='galleries')
+    original_image = models.ImageField(upload_to='photos')
     thumbnail = ImageSpecField([Thumbnail(80, 60)], source='original_image')
 
     def __str__(self):
