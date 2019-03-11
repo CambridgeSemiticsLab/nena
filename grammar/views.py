@@ -47,12 +47,25 @@ def dialects_with_feature(request, pk):
     ''' todo - replace FeatureDetailView and FeatureParadigmView with this or similar '''
     feature = Feature.objects.get(pk=pk)
     prefetch_entries = Prefetch('entries', DialectFeatureEntry.objects.order_by('-frequency'))
+    queryset = DialectFeature.objects.filter(feature_id=feature.id) \
+                             .select_related('dialect') \
+                             .prefetch_related(prefetch_entries) \
+                             .order_by('dialect__name')
+
+    # todo: combine this filtering logic with similar in dialects.DialectListView
+    if request.GET.get('community'):
+        queryset = queryset.filter(dialect__community=request.GET.get('community'))
+
+    if request.GET.get('location'):
+        queryset = queryset.filter(dialect__location=request.GET.get('location'))
+
     context = {
         'feature': feature,
-        'dialect_features': DialectFeature.objects.filter(feature_id=feature.id) \
-                                          .select_related('dialect') \
-                                          .prefetch_related(prefetch_entries)
-                                          .order_by('dialect__name'),
+        'dialect_features': queryset,
+        'communities':      Dialect.COMMUNITIES,
+        'chosen_community': request.GET.get('community'),
+        'locations':        Dialect.LOCATIONS,
+        'chosen_location':  request.GET.get('location'),
     }
     return render(request, 'grammar/feature_detail.html', context)
 

@@ -1,0 +1,18 @@
+{# expects `communities` and `locations` with format ((code, name),)#}
+{# `chosen_community` and `chosen_location` set default selection   #}
+<form action="" method="GET">
+  <select name="community">
+    <option value="">-- choose community --</option>
+    {% for code, name in communities %}
+    <option value="{{code}}" {% if code == chosen_community %}selected{% endif %}>{{name}}</option>
+    {% endfor %}
+  </select>
+  <select name="location">
+    <option value="">-- choose location --</option>
+    {% for code, name in locations %}
+    <option value="{{code}}" {% if code == chosen_location %}selected{% endif %}>{{name}}</option>
+    {% endfor %}
+  </select>
+  <input class="button" type="submit">
+  <a class="button dull" href="?">Reset</a>
+</form>

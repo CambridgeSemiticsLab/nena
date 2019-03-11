@@ -7,6 +7,7 @@
 {% block page_content %}
   <div class="campl-column12 clearfix" id="feature_detail">
   <div class="campl-content-container">
+    {% include 'dialects/_dialect_filter.html' %}
     <table class="campl-table campl-table-condensed campl-table-striped">
       {% for dialect_feature in dialect_features %}
       {% with dialect=dialect_feature.dialect entries=dialect_feature.entries %}
@@ -19,6 +20,8 @@
             {{ entry.entry|safe }}<br>
           {% endfor %}
           </td>
+          <td>{{ dialect.get_community_display }}</td>
+          <td>{{ dialect.get_location_display }}</td>
           <td>
             <a href="{% url 'dialects:dialect-feature' dialect.id dialect_feature.id %}">details &raquo;</a>
           </td>
