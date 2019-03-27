@@ -30,6 +30,28 @@
         "Normal view": cities_and_terrain,
     };
 
+    var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
+    var map     = L.map('map',{layers: [printmap, cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
+    var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
+
+    // Process our map data points, grouping into layers by point.properties.group
+    // if this doesn't exist stick them in a single layer called "points"
+    json_data = {{map_data_json|safe}};
+    all_names = json_data.map(point => point.properties.group)
+                         .filter(x => typeof x !== 'undefined')
+    group_names = Array.from(new Set(all_names))
+
+    if( !group_names.length ){
+      group_names = ['points']
+    }
+
+    groups = {}
+    for(i in group_names){
+      var group = L.featureGroup();
+      group.addTo(map);
+      groups[group_names[i]] = group;
+    }
+
     // This provides a lookup function to convert from a geoJSON item to a Leaflet Marker
     dataLayerOptions = {pointToLayer: function (feature, latlng) {
         var props = feature.properties;
@@ -38,7 +60,12 @@
             class_list += ' icon_focus';
         }
         if(typeof props.group_number !== 'undefined'){
-          class_list += ' group_'+props.group_number;
+          if(group_names.length < 2)
+          {
+            class_list += ' only_group';
+          }else{
+            class_list += ' group_'+props.group_number;
+          }
         }
         myIcon   = L.divIcon({iconSize: L.point(7, 7), className: class_list });
         myMarker = L.marker(latlng, { icon: myIcon });
@@ -62,29 +89,6 @@
         return myMarker;
     }};
 
-    var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
-    var map     = L.map('map',{layers: [printmap, cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
-    var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
-
-    // Process our map data points, grouping into layers by point.properties.group
-    // if this doesn't exist stick them in a single layer called "points"
-    json_data = {{map_data_json|safe}};
-    all_names = json_data.map(point => point.properties.group)
-                         .filter(x => typeof x !== 'undefined')
-    group_names = Array.from(new Set(all_names))
-
-    if( !group_names.length ){
-      group_names = ['points']
-    }
-    console.log(group_names)
-
-    groups = {}
-    for(i in group_names){
-      var group = L.featureGroup();
-      group.addTo(map);
-      groups[group_names[i]] = group;
-    }
-
     for(i in json_data){
       marker_data = json_data[i]
       group_name = marker_data.properties.group || 'points';
@@ -93,10 +97,25 @@
       marker.addTo(groups[group_name]);
     }
 
+    if(group_names.length > 1){
+      prefixed_groups = {};
+      group_counter = 0;
+      for(group_name in groups){
+        group = groups[group_name]
+        prefixed_name = '<span class="label group_'+group_counter+'"></span> '+group_name+' <i>('+group.getLayers().length+')</i>';
+        prefixed_groups[prefixed_name] = group;
+        group_counter++;
+      }
+    }else{
+      prefixed_groups = groups;
+    }
+    L.control.layers(baseLayers, prefixed_groups).addTo(map);
+
+
+
     markers = L.geoJSON(json_data, dataLayerOptions)
     map.setMaxBounds(markers.getBounds().pad(.2));
 
-    L.control.layers(baseLayers, groups).addTo(map);
 
     /* {# not sure this is doing anything, to remove if we don't implement label culling on zoom #}
     var show_label_zoom = 3; // zoom level threshold for showing/hiding labels
