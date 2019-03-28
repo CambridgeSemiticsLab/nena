@@ -5,10 +5,12 @@ from treebeard.mp_tree import MP_Node
 
 
 class Feature(MP_Node):
-    name = models.CharField(max_length=250, unique=False)
-    heading = models.IntegerField(blank=True, null=True)
-    group = models.BooleanField(null=False, default=False)
-    fullheading =  models.CharField(max_length=20, blank=True, null=True, editable=False)
+    name          = models.CharField(max_length=250, unique=False)
+    heading       = models.IntegerField(blank=True, null=True)
+    group         = models.BooleanField(null=False, default=False)
+    fullheading   = models.CharField(max_length=20, blank=True, null=True, editable=False)
+    category_list = models.TextField(blank=True, null=True)
+    # ^ Pipe (|) separated list of strings, if set must be chosen by related DialectFeature.category
 
     node_order_by = ['heading']
 
@@ -22,7 +24,6 @@ class Feature(MP_Node):
             return str(self.heading)+'.0'
         else:
             fullheading = [str(a.heading) for a in self.get_ancestors() if a.depth > 1] + [str(self.heading)]
-        #fullheading = [str(a.heading) for a in self.get_ancestors()]+ [h+'.' for h in str(self.heading)]
             return '.'.join(fullheading)+'.'
 
     def __str__(self):

@@ -19,6 +19,7 @@ from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
 from grammar.models import Feature
 from gallery.models import Photo
 from audio.models import Audio
+from dialects.forms import DialectFeatureForm
 
 
 def homepage(request):
@@ -221,8 +222,9 @@ def features_of_dialect(request, dialect_id_string, section=None):
     base_path = chosen_root.path if chosen_root else ''
     feature_examples = DialectFeature.objects.filter(dialect__in=dialect_ids) \
                                              .filter(feature__path__startswith=base_path) \
-                                             .values('id', 'dialect_id', 'feature_id', 'feature__path',
-                                                     'entries__entry', 'entries__frequency', 'entries__comment') \
+                                             .values('id', 'dialect_id', 'feature_id', 'feature__path', 'feature__fullheading',
+                                                     'is_absent', 'introduction', 'comment',
+                                                     'entries__id', 'entries__entry', 'entries__frequency', 'entries__comment') \
                                              .order_by('feature__path')
 
     if is_bulk_edit:  # Only provide examples at one level for bulk edit (can't bulk edit in subfolders)
@@ -266,16 +268,27 @@ def features_of_dialect(request, dialect_id_string, section=None):
                 num_features += 1
                 entry_level = level
 
-                examples = OrderedDict((x, []) for x in dialect_ids)
+                examples = OrderedDict((x, {}) for x in dialect_ids)
                 while True:  # Loop through all examples of this feature
-                    examples[feature_examples[i]['dialect_id']].append({
-                        'text': feature_examples[i]['entries__entry'] or '-',
-                        'frequency': feature_examples[i]['entries__frequency'],
-                        'comment': feature_examples[i]['entries__comment'] or '',
-                        'df_id': feature_examples[i]['id'],
+                    example = feature_examples[i]
+                    if 'entries' not in examples[example['dialect_id']]:
+                        examples[example['dialect_id']] = {
+                            'id':                   example['id'],
+                            'dialect_id':           example['dialect_id'],
+                            'feature__fullheading': example['feature__fullheading'],
+                            'is_absent':            example['is_absent'],
+                            'introduction':         example['introduction'],
+                            'comment':              example['comment'],
+                            'entries':              [],
+                        }
+                    examples[example['dialect_id']]['entries'].append({
+                        'id':        example['entries__id'],
+                        'entry':     example['entries__entry'] or '',
+                        'frequency': example['entries__frequency'],
+                        'comment':   example['entries__comment'] or '',
                     })
                     i -= 1
-                    if i < 0 or feature_examples[i]['feature_id'] != feature_id:
+                    if i < 0 or feature_examples[i] != feature_id:
                         feature_list[j][1].update({
                             'dialects': examples
                         })
@@ -302,8 +315,8 @@ def features_of_dialect(request, dialect_id_string, section=None):
         raw_rows = []
         for feature, info in feature_list[1:]:
             if 'dialects' in info:
-                entry = info['dialects'][dialects[0].id][0]
-                raw_row = entry['text']
+                entry = info['dialects'][dialects[0].id]['entries'][0]
+                raw_row = entry['entry']
                 if entry['frequency'] is not 'P':
                     raw_row += ' {}'.format(entry['frequency'])
                 if entry['comment']:
@@ -338,19 +351,18 @@ class DialectFeatureDetailView(DetailView):
 def dialect_feature_pane(request, dialect_id, feature_heading):
     """ renders just a snippet of html that contains details of the DialectFeature, for ajaxing
     """
-    df = DialectFeature.objects.filter(dialect=dialect_id, feature__fullheading=feature_heading) \
-                               .annotate(fullheading=F('feature__fullheading')) \
-                               .first()
+    df_dict = DialectFeature.objects.filter(dialect=dialect_id, feature__fullheading=feature_heading) \
+                                    .values('id', 'dialect_id', 'feature__fullheading', 'is_absent', 'introduction', 'comment') \
+                                    .first()
     context = {
         'dialect_id':      dialect_id,
         'feature_heading': feature_heading,
     }
-    if df:
-        # todo make feature_pane template expect dict in format of [Feature].entries to avoid
-        # having to annotate for consistency with the data built in features_of_dialect() above
-        # (which will also need changed!)
+    if df_dict:
+        df_dict['entries'] = DialectFeatureEntry.objects.filter(feature_id=df_dict['id']) \
+                                                        .values('entry', 'comment')
         context.update({
-            'entries': df.entries.annotate(df_id=F('feature_id'), text=F('entry')),
+            'df': df_dict,
         })
     return render(request, 'dialects/_dialectfeature_pane.html', context)
 
@@ -377,12 +389,11 @@ def dialect_feature_edit(request, dialect_id, feature_heading):
         'initial': [{'frequency': 'M' if df and df.entries.count() > 0 else 'P'}],
         'instance': df,
     }
-    df_form_class     = modelform_factory(DialectFeature, fields=('introduction', 'comment'))
     dfe_formset_class = inlineformset_factory(DialectFeature, DialectFeatureEntry,
                                               fields=('entry', 'frequency', 'comment'), extra=1)
 
     postvars    = request.POST or None
-    df_form     = df_form_class(postvars, instance=df)
+    df_form     = DialectFeatureForm(postvars, instance=df)
     dfe_formset = dfe_formset_class(postvars, **shared_kwargs)
 
     if request.method == 'POST' and dfe_formset.is_valid():

@@ -9,8 +9,19 @@
   <div class='campl-column12'>
   <div class="campl-content-container">
 
-    <p>introduction:{{object.introduction}}</p>
-    <p>comment:{{object.comment}}</p>
+    {% if object.is_absent %}
+    <p>Dialect does not have this feature</p>
+    {% endif %}
+    {% if object.feature.category_list %}
+    <p><b>{{object.category}}</b></p>
+    {% endif %}
+
+    {% if object.introduction %}
+    <p>{{object.introduction}}</p>
+    {% endif %}
+    {% if object.comment %}
+    <p>{{object.comment|safe}}</p>
+    {% endif %}
 
     <ul class="campl-unstyled-list">
       {% for example in examples %}

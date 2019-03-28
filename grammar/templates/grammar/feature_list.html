@@ -120,7 +120,7 @@
           <textarea class="df_edit_bulk utf8-text" name="bulk_edit" rows="{{feature_list|length|add:'-1'}}">{{raw_text}}</textarea>
           {% endif %}
         {% elif dialects %}
-          {% for dialect_id, entries in info.dialects.items %}
+          {% for dialect_id, df in info.dialects.items %}
             <div class="example" data-src="{% url 'dialects:dialect-feature-pane' dialect_id feature.fullheading %}">
                 {% include 'dialects/_dialectfeature_pane.html' with feature_heading=feature.fullheading%}
             </div>

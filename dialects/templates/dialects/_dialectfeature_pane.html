@@ -1,17 +1,34 @@
-{# expects `dialect_id`, `feature_heading` and `entries` to be set #}
-{% if entries %}
-  {% for entry in entries %}
-    <a class="plain" href="{% url 'dialects:dialect-feature' dialect_id entry.df_id %}">
-    {{entry.text|safe}}
-    </a>
-
-    {% if not forloop.last %}
-    <br>
-    {% endif %}
-  {% endfor %}
+{# expects `dialect_id`, `feature_heading` always and `df` dictionary if the DialectFeature exists #}
+{% if df.is_absent %}
+  Not in dialect
 {% endif %}
+{% if df.feature.category_list %}
+  <b>{{df.category}}</b><br>
+{% endif %}
+
+{% if df.introduction %}
+<span title="{{df.introduction}}"></span>
+{% endif %}
+{% if df.comment %}
+<span class="comment" data-text="{{df.comment}}">💬</span>
+{% endif %}
+
+{% for entry in df.entries %}
+  <a class="plain" href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">
+  {{entry.entry|safe}}
+  </a>
+  {% if entry.comment %}
+  <span class="comment" data-text="{{entry.comment}}">💬</span>
+  {% endif %}
+
+
+  {% if not forloop.last %}
+  <br>
+  {% endif %}
+{% endfor %}
 {% if user.is_staff %}
-  <a class="edit" href="{% url 'dialects:dialect-feature-edit' dialect_id feature_heading %}" target="_BLANK" title="add">
-  {{entries|yesno:"&#x270D;,+ add"|safe}}
+  <a class="edit" href="{% url 'dialects:dialect-feature-edit' dialect_id feature_heading %}"
+     target="_BLANK" title="{{df.id|yesno:"edit,add"}}">
+  {{df.id|yesno:"&#x270D;,+"|safe}}
   </a>
 {% endif %}

@@ -61,10 +61,12 @@ class Dialect(models.Model):
         ordering = ['name']
 
 class DialectFeature(models.Model):
-    feature = models.ForeignKey(Feature, on_delete=models.CASCADE)
-    dialect = models.ForeignKey(Dialect, related_name='features', on_delete=models.CASCADE)
-    introduction = RichTextField(null=True, blank=True) 
-    comment = RichTextField(null=True, blank=True)
+    feature   = models.ForeignKey(Feature, on_delete=models.CASCADE)
+    dialect   = models.ForeignKey(Dialect, related_name='features', on_delete=models.CASCADE)
+    is_absent = models.BooleanField(default=False)
+    category  = models.CharField(max_length=80, null=True, blank=True)  # must match one of Feature.category_list if set
+    introduction = RichTextField(null=True, blank=True)
+    comment   = RichTextField(null=True, blank=True)
 
     def __str__(self):
         return '{} ({}): {}'.format(self.dialect, self.dialect.community, self.feature)
@@ -79,8 +81,8 @@ class DialectFeatureEntry(models.Model):
     feature = models.ForeignKey(DialectFeature, related_name='entries', on_delete=models.CASCADE)
     entry = models.CharField(max_length=160, unique=False, null=False, blank=False)
     frequency = models.CharField(max_length=1, choices=FREQUENCIES,
-                default='', null=False, blank=False) 
-    comment = RichTextField(null=True, blank=True) 
+                default='', null=False, blank=False)
+    comment = RichTextField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Dialect feature entries'

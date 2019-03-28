@@ -11,26 +11,33 @@
   <div id="form_holder" class="campl-content-container" style="width: 350px;">
     <form class="df_form" action="{% url 'dialects:dialect-feature-edit' dialect.id feature.fullheading %}" method="POST">
     {% csrf_token %}
-    <div style="display:none">{{ df_form }}</div>
-
-    {{ dfe_formset.management_form }}
-    {% for form in dfe_formset %}
-      {% if forloop.last and not forloop.first %}
-      <input class="add_new" type="checkbox">
-      <div>
+    <label for="id_is_absent">Dialect has this feature?</label>
+    {{ df_form.is_absent|add_class:"chex flip"}}
+    <div>
+      {% if feature.category_list %}
+        {{ df_form.category }}
       {% endif %}
-
-        {# hidden fields: #} {{form.id}} {{form.feature}}
-        {{form.DELETE|add_class:"chex_delete"|attr:"data-chex:remove example"}}
+      {{ df_form.comment|attr:"placeholder: general comment (optional)" }}
+      <h2>Examples:</h2>
+      {{ dfe_formset.management_form }}
+      {% for form in dfe_formset %}
+        {% if forloop.last and not forloop.first %}
+        <input class="add_new" type="checkbox">
         <div>
-          {{form.entry|attr:"placeholder:example text"|add_class:"utf8-text"|attr:"style:font-size:1.3em;"}} {{form.frequency}}<br>
-          {{form.comment|attr:"placeholder:definition or further comment"}} <br>
-        </div>
+        {% endif %}
 
-      {% if forloop.last and not forloop.first %}
-      </div>
-      {% endif %}
+          {# hidden fields: #} {{form.id}} {{form.feature}}
+          {{form.DELETE|add_class:"chex_delete"|attr:"data-chex:remove example"}}
+          <div>
+            {{form.entry|attr:"placeholder:example text"|add_class:"utf8-text"|attr:"style:font-size:1.3em;"}} {{form.frequency}}<br>
+            {{form.comment|attr:"placeholder:definition or further comment"}} <br>
+          </div>
+
+        {% if forloop.last and not forloop.first %}
+        </div>
+        {% endif %}
     {% endfor %}
+    </div>
     <div class="controls">
       {% if df.id %}
         <a class="button dull cancel" href="{% url 'dialects:dialect-feature' dialect.id df.id %}">Cancel</a>

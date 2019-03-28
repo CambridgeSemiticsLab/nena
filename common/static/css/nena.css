@@ -261,6 +261,35 @@ ul{
     margin: -0.1em -0.2em;
 }
 
+.comment {
+  opacity: 0.6;
+  position: relative;
+  cursor: default;
+  padding: 0.3em;
+  border-top-left-radius: 0.3em;
+  border-bottom-left-radius: 0.3em;
+}
+.comment:hover {
+  opacity: 1;
+  background-color: #cef;
+  z-index: 2;
+}
+.comment:hover:before {
+  content: attr(data-text);
+  position: absolute;
+  display: block;
+  left: 100%;
+  top: 0;
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.3em 0.6em;
+  background-color: #cef;
+  border-top-right-radius: 0.3em;
+  border-bottom-right-radius: 0.3em;
+}
+
 img {
     max-width:600px;
 }
@@ -474,12 +503,16 @@ a.plain {
   margin-right: -26px;
 }
 .df_form [id$="-DELETE"]:checked + div {
-  height: 1.8em;
+  height: 3em;
   overflow-y: hidden;
 }
 .df_form [id$="-DELETE"]:checked + div * {
   text-decoration: line-through red;
   opacity: 0.6;
+}
+.df_form [name=is_absent]:checked + div {
+  height: 0;
+  overflow: hidden;
 }
 .df_form .cancel {
   cursor: pointer;
@@ -507,6 +540,7 @@ input[type=checkbox].chex {
     position:relative;
     height:0;
     width:2.3em;
+    vertical-align: baseline;
     }
 input[type=checkbox].chex:before {
     content: '';
@@ -523,6 +557,7 @@ input[type=checkbox].chex:before {
 input[type=checkbox].chex:hover:before {
     box-shadow: 0 0 4px rgba(0,0,0,0.3) inset;
     }
+input[type=checkbox].chex.flip:checked:after,
 input[type=checkbox].chex:after{
     content: '';
     color: red;
@@ -531,6 +566,7 @@ input[type=checkbox].chex:after{
     font-size: 2em;
     padding: 0.2em;
     }
+input[type=checkbox].chex.flip:after,
 input[type=checkbox].chex:checked:after {
     content: '✔';
     position: relative;
