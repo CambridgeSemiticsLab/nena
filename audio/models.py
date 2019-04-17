@@ -1,7 +1,6 @@
 from django.db import models
 from django.urls import reverse_lazy
 from dialects.models import Dialect
-from ckeditor.fields import RichTextField
 
 class Audio(models.Model):
     title = models.CharField(max_length=50, null=False)
@@ -9,8 +8,8 @@ class Audio(models.Model):
     description = models.CharField(max_length=255, blank=True, null=False)
     data = models.FileField(upload_to='audio/')
     annotations = models.FileField(upload_to='annotations/', null=True, blank=True)
-    transcript = RichTextField(null=True, blank=True)
-    translation = RichTextField(null=True, blank=True)
+    transcript = models.TextField(null=True, blank=True)
+    translation = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return "{}: {}".format(self.dialect, self.title)

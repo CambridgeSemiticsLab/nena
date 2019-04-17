@@ -1,4 +1,5 @@
 {% extends 'nena.html' %}
+{% load widget_tweaks %}
 
 {% block subtitle %}
     {% if object.name %}
@@ -11,10 +12,29 @@
 {% block page_content %}
     {% block content_column_2 %}
         <div class='campl-column6'>
-            <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+            <form class="audio_form" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
                 {{ form.media }}
-                {{ form.as_p }}
-                <input type="submit" value="Save" />
+                {% for field in form %}
+                <p>
+                  {# todo - maybe add annotations back in once they're better spec'd #}
+                  {% if field.html_name == 'annotations' %}
+                    <div style="display: none;">
+                      {{ field.errors }}
+                      {{ field.label_tag }}
+                      {{ field }}
+                    </div>
+                  {% elif field.html_name == 'transcript' %}
+                    {{ field.errors }}
+                    {{ field.label_tag }}
+                    {{ field|add_class:"aramaic" }}
+                  {% else %}
+                    {{ field.errors }}
+                    {{ field.label_tag }}
+                    {{ field }}
+                  {% endif %}
+                </p>
+                {% endfor %}
+                <input class="button" type="submit" value="Save" />
             </form>
         </div>
     {% endblock %}

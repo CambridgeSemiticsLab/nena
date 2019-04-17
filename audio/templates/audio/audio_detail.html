@@ -11,20 +11,38 @@
         <source src="{{ clip.data.url }}" type="{{ clip.data.type}}">
         Your browser does not support the audio element.
       </audio>
+
+      <table class="translation_table">
+      <tr>
+        <td><h2>Transcript</h2></td>
+        <td><h2>Translation</h2></td>
+      </tr>
+      {% if text_chunks %}
+        {% for transcript_chunk, translation_chunk in text_chunks %}
+        <tr>
+          <td><p class="aramaic">({{transcript_chunk|safe}}</p></td>
+          <td><p>({{translation_chunk|safe}}</p></td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td><p class="aramaic">{{ clip.transcript|safe|linebreaksbr }}</p></td>
+          <td><p>{{ clip.translation|safe|linebreaksbr }}</p></td>
+        </tr>
+      {% endif %}
+      </table>
   </div>
   </div>
 
-  <div class='campl-column6'>
+  <div class='campl-column12'>
   <div class="campl-content-container">
-      <h2>Transcript</h2>
-      {{ clip.transcript|safe }}
+    {% if user.is_staff %}
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'audio:audio-edit' object.pk %}">Edit audio and transcription</a>
+        <a class="button" href="{% url 'audio:audio-delete' object.pk %}">Delete audio and transcription</a>
+      </div>
+    {% endif %}
   </div>
   </div>
-
-  <div class='campl-column6'>
-  <div class="campl-content-container">
-      <h2>Translation</h2>
-      {{ clip.translation|safe }}
- </div>
- </div>
 {% endblock %}

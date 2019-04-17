@@ -5,6 +5,11 @@
   padding: 0;
 }
 
+/* revert some crazy defaults from base style */
+input, textarea {
+    width: auto;
+}
+
 /* overrides for campl theme stuff */
 .campl-theme-6 .campl-page-header {
     background-image: url(/static/images/bg.jpg);
@@ -608,3 +613,20 @@ input[type=checkbox].chex_delete:hover:before {
 input[type=checkbox].chex_delete:checked:before {
     color: #f44;
     }
+
+
+.translation_table {
+  width: 80%;
+}
+.translation_table td {
+  width: 50%;
+  padding: 0.3em 0.6em;
+}
+
+.audio_form #id_translation {
+  font-size: 1.2em;
+}
+.audio_form textarea {
+  width: 50em;
+  height: 20em;
+}

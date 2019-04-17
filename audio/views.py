@@ -1,5 +1,8 @@
-from django.shortcuts import get_object_or_404
+import re
 
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -9,11 +12,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 
 from audio.models import Audio
-from dialects.models import Dialect
+from dialects.models import Dialect, DialectFeatureEntry
 
 
 class AudioListView(ListView):
-
     name = 'Audio'
     model = Audio
     context_object_name = 'clips'
@@ -25,14 +27,29 @@ class AudioListView(ListView):
 
 
 class AudioDetailView(DetailView):
-
     name = 'Audio'
     model = Audio
     context_object_name = 'clip'
 
     def get_context_data(self, **kwargs):
         context = super(AudioDetailView, self).get_context_data(**kwargs)
+        clip = context['clip']
+        regex = '\((?=\d+\))'
+        transcript_chunks  = re.split(regex, clip.transcript or '')
+        translation_chunks = re.split(regex, clip.translation or '')
+        text_chunks = zip(transcript_chunks[1:], translation_chunks[1:])
+
+        # todo - try to find matching words within text
+        # words = set(re.findall('\w+', clip.transcript))
+        # words = [w for w in words if not w.isdigit()]
+
+        # dfs = DialectFeatureEntry.objects.filter(feature__dialect_id=clip.dialect_id) \
+                                         # .filter(entry__in=words) \
+                                         # .values_list('entry', 'feature__dialect_id')
+
+        context.update({'text_chunks': text_chunks})
         return context
+
 
 class DialectAudioView(ListView):
 
@@ -48,15 +65,24 @@ class DialectAudioView(ListView):
         context['dialect'] = self.dialect
         return context
 
+
 @method_decorator(login_required, name='dispatch')
 class AudioCreateView(CreateView):
     model = Audio
     fields = '__all__'
 
+    def get_success_url(self):
+        return reverse('audio:audio-detail', args=(self.kwargs['pk']))
+
+
 @method_decorator(login_required, name='dispatch')
 class AudioUpdateView(UpdateView):
     model = Audio
     fields = '__all__'
+
+    def get_success_url(self):
+        return reverse('audio:audio-detail', args=(self.kwargs['pk'],))
+
 
 @method_decorator(login_required, name='dispatch')
 class AudioDeleteView(DeleteView):
