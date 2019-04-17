@@ -67,7 +67,11 @@
       </span>
       {% endfor %}
     {% elif bulk_edit %}
-      eg. &nbsp; <span class="utf8-text" style="font-size:1.5em">{{example_text}}</span>
+      eg. &nbsp;
+      <span class="utf8-text" style="font-size:1.5em">
+        <span style="color:blue">kaθu</span> <span style="color:red">P</span> "<span style="color:green">he writes</span>"
+        ~ <span style="color:blue">kaθ</span> <span style="color:red">M</span>
+      </span>
       <input class="button fr" type="submit" value="Save all">
       <a class="button dull fr" href="?" style="float:right">Cancel</a>
     {% elif dialects %}

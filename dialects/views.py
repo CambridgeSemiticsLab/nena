@@ -195,27 +195,38 @@ def features_of_dialect(request, dialect_id_string, section=None):
     max_depth    = chosen_root.depth + 1 if is_bulk_edit else None
     feature_list = Feature.get_annotated_list(parent=chosen_root, max_depth=max_depth)
 
-    bulk_text = request.POST.get('bulk_edit', None)
+    # process bulk save if that's what's happening
+    # todo - separate this out into a different function, with own url and pass feature id list
+    #        through form so it doesn't rely on the above code
+    bulk_text   = request.POST.get('bulk_edit', None)
+    entry_regex = r'^\s*(?P<entry>.+?)\s*(?P<frequency>\b[MPmp]\b){0,1}\s*(?P<comment>\".+\")?\s*$'
     if bulk_text is not None:
-        regex = r'^\s*(?P<entry>.+?)\s*(?P<frequency>\b[MPmp]\b){0,1}\s*(?P<comment>\'.+\')?\s*$'
-        text_matches = [re.match(regex, x.strip('\r')) for x in bulk_text.split('\n')]
-        text_groups  = [x.groupdict() if x else None for x in text_matches]
+        row_texts = bulk_text.split('\n')
+        for row_text, feature in zip_longest(row_texts, feature_list[1:], fillvalue=''):  # skip first feature as it matches the top-level group
+            dfes = []
+            for entry_text in row_text.split('~'):
+                matches = re.match(entry_regex, entry_text.strip('\r').strip(' '))
+                if not matches:
+                    continue
+                matches_dict = matches.groupdict()
+                if len(matches_dict['entry'].strip(' ')) < 1:
+                    continue
+                matches_dict['frequency'] = matches_dict['frequency'].upper() if matches_dict['frequency'] else 'P'
+                matches_dict['comment']   = matches_dict['comment'].strip('"') if matches_dict['comment'] else None
+                dfes.append(DialectFeatureEntry(**matches_dict))
 
-        #raise Exception(text_groups)
-        for groups, feature in zip_longest(text_groups, feature_list[1:], fillvalue=None):  # skip first feature as it matches the top-level group
-            df = DialectFeature.objects.filter(dialect=dialects[0].id, feature=feature[0].id).first() \
-                 or DialectFeature(dialect_id=dialects[0].id, feature_id=feature[0].id)
-            if not groups or len(groups['entry'].strip(' ')) < 1:
-                if df.id:
-                    df.delete()
-                continue
+            # load the existing DialectFeature or prepare a new one
+            df = DialectFeature.objects.filter(dialect=dialects[0].id, feature=feature[0].id).first()
+            if not df:
+                df = DialectFeature(dialect_id=dialects[0].id, feature_id=feature[0].id)
+                df.save()
 
             df.entries.all().delete()  # clear any existing entries
-            groups['frequency'] = groups['frequency'].upper() if groups['frequency'] else 'P'
-            groups['comment']   = groups['comment'].strip("'") if groups['comment'] else None
-            dfe = DialectFeatureEntry(**groups)
-            df.save()
-            df.entries.add(dfe, bulk=False)
+            df.entries.set(dfes, bulk=False)
+
+            if len(dfes) < 1:  # delete the Dialect Feature if no entries were submitted
+                df.delete()
+
         return HttpResponseRedirect(reverse('dialects:dialect-grammar-section', args=(dialects[0].id, section)))
 
 
@@ -230,22 +241,24 @@ def features_of_dialect(request, dialect_id_string, section=None):
     if is_bulk_edit:  # Only provide examples at one level for bulk edit (can't bulk edit in subfolders)
         feature_examples = feature_examples.filter(feature__depth=max_depth)
 
-    # Step *backwards* through the list of features `feature_list` trying to join in matching
-    # DialectFeature details from `feature_examples`.
-    #
-    # `feature_list` (FL) entries are tuples like:
-    #    (<Feature object>, {**info about feature's position in hirarchy, see above link})
-    # `feature_examples` (FE) entries are dicts like:
-    #    {'id': _, 'feature_id': _, 'feature__path': _, 'entries__entry': _}
-    #
-    # We match on Feature.path, if a match is found we port some uesful details from (FE) into
-    # the info entry in (AL)
-    #
-    # Much of the complexity is down to keeping track of whether a parent feature contains any
-    # children (or childrens-children, etc...) which have an entry. `entry_level` and `empty_level`
-    # are there to bubble entries (or a lack thereof) up the tree. As we traverse up a level we
-    # stamp the parent with an indicator of its deep contents to make rendering easier.
-    #
+    """
+    Step *backwards* through the list of features `feature_list` trying to join in matching
+    DialectFeature details from `feature_examples`.
+
+    `feature_list` (FL) entries are tuples like:
+       (<Feature object>, {**info about feature's position in hirarchy, see above link})
+    `feature_examples` (FE) entries are dicts like:
+       {'id': _, 'feature_id': _, 'feature__path': _, 'entries__entry': _}
+
+    We match on Feature.path, if a match is found we port some uesful details from (FE) into
+    the info entry in (FL)
+
+    Much of the complexity is down to keeping track of whether a parent feature contains any
+    children (or childrens-children, etc...) which have an entry. `entry_level` and `empty_level`
+    are there to bubble entries (or a lack thereof) up the tree. As we traverse up a level we
+    stamp the parent with an indicator of its deep contents to make rendering easier.
+    """
+
     num_features = 0
     if len(feature_examples):
         entry_level = 0  # tracks presence of features with an entry up the tree
@@ -288,7 +301,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
                         'comment':   example['entries__comment'] or '',
                     })
                     i -= 1
-                    if i < 0 or feature_examples[i] != feature_id:
+                    if i < 0 or feature_examples[i]['feature_id'] != feature_id:
                         feature_list[j][1].update({
                             'dialects': examples
                         })
@@ -311,23 +324,29 @@ def features_of_dialect(request, dialect_id_string, section=None):
         'bulk_edit':    is_bulk_edit,
     }
 
+
     if context['bulk_edit']:
+        def encode_entry(entry):
+            encoded_entry = entry['entry']
+            if entry['frequency'] is not 'P':
+                encoded_entry += ' {}'.format(entry['frequency'])
+            if entry['comment']:
+                encoded_entry += ' "{}"'.format(entry['comment'])
+            return encoded_entry
+
         raw_rows = []
         for feature, info in feature_list[1:]:
-            if 'dialects' in info:
-                entry = info['dialects'][dialects[0].id]['entries'][0]
-                raw_row = entry['entry']
-                if entry['frequency'] is not 'P':
-                    raw_row += ' {}'.format(entry['frequency'])
-                if entry['comment']:
-                    raw_row += " '{}'".format(entry['comment'])
-                raw_rows.append(raw_row)
-            else:
+            if 'dialects' not in info:
                 raw_rows.append(' ')
+                continue
+
+            entries = info['dialects'][dialects[0].id]['entries']
+            raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
+
         raw_text = '\n'.join(raw_rows)
         context.update({
             'raw_text':     raw_text,
-            'example_text': "kaθu  P 'he writes'",
+            'example_text': 'kaθu  P "he writes" ~ kaθ <span style="color:red">M</span>',
         })
     if chosen_root:
         context['total_features'] = DialectFeature.objects.filter(dialect__in=dialect_ids).count()
@@ -369,7 +388,7 @@ def dialect_feature_pane(request, dialect_id, feature_heading):
 
 @staff_member_required
 def dialect_feature_edit(request, dialect_id, feature_heading):
-    """ and edit page for DialectFeature details as well as adding, changing and removing its examples
+    """ edit page for DialectFeature details as well as adding, changing and removing its examples
     """
     feature = Feature.objects.get(fullheading=feature_heading)
     dialect = Dialect.objects.get(id=dialect_id)
