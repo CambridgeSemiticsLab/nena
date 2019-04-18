@@ -117,6 +117,9 @@
               {% endif %}
               {% endspaceless %}" title="show just this section">§</a>
           {% endif %}
+          {% if user.is_staff %}
+          <a class="edit" href="{% url 'admin:grammar_feature_change' feature.id %}" target="_BLANK" title="edit">&#x270D;</a>
+          {% endif %}
         </label>
 
         {% if bulk_edit %}

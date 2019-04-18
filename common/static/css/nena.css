@@ -397,9 +397,11 @@ a.plain {
 #grammar_tree.multi_dialect .example {
         width: 280px;
 }
+#grammar_tree label > .edit,
 #grammar_tree .example .edit {
         display: none;
 }
+#grammar_tree label:hover > .edit,
 #grammar_tree li:hover > .example .edit {
         display: inline-block;
 }
