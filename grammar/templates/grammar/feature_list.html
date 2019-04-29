@@ -63,7 +63,7 @@
       {% for d in dialects %}
       <span class="dialect_header">
         <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
-        <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}?remove_compare={{d.id}}">&times;</a>
+        <a href="?remove_compare={{d.id}}&section={{section.fullheading}}">&times;</a>
       </span>
       {% endfor %}
     {% elif bulk_edit %}

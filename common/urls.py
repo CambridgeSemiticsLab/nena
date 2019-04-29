@@ -50,7 +50,7 @@ urlpatterns = [
 if not settings.USE_AWS_S3:
     urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if settings.DEBUG:
+if settings.USE_SILK and settings.DEBUG:
     urlpatterns = [
         url(r'^silk/', include('silk.urls', namespace='silk')),
     ] + urlpatterns
