@@ -9,16 +9,23 @@
 {% if df.introduction %}
 <span title="{{df.introduction}}"></span>
 {% endif %}
+{% if df.category %}
+  <a class="plain" href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">
+  {{df.category}}
+  </a>
+{% endif %}
 {% if df.comment %}
-<span class="comment" data-text="{{df.comment}}">💬</span>
+<a class="comment plain" data-text="{{df.comment}}"  href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">💬</a>
 {% endif %}
 
 {% for entry in df.entries %}
-  <a class="plain" href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">
-  {{entry.entry|safe}}
-  </a>
+  {% if entry.entry %}
+    <a class="plain aramaic" href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">
+    {{entry.entry|safe}}
+    </a>
+  {% endif %}
   {% if entry.comment %}
-  <span class="comment" data-text="{{entry.comment}}">💬</span>
+    <span class="comment" data-text="{{entry.comment}}">💬</span>
   {% endif %}
 
 

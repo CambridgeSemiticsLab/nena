@@ -26,6 +26,11 @@
                   {% elif field.html_name == 'transcript' %}
                     {{ field.errors }}
                     {{ field.label_tag }}
+                    <p style="font-style: italic; font-size: 0.7em; line-height: 1.2em">
+                      Use numbers in brackets to align transcript and translation text. eg. "(1)"
+                      can be inserted into both pieces of text, the bracketed number will be removed
+                      and the texts aligned on the page at this point.
+                    </p>
                     {{ field|add_class:"aramaic" }}
                   {% else %}
                     {{ field.errors }}

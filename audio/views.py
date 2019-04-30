@@ -35,9 +35,12 @@ class AudioDetailView(DetailView):
         context = super(AudioDetailView, self).get_context_data(**kwargs)
         clip = context['clip']
         regex = '\((?=\d+\))'
-        transcript_chunks  = re.split(regex, clip.transcript or '')
-        translation_chunks = re.split(regex, clip.translation or '')
-        text_chunks = zip(transcript_chunks[1:], translation_chunks[1:])
+        transcript_chunks = re.split(regex, clip.transcript or '')
+        if len(transcript_chunks) > 1:
+            translation_chunks = re.split(regex, clip.translation or '')
+            text_chunks = zip(transcript_chunks[1:], translation_chunks[1:])
+        else:
+            text_chunks = [(clip.transcript, clip.translation)]
 
         # todo - try to find matching words within text
         # words = set(re.findall('\w+', clip.transcript))

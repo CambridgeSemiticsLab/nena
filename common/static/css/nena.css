@@ -10,6 +10,12 @@ input, textarea {
     width: auto;
 }
 
+a.plain {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 /* overrides for campl theme stuff */
 .campl-theme-6 .campl-page-header {
     background-image: url(/static/images/bg.jpg);
@@ -136,12 +142,15 @@ ul{
 }
 #map .label:before {
     top: 0px;
-    left: -4px;
+    left: -3px;
     background: #999;
     font-size: 13px;
     width: 16px;
     height: 16px;
     line-height: 16px;
+}
+#map input:checked + span .label:before {
+    background: #555;
 }
 
 #map .icon_base:hover {
@@ -264,6 +273,13 @@ ul{
     background-color: #fec4;
     padding: 0.1em 0.2em;
     margin: -0.1em -0.2em;
+}
+/* aramaic classes can be present in old data, don't extra-pad-and-margin them */
+.aramaic .aramaic {
+    font-size: 100%;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
 }
 
 .comment {

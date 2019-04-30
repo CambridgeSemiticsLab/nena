@@ -234,7 +234,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
     feature_examples = DialectFeature.objects.filter(dialect__in=dialect_ids) \
                                              .filter(feature__path__startswith=base_path) \
                                              .values('id', 'dialect_id', 'feature_id', 'feature__path', 'feature__fullheading',
-                                                     'is_absent', 'introduction', 'comment',
+                                                     'is_absent', 'introduction', 'comment', 'category',
                                                      'entries__id', 'entries__entry', 'entries__frequency', 'entries__comment') \
                                              .order_by('feature__path')
 
@@ -292,6 +292,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
                             'is_absent':            example['is_absent'],
                             'introduction':         example['introduction'],
                             'comment':              example['comment'],
+                            'category':             example['category'],
                             'entries':              [],
                         }
                     examples[example['dialect_id']]['entries'].append({
@@ -337,7 +338,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
         raw_rows = []
         for feature, info in feature_list[1:]:
             if 'dialects' not in info:
-                raw_rows.append(' ')
+                raw_rows.append('')
                 continue
 
             entries = info['dialects'][dialects[0].id]['entries']
