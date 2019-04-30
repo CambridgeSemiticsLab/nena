@@ -75,7 +75,7 @@ class AudioCreateView(CreateView):
     fields = '__all__'
 
     def get_success_url(self):
-        return reverse('audio:audio-detail', args=(self.kwargs['pk']))
+        return reverse('audio:audio-detail', args=(self.object.pk))
 
 
 @method_decorator(login_required, name='dispatch')
