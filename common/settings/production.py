@@ -80,3 +80,4 @@ if USE_AWS_S3:
     AWS_S3_REGION_NAME = env('DJANGO_AWS_S3_REGION_NAME', default='eu-west-2')
 
 STATIC_ROOT = str(WEBROOT_DIR('static'))
+MEDIA_ROOT = str(WEBROOT_DIR('media'))
