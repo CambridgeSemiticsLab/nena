@@ -40,7 +40,7 @@ class AudioDetailView(DetailView):
             translation_chunks = re.split(regex, clip.translation or '')
             text_chunks = zip(transcript_chunks[1:], translation_chunks[1:])
         else:
-            text_chunks = [(clip.transcript, clip.translation)]
+            text_chunks = None
 
         # todo - try to find matching words within text
         # words = set(re.findall('\w+', clip.transcript))

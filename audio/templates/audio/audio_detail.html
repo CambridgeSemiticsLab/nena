@@ -12,6 +12,7 @@
         Your browser does not support the audio element.
       </audio>
 
+    {% if clip.transcript %}
       <table class="translation_table">
       <tr>
         <td><h2>Transcript</h2></td>
@@ -31,6 +32,12 @@
         </tr>
       {% endif %}
       </table>
+    {% else %}
+      <p>
+        <br>
+        No transcription currently available.
+      </p>
+    {% endif %}
   </div>
   </div>
 
