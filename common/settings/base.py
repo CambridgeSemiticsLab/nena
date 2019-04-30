@@ -28,7 +28,8 @@ if READ_DOT_ENV_FILE:
     print('The .env file has been loaded. See base.py for more information')
 
 
-DEBUG = env.bool('DJANGO_DEBUG', False)
+DEBUG    = env.bool('DJANGO_DEBUG', False)
+USE_SILK = False
 
 USE_AWS_S3 = env.bool('DJANGO_USE_AWS_S3', False)
 
