@@ -13,8 +13,7 @@ git pull
 # delete all .pyc files from venv/source dir
 find /var/www/default/docroot -name \*.pyc -delete
 source env/bin/activate
-#pip3 install -r requirements/production.txt
-#SetEnv DJANGO_SETTINGS_MODULE common.settings.production
+pip3 install -r requirements/production.txt
 python3 manage.py migrate --settings=common.settings.production
 python3 manage.py collectstatic --noinput --settings=common.settings.production
 
