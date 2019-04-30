@@ -9,7 +9,7 @@
 # create production settings file (w/permissions)
 
 ## These are for subsequent deployments
-git pull
+git pull --ff-only
 # delete all .pyc files from venv/source dir
 find /var/www/default/docroot -name \*.pyc -delete
 source env/bin/activate
