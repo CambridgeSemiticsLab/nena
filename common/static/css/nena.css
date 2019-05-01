@@ -116,6 +116,19 @@ ul{
   box-shadow: 4px 4px 8px rgba(0,0,0,0.3)
 }
 
+#map .key {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  z-index: 1000;
+}
+#map .key .icon_base:before {
+  top: 2px;
+  left: -2px;
+  height: 10px;
+  width: 10px;
+}
+
 #map .map_tooltip {
   font-family: CharisSILW;
   font-size: 24px;
