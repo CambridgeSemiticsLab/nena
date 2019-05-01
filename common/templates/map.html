@@ -10,6 +10,8 @@
 </div>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
 <script src="/static/js/borders.js"></script>
 <script>
 
@@ -42,6 +44,8 @@
     map.on('baselayerchange', function(e) {
       $('#map').toggleClass('print')
     });
+
+    map.addControl(new L.Control.Fullscreen());
 
     // Process our map data points, grouping into layers by point.properties.group
     // if this doesn't exist stick them in a single layer called "points"
