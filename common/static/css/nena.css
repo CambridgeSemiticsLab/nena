@@ -134,6 +134,25 @@ ul{
   font-size: 24px;
   padding: 10px 20px;
 }
+#map .map_tooltip .entry {
+  display: block;
+}
+#map .map_tooltip .dialect {
+  display: block;
+  font-size: 60%;
+}
+
+#map.print .map_tooltip {
+  padding: 4px;
+  font-size: 1.3em;
+  box-shadow: none;
+}
+#map.print .map_tooltip .entry {
+  display:none;
+}
+#map.print .map_tooltip .dialect {
+  font-size: 100%;
+}
 
 #map .icon_base:before,
 #map .label:before {

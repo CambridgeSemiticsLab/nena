@@ -33,17 +33,13 @@
             maxZoom: 11 });
 
     var baseLayers = {
-        "Print view": printmap,
         "Normal view": cities_and_terrain,
+        "Print view": printmap,
     };
 
     var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
     var map     = L.map('map',{layers: [cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
     var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
-
-    map.on('baselayerchange', function(e) {
-      $('#map').toggleClass('print')
-    });
 
     map.addControl(new L.Control.Fullscreen());
 
@@ -90,9 +86,9 @@
             permanent: props.focus ? true : false,
         }
         if( props.type == 'entry' ){
-          tooltip_content = props.entry + '<br><span style="font-size:60%">'+props.dialect+'</span>';
+          tooltip_content = '<span class="aramaic entry">'+props.entry+'</span><span class="dialect">'+props.dialect+'</span>';
         }else{
-          tooltip_content = props.dialect;
+          tooltip_content = '<span class="dialect">'+props.dialect+'</span>';
         }
         myMarker.bindTooltip(tooltip_content, tooltip_options);
 
@@ -129,6 +125,29 @@
     markers = L.geoJSON(json_data, dataLayerOptions)
     map.setMaxBounds(markers.getBounds().pad(.2));
 
+    map.on('baselayerchange', function(e) {
+      $('#map').toggleClass('print')
+      printing = $('#map').hasClass('print')
+
+      map.eachLayer(function(layer) {
+          if(layer.options.pane === "markerPane"){
+            if(printing){
+              tooltip = layer.getTooltip();
+              tooltip.options.permanent = true;
+              tooltip.options.direction = 'right';
+              tooltip.options.offset    = L.point(10, 4);
+              tooltip.update();
+              layer.openTooltip();
+            }else{
+              layer.closeTooltip();
+            }
+          }
+      });
+
+      $('.leaflet-tooltip-top, .leaflet-tooltip-right')
+        .toggleClass('leaflet-tooltip-top')
+        .toggleClass('leaflet-tooltip-right')
+    });
 
     /* {# not sure this is doing anything, to remove if we don't implement label culling on zoom #}
     var show_label_zoom = 3; // zoom level threshold for showing/hiding labels
