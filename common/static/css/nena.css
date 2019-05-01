@@ -181,6 +181,18 @@ ul{
     background: rgba(0,0,255,1);
 }
 
+#map.print .icon_C:before {
+    background: black;
+    border-color: white;
+    color: white;
+}
+#map.print .icon_J:before {
+    background: white;
+    border-color: black;
+    color: black;
+    text-shadow: none;
+}
+
 #map .icon_focus {
     z-index: 10000!important;
 }

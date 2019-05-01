@@ -36,8 +36,12 @@
     };
 
     var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
-    var map     = L.map('map',{layers: [printmap, cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
+    var map     = L.map('map',{layers: [cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
     var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
+
+    map.on('baselayerchange', function(e) {
+      $('#map').toggleClass('print')
+    });
 
     // Process our map data points, grouping into layers by point.properties.group
     // if this doesn't exist stick them in a single layer called "points"
