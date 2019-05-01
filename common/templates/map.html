@@ -73,7 +73,7 @@
           {
             class_list += ' only_group';
           }else{
-            class_list += ' group_'+props.group_number;
+            class_list += ' original_group_'+props.group_number+' group_'+props.group_number;
           }
         }
         myIcon   = L.divIcon({iconSize: L.point(7, 7), className: class_list });
@@ -148,6 +148,31 @@
         .toggleClass('leaflet-tooltip-top')
         .toggleClass('leaflet-tooltip-right')
     });
+
+
+    // Correct css-based group numbering when marker groups are toggled on and off
+    map.on("overlayadd overlayremove", function(e){
+      toggle_panel = $('.leaflet-control-layers-overlays');
+
+      // set up a permanent link between the toggle labels and the markers they refer to
+      toggle_panel.find('.label').each(function(i){
+        $(this).attr('data-marker-class', 'original_group_'+i)
+      })
+
+      // clear any class that starts "group_" from both toggle labels and map markers
+      toggle_panel.find('.label')
+        .add('#map .icon_base')
+        .attr('class', (i, c) => c.replace(/(^|\s)group_\d+/g, ' group_off'));
+
+      // run through the checkboxes adding updated "group_x" classes to related label and markers
+      toggle_panel.find('input:checked').each(function(i){
+        marker_class = $(this).parent().find('.label').attr('data-marker-class')
+        $(this).parent().find('.group_off')
+          .add('#map .'+marker_class)
+          .removeClass('group_off')
+          .addClass('group_'+i);
+      })
+    })
 
     /* {# not sure this is doing anything, to remove if we don't implement label culling on zoom #}
     var show_label_zoom = 3; // zoom level threshold for showing/hiding labels

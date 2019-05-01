@@ -227,6 +227,7 @@ ul{
    padding: 3px;
 }
 
+#map .group_off:before {content:'+';}
 #map .group_0:before {content:'1';}
 #map .group_1:before {content:'2';}
 #map .group_2:before {content:'3';}
