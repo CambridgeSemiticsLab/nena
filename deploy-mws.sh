@@ -9,12 +9,12 @@
 # create production settings file (w/permissions)
 
 ## These are for subsequent deployments
-git pull --ff-only
+git pull
 # delete all .pyc files from venv/source dir
 find /var/www/default/docroot -name \*.pyc -delete
-source env/bin/activate
-pip3 install -r requirements/production.txt
-python3 manage.py migrate --settings=common.settings.production
-python3 manage.py collectstatic --noinput --settings=common.settings.production
+find /var/www/default/admindir -name \*.py[co] -delete
+/var/www/default/admindir/venv/bin/pip3 install -r requirements/production.txt
+/var/www/default/admindir/venv/bin/python3 manage.py migrate --settings=common.settings.production
+/var/www/default/admindir/venv/bin/python manage.py collectstatic --noinput --settings=common.settings.production
 
 # then restart server through MWS control panel "settings" button: https://panel.mws3.csx.cam.ac.uk/settings/337/
