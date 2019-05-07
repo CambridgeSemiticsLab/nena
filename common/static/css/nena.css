@@ -227,6 +227,11 @@ ul{
    padding: 3px;
 }
 
+#map .leaflet-control-attribution {
+  max-width: 80%;
+  max-height: 1.5em;
+}
+
 #map .group_off:before {content:'+';}
 #map .group_0:before {content:'1';}
 #map .group_1:before {content:'2';}
