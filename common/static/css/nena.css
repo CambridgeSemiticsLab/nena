@@ -47,6 +47,13 @@ body .campl-page-title {
     box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
     }
 
+body .campl-wrap.fullwidth {
+    width: auto;
+    overflow-x: initial;
+    white-space: nowrap;
+}
+}
+
 /* aramaic text is displayed using Charis for it extensive character set */
 @font-face {
   font-family: CharisSILW;
@@ -397,6 +404,7 @@ a.plain {
 }
 #compare_form {
     display: inline-block;
+    float:right;
 }
 #grammar_tree_heading .dialect_header {
     font-size: 2em;

@@ -114,7 +114,7 @@
         </div>
   {% endblock %}
   <div class="campl-row campl-content"  id="content">
-    <div class="campl-wrap clearfix">
+    <div class="campl-wrap clearfix {%block page_wrapper_class%}{%endblock%}">
       {# Make this block empty in your sub-template if you don't want tabs. #}
       {% block campl_tabs_header %}
                 <div class="campl-column12 campl-main-content">

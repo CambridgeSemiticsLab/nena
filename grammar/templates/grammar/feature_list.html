@@ -1,6 +1,8 @@
 {% extends 'nena.html' %}
 {% load static %}
 
+{% block page_wrapper_class %}{% if dialects|length > 2 %}fullwidth{% endif %}{% endblock %}
+
 {% block subtitle %}
   {% if section and dialects %}
     {% if bulk_edit %}Edit {% endif %}
@@ -59,14 +61,7 @@
       {% endif %}
     </div>
 
-    {% if dialects|length > 1 %}
-      {% for d in dialects %}
-      <span class="dialect_header">
-        <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
-        <a href="?remove_compare={{d.id}}&section={{section.fullheading}}">&times;</a>
-      </span>
-      {% endfor %}
-    {% elif bulk_edit %}
+    {% if bulk_edit %}
       eg. &nbsp;
       <span class="utf8-text" style="font-size:1.5em">
         <span style="color:blue">kaθu</span> <span style="color:red">P</span> "<span style="color:green">he writes</span>"
@@ -74,20 +69,30 @@
       </span>
       <input class="button fr" type="submit" value="Save all">
       <a class="button dull fr" href="?" style="float:right">Cancel</a>
-    {% elif dialects %}
-      <form id="compare_form" action="" method="GET">
-        Compare with
-        <select name="compare_with" onchange="$('#compare_form').submit()">
-          <option>-- choose dialect --</option>
-          {% for id, name in all_dialects %}
-          <option value="{{id}}">{{name}}</option>
-          {% endfor %}
-        </select>
-      </form>
-      {% if user.is_staff and section %}
-        <a class="button fr" href="?edit=1">
-          Bulk edit
-        </a>
+    {% else %}
+      {%if dialects|length > 1 %}
+        {% for d in dialects %}
+        <span class="dialect_header">
+          <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
+          <a href="?remove_compare={{d.id}}&section={{section.fullheading}}">&times;</a>
+        </span>
+        {% endfor %}
+      {% endif %}
+      {% if dialects %}
+        <form id="compare_form" action="" method="GET">
+          Compare with
+          <select name="compare_with" onchange="$('#compare_form').submit()">
+            <option>-- choose dialect --</option>
+            {% for id, name in all_dialects %}
+            <option value="{{id}}">{{name}}</option>
+            {% endfor %}
+          </select>
+        </form>
+        {% if user.is_staff and section %}
+          <a class="button fr" href="?edit=1">
+            Bulk edit
+          </a>
+        {% endif %}
       {% endif %}
     {% endif %}
   </div>
