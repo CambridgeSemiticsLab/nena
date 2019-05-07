@@ -47,7 +47,10 @@
       <a class="fr" href="{% url 'dialects:dialect-grammar' object.pk %}">Browse grammatical description &raquo;</a>
       <br>
       {% else %}
-      No features of this dialect are currently documented
+        No features of this dialect are currently documented
+        {% if user.is_staff %}
+        - <a href="{% url 'dialects:dialect-grammar' object.pk %}">add some</a>
+        {% endif %}
       {% endif %}
     </p>
 

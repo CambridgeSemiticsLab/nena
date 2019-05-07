@@ -143,6 +143,34 @@ class DialectCreateView(CreateView):
     model = Dialect
     fields = ['name', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']
 
+    def get_context_data(self, **kwargs):
+        dialects = Dialect.objects.values_list('id', 'name')
+        context = super(DialectCreateView, self).get_context_data(**kwargs)
+        context.update({'dialects': dialects})
+        return context
+
+    def form_valid(self, form):
+        response = super(DialectCreateView, self).form_valid(form)
+        new_dialect     = self.object
+
+        # if a base dialect is selected, clone all of its features and entries into this new one
+        base_dialect_id = int(self.request.POST.get('base_dialect_id'))
+        if base_dialect_id:
+            base_dialect = Dialect.objects.filter(id=base_dialect_id).first()
+            for feature in base_dialect.features.all():
+                entries = feature.entries.all()
+
+                feature.pk = None
+                feature.dialect = new_dialect
+                feature.save()
+
+                for entry in entries:
+                    entry.pk = None
+                    entry.feature = feature
+                    entry.save()
+
+        return response
+
 class DialectUpdateView(UpdateView):
     model = Dialect
     fields = ['name', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']

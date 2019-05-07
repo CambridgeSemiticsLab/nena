@@ -6,17 +6,32 @@
     {% else %}
     New dialect
     {% endif %}
-    
+
 {% endblock %}
 
 {% block page_content %}
-    {% block content_column_2 %}
-        <div class='campl-column6'>
-            <form action="" method="post">{% csrf_token %}
-                {{ form.media }}
-                {{ form.as_p }}
-                <input type="submit" value="Save" />
-            </form>
-        </div>
-    {% endblock %}
+  {% block content_column_2 %}
+    <div class='campl-column6'>
+    <div class="campl-content-container">
+      <form action="" method="post">
+        {% csrf_token %}
+        {{ form.media }}
+
+        {% if not object.name %}
+          Base this dialect on an existing dialect?
+          <select name="base_dialect_id">
+            <option value=0>Start from a clean slate</option>
+            <option value=0> --- </option>
+            {% for id, name in dialects %}
+            <option value={{id}}>{{name}}</option>
+            {% endfor %}
+          </select>
+        {% endif %}
+
+        {{ form.as_p }}
+        <input type="submit" value="Save" />
+      </form>
+    </div>
+    </div>
+  {% endblock %}
 {% endblock %}
