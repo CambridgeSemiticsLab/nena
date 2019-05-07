@@ -2,6 +2,9 @@
 
 {% block subtitle %}
     {{ view.name }}
+    {% if dialect %}
+      for {{dialect}}
+    {% endif %}
 {% endblock %}
 
 {% block page_content %}

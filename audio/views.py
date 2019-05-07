@@ -54,14 +54,11 @@ class AudioDetailView(DetailView):
         return context
 
 
-class DialectAudioView(ListView):
-
-    name = 'Audio'
-    context_object_name = 'clips'
+class DialectAudioView(AudioListView):
 
     def get_queryset(self):
         self.dialect = get_object_or_404(Dialect, pk=self.kwargs['dialect'])
-        return Audio.objects.filter(dialect=self.dialect)
+        return super(DialectAudioView, self).get_queryset().filter(dialect=self.dialect)
 
     def get_context_data(self, **kwargs):
         context = super(DialectAudioView, self).get_context_data(**kwargs)
