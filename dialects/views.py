@@ -214,10 +214,14 @@ def features_of_dialect(request, dialect_id_string, section=None):
             args.append(section)
         return HttpResponseRedirect(reverse(view_name, args=args))
 
+    is_bulk_edit = request.GET.get('edit') or False
+    base_dialect_id = int(request.GET.get('base_on', 0))
+    if is_bulk_edit and base_dialect_id:
+        dialect_ids.append(base_dialect_id)
+
     preserved    = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
     dialects     = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved)
     chosen_root  = get_section_root(section)
-    is_bulk_edit = request.GET.get('edit') or False
 
     # annotated lists are an efficient way of getting a big chunk of a treebeard tree
     # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
@@ -370,7 +374,8 @@ def features_of_dialect(request, dialect_id_string, section=None):
                 raw_rows.append('')
                 continue
 
-            entries = info['dialects'][dialects[0].id]['entries']
+            dialect_idx = 1 if base_dialect_id else 0
+            entries = info['dialects'][dialects[dialect_idx].id]['entries']
             raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
 
         raw_text = '\n'.join(raw_rows)

@@ -8,7 +8,7 @@
     {% if bulk_edit %}Edit {% endif %}
     {{section|safe}} in
     {% for dialect in dialects %}
-      {{dialect.name}}{% if not forloop.last %},{% endif %}
+      {{dialect.name}}{% if not forloop.last %}{% if bulk_edit %} based on {% else %},{% endif %}{% endif %}
     {% endfor %}
   {% elif section %}
     {{section|safe}}
@@ -69,14 +69,25 @@
       </span>
       <input class="button fr" type="submit" value="Save all">
       <a class="button dull fr" href="?" style="float:right">Cancel</a>
+
+      <select style="position: absolute; right: 0; top: 50px;" onchange="window.location=window.location+'&base_on='+$(this).val()">
+        <option>-- base on: --</option>
+        {% for id, name in all_dialects %}
+        <option value="{{id}}">{{name}}</option>
+        {% endfor %}
+      </select>
     {% else %}
-      {%if dialects|length > 1 %}
+      {% if dialects|length > 1 %}
         {% for d in dialects %}
         <span class="dialect_header">
           <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
           <a href="?remove_compare={{d.id}}&section={{section.fullheading}}">&times;</a>
         </span>
         {% endfor %}
+      {% elif user.is_staff and section %}
+        <a class="button fr" href="?edit=1">
+          Bulk edit
+        </a>
       {% endif %}
       {% if dialects %}
         <form id="compare_form" action="" method="GET">
@@ -88,11 +99,6 @@
             {% endfor %}
           </select>
         </form>
-        {% if user.is_staff and section %}
-          <a class="button fr" href="?edit=1">
-            Bulk edit
-          </a>
-        {% endif %}
       {% endif %}
     {% endif %}
   </div>
