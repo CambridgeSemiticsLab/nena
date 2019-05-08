@@ -93,7 +93,11 @@ class DialectDetailView(DetailView):
         context = super(DialectDetailView, self).get_context_data(**kwargs)
         context.update({
             'photos': Photo.objects.filter(dialect=self.object)[0:5],
-            'audio':  Audio.objects.filter(dialect=self.object)[0:5],
+            'audio':  Audio.objects.filter(dialect=self.object) \
+                           .order_by(
+                                F('translation').desc(nulls_last=True),
+                                F('transcript').desc(nulls_last=True)
+                           )[0:5],
             'feature_count': DialectFeature.objects.filter(dialect=self.object).count(),
             'map_data_json': json.dumps(map_data, indent=2),
             'map_center': [self.object.latitude, self.object.longitude]
