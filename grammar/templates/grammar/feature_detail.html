@@ -2,11 +2,15 @@
 
 {% block subtitle %}
     {{ feature.fullheading }}&nbsp;{{ feature.name|safe }}
+    {% if entry_filter %}matching "<span class="aramaic">{{entry_filter|safe}}</span>"{% endif %}
 {% endblock %}
 
 {% block page_content %}
   <div class="campl-column12 clearfix" id="feature_detail">
   <div class="campl-content-container">
+    <a class="button fr" href="{% url 'grammar:feature-map' feature.id %}">
+        See map of this feature
+    </a>
     {% include 'dialects/_dialect_filter.html' %}
     <table class="campl-table campl-table-condensed campl-table-striped">
       {% for dialect_feature in dialect_features %}
@@ -17,7 +21,12 @@
           </td>
           <td>
           {% for entry in dialect_feature.entries.all %}
-            {{ entry.entry|safe }}<br>
+            <div>
+              {{ entry.entry|safe }}
+              <a class="filter" title="filter examples like this" href="{% url 'grammar:feature-detail' feature.id %}?entry={{ entry.entry }}">
+                <svg viewBox="0 0 80 90" focusable=false><path d="m 0,0 30,45 0,30 10,15 0,-45 30,-45 Z"></path></svg>
+              </a>
+            </div>
           {% endfor %}
           </td>
           <td>{{ dialect.get_community_display }}</td>
@@ -30,14 +39,6 @@
       {% endfor %}
     </table>
 
-    <p>
-      <br>
-      <br>
-      <br>
-      <a href="{% url 'grammar:feature-map' feature.id %}">
-        See map of this feature &raquo;
-      </a>
-    </p>
   </div>
   </div>
 {% endblock %}

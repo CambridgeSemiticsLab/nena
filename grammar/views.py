@@ -59,6 +59,9 @@ def dialects_with_feature(request, pk):
     if request.GET.get('location'):
         queryset = queryset.filter(dialect__location=request.GET.get('location'))
 
+    if request.GET.get('entry'):
+        queryset = queryset.filter(entries__entry=request.GET.get('entry'))
+
     context = {
         'feature': feature,
         'dialect_features': queryset,
@@ -66,6 +69,7 @@ def dialects_with_feature(request, pk):
         'chosen_community': request.GET.get('community'),
         'locations':        Dialect.LOCATIONS,
         'chosen_location':  request.GET.get('location'),
+        'entry_filter':     request.GET.get('entry', None),
     }
     return render(request, 'grammar/feature_detail.html', context)
 

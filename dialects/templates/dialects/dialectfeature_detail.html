@@ -26,7 +26,11 @@
     <ul class="campl-unstyled-list">
       {% for example in examples %}
           <li>
-            Example: "{{ example.entry }}"<br>
+            Example: "{{ example.entry }}"
+            <a href="{% url 'grammar:feature-detail' object.feature.id %}?entry={{ example.entry }}">
+              list all matching &raquo;
+            </a>
+            <br>
             Frequency: {{ example.frequency }}<br>
             Comment: {{ example.comment }}
           </li>
@@ -35,11 +39,6 @@
       {% endfor %}
     </ul>
 
-    {% if user.is_staff %}
-      <div style="margin-top: 100px;">
-        <a class="button" href="{% url 'dialects:dialect-feature-edit' object.dialect.id object.feature.fullheading %}">Edit entry</a>
-      </div>
-    {% endif %}
     <p>
       <br>
       <br>
@@ -50,4 +49,16 @@
     </p>
   </div>
   </div>
+
+  {% if user.is_staff %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'dialects:dialect-feature-edit' object.dialect.id object.feature.fullheading %}">Edit entry</a>
+      </div>
+  </div>
+  </div>
+  {% endif %}
+
 {% endblock %}

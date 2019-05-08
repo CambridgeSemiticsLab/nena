@@ -26,10 +26,20 @@
           No dialects.
       {% endfor %}
       </table>
-  {% if user.is_staff %}
-      <div class="clearfix"><a class="button" href="{% url 'dialects:dialect-new' %}">New dialect</a></div>
-  {% endif %}
+
       {% include 'ucamprojectlight-pagination.html' %}
   </div>
   </div>
+
+  {% if user.is_staff %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'dialects:dialect-new' %}">New dialect</a>
+      </div>
+  </div>
+  </div>
+  {% endif %}
+
 {% endblock %}

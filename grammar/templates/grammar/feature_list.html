@@ -128,9 +128,6 @@
               {% endif %}
               {% endspaceless %}" title="show just this section">§</a>
           {% endif %}
-          {% if user.is_staff %}
-          <a class="edit" href="{% url 'admin:grammar_feature_change' feature.id %}" target="_BLANK" title="edit">&#x270D;</a>
-          {% endif %}
         </label>
 
         {% if bulk_edit %}
@@ -247,4 +244,15 @@
   }
   </style>
 
+
+  {% if user.is_staff %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'admin:grammar_feature_changelist' %}" target="_BLANK">Edit grammar feature tree</a>
+      </div>
+  </div>
+  </div>
+  {% endif %}
 {% endblock %}
