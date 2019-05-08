@@ -21,6 +21,27 @@ a.plain {
     background-image: url(/static/images/bg.jpg);
     background-size: 200px;
     }
+.campl-theme-6 .campl-page-header:hover:before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    height: 90%;
+    width: 100px;
+    background: url(https://i.pinimg.com/originals/ea/06/50/ea0650d52e5e2ba55de63285f2467a4e.png) no-repeat transparent;
+    background-size: contain
+}
+.campl-theme-6 .campl-page-header:hover:after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    height: 90%;
+    width: 100px;
+    background: url(https://i.pinimg.com/originals/71/43/4f/71434f79f883930ded6927b8138046c7.png) no-repeat transparent;
+    background-size: contain
+}
+
 .campl-theme-6 .campl-page-header:nth-of-type(1) {
     box-shadow: 0 20px 40px rgba(0,0,0,0.5) inset;
 }
