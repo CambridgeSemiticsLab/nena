@@ -4,7 +4,6 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Prefetch, Count, F
 from django.urls import reverse_lazy
@@ -14,7 +13,7 @@ from grammar.models import Feature
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry, DialectFeatureExample
 from dialects.views import get_section_root
 
-@staff_member_required
+@login_required
 def features(request, section=None):
     '''The grammar feature list page with the main categories.'''
     chosen_root = get_section_root(section)
@@ -41,7 +40,7 @@ def features(request, section=None):
     return render(request, 'grammar/feature_list.html', context)
 
 
-@staff_member_required
+@login_required
 def dialects_with_feature(request, pk):
     ''' Faster way to list all dialects with corresponding entries for a given feature '''
     ''' todo - replace FeatureDetailView and FeatureParadigmView with this or similar '''
@@ -74,7 +73,7 @@ def dialects_with_feature(request, pk):
     return render(request, 'grammar/feature_detail.html', context)
 
 
-@staff_member_required
+@login_required
 def map_of_feature(request, pk):
     '''  '''
     from dialectmaps.views import entry_to_map_point

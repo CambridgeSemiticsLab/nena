@@ -8,6 +8,7 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -197,7 +198,7 @@ def get_section_root(section):
     return root
 
 
-@staff_member_required
+@login_required
 def features_of_dialect(request, dialect_id_string, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
     dialect_ids = [int(x) for x in dialect_id_string.split(',')]
