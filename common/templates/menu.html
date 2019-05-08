@@ -9,6 +9,7 @@
                     <li><a href="{% url 'gallery:photo-list' %}">Image Gallery</a></li>
                     {% if user.is_staff %}
                     <li style="float:right;"><a href="{% url 'dialects:problems' %}">Problems</a></li>
+                    <li style="float:right;"><a href="{% url 'admin:auth_user_changelist' %}" target="_BLANK">Users</a></li>
                     {% endif %}
                 </ul>
             </div>
