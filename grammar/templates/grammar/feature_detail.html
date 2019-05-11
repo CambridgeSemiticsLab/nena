@@ -20,6 +20,10 @@
             <a href="{% url 'dialects:dialect-detail' dialect.id %}">{{ dialect.name }}</a>
           </td>
           <td>
+          {% if dialect_feature.category %}
+            {{dialect_feature.category}}<br>
+          {% endif %}
+
           {% for entry in dialect_feature.entries.all %}
             <div>
               {{ entry.entry|safe }}

@@ -13,6 +13,7 @@ class Feature(MP_Node):
     # ^ Pipe (|) separated list of strings, if set must be chosen by related DialectFeature.category
 
     node_order_by = ['heading']
+    CATEGORY_SEPARATOR = '\n'
 
     def get_absolute_url(self):
         return reverse('grammar:feature-detail', args=[str(self.id)])
@@ -43,3 +44,14 @@ class Feature(MP_Node):
             return 'branch'
         else:
             return 'leaf'
+
+    def list_categories(self):
+        list       = self.category_list or ''
+        categories = list.split(self.CATEGORY_SEPARATOR)
+        return [x.strip() for x in categories]
+
+    def add_category(self, name):
+        categories = self.list_categories()
+        categories.append(name.strip())
+        self.category_list = self.CATEGORY_SEPARATOR.join(set(categories)).strip()
+
