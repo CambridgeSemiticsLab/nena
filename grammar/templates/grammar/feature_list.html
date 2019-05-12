@@ -1,5 +1,6 @@
 {% extends 'nena.html' %}
 {% load static %}
+{% load nbsp %}
 
 {% block page_wrapper_class %}{% if dialects|length > 2 %}fullwidth{% endif %}{% endblock %}
 
@@ -72,7 +73,7 @@
 
       <select style="position: absolute; right: 0; top: 50px;" onchange="window.location=window.location+'&base_on='+$(this).val()">
         <option>-- base on: --</option>
-        {% for id, name in all_dialects %}
+        {% for id, name, feature_count in all_dialects %}
         <option value="{{id}}">{{name}}</option>
         {% endfor %}
       </select>
@@ -92,10 +93,10 @@
       {% if dialects %}
         <form id="compare_form" action="" method="GET">
           Compare with
-          <select name="compare_with" onchange="$('#compare_form').submit()">
+          <select name="compare_with" onchange="$('#compare_form').submit()" style="font-family: monospace">
             <option>-- choose dialect --</option>
-            {% for id, name in all_dialects %}
-            <option value="{{id}}">{{name}}</option>
+            {% for id, name, feature_count in all_dialects %}
+            <option value="{{id}}">{{name|ljust:"30"|nbsp}} {{feature_count}} feature{{feature_count|pluralize}}</option>
             {% endfor %}
           </select>
         </form>

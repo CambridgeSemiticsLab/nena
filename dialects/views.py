@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.db.models import Case, When, F
+from django.db.models import Case, When, F, Count
 from django.forms import modelform_factory, inlineformset_factory
 
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
@@ -358,8 +358,10 @@ def features_of_dialect(request, dialect_id_string, section=None):
         'feature_list': feature_list,
         'num_features': num_features,
         'all_dialects': Dialect.objects.all() \
+                                       .filter(features__feature__path__startswith=base_path) \
                                        .exclude(id__in=dialect_ids) \
-                                       .values_list('id', 'name'),
+                                       .annotate(feature_count=Count('features'))
+                                       .values_list('id', 'name', 'feature_count'),
         'bulk_edit':    is_bulk_edit,
     }
 
@@ -367,7 +369,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
     if context['bulk_edit']:
         def encode_entry(entry):
             encoded_entry = entry['entry']
-            if entry['frequency'] is not 'P':
+            if entry['frequency'] not in ('P', None):
                 encoded_entry += ' {}'.format(entry['frequency'])
             if entry['comment']:
                 encoded_entry += ' "{}"'.format(entry['comment'])
@@ -380,7 +382,8 @@ def features_of_dialect(request, dialect_id_string, section=None):
                 continue
 
             dialect_idx = 1 if base_dialect_id else 0
-            entries = info['dialects'][dialects[dialect_idx].id]['entries']
+            dialect     = info['dialects'][dialects[dialect_idx].id]
+            entries     = dialect['entries'] if 'entries' in dialect else []
             raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
 
         raw_text = '\n'.join(raw_rows)
