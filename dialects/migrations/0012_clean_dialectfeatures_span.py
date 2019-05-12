@@ -8,6 +8,7 @@ from dialects.models import DialectFeatureEntry
 cleaners = (
     ('\<sup\>\+\<\/sup\>', lambda entry: entry.lower().replace('<sup>+</sup>', '⁺')),
     ('\<sup\>y\<\/sup\>', lambda entry: entry.lower().replace('<sup>y</sup>', 'ʸ')),
+    ('\<br \/\>', lambda entry: entry.lower().replace('<br />', '')),
     ('\<span class=aramaic\>', lambda entry: entry.lower().replace('<span class=aramaic>', '')),
     ('\<\/span\>', lambda entry: entry.lower().replace('</span>', '')),
     ('\<span\>', lambda entry: entry.lower().replace('<span>', '')),

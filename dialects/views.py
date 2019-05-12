@@ -509,7 +509,7 @@ def problems(request):
         ('test',             '^ *test *$'),
         ('as_usual',         '^ *As usual *$'),
         ('penultiamte',      '^ *Penultimate *$'),
-        ('penultiamte',      '^ *Regular assimilation of L-suffix and resulting gemination of \/[rn]\/\. *$'),
+        ('assimilation',     '^ *Regular assimilation of L-suffix and resulting gemination of \/[rn]\/\. *$'),
     ]
     os = DialectFeatureEntry.objects
     canfix = [
