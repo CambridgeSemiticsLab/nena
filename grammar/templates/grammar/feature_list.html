@@ -52,11 +52,11 @@
 
       {% if dialects %}
       <label class="ilb">
-        <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_entries')">
+        <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_entries', $(this).prop('checked'))">
         Show with entries
       </label>
       <label class="ilb">
-        <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_empties')">
+        <input class="chex" type="checkbox" checked onchange="$('#grammar_tree').toggleClass('show_empties', $(this).prop('checked'))">
         Show without entries
       </label>
       {% endif %}
@@ -208,6 +208,7 @@
       return false;
     })
 
+    $('.controls .chex').trigger('change')
 
   })
   </script>
