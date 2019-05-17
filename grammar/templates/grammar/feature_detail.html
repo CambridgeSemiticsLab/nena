@@ -3,12 +3,14 @@
 {% block subtitle %}
     {{ feature.fullheading }}&nbsp;{{ feature.name|safe }}
     {% if entry_filter %}matching "<span class="aramaic">{{entry_filter|safe}}</span>"{% endif %}
+    {% if chosen_location_name %}in {{chosen_location_name}}{% endif %}
+    {% if chosen_community_name %}in {{chosen_community_name}} communities{% endif %}
 {% endblock %}
 
 {% block page_content %}
   <div class="campl-column12 clearfix" id="feature_detail">
   <div class="campl-content-container">
-    <a class="button fr" href="{% url 'grammar:feature-map' feature.id %}">
+    <a class="button fr" href="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}">
         See map of this feature
     </a>
     {% include 'dialects/_dialect_filter.html' %}

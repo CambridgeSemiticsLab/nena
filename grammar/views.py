@@ -70,6 +70,13 @@ def dialects_with_feature(request, pk):
         'chosen_location':  request.GET.get('location'),
         'entry_filter':     request.GET.get('entry', None),
     }
+
+    if request.GET.get('community'):
+        context.update({'chosen_community_name': dict(Dialect.COMMUNITIES)[request.GET.get('community')]})
+
+    if request.GET.get('location'):
+        context.update({'chosen_location_name': dict(Dialect.LOCATIONS)[request.GET.get('location')]})
+
     return render(request, 'grammar/feature_detail.html', context)
 
 
@@ -87,13 +94,34 @@ def map_of_feature(request, pk):
                                                  latitude=F('feature__dialect__latitude'),
                                                  group=F('entry'))
 
+    # todo: combine this filtering logic with similar in dialects.DialectListView
+    if request.GET.get('community'):
+        entries = entries.filter(feature__dialect__community=request.GET.get('community'))
+
+    if request.GET.get('location'):
+        entries = entries.filter(feature__dialect__location=request.GET.get('location'))
+
+    if request.GET.get('entry'):
+        entries = entries.filter(entry=request.GET.get('entry'))
+
     feature = Feature.objects.get(pk=pk)
     map_data = [entry_to_map_point(e) for e in entries]
     context = {
         'feature': feature,
         'map_data_json': json.dumps(map_data, indent=2),
-        'view': {'name': feature}
+        'view': {'name': feature},
+        'communities':      Dialect.COMMUNITIES,
+        'chosen_community': request.GET.get('community'),
+        'locations':        Dialect.LOCATIONS,
+        'chosen_location':  request.GET.get('location'),
+        'entry_filter':     request.GET.get('entry', None),
     }
+
+    if request.GET.get('community'):
+        context.update({'chosen_community_name': dict(Dialect.COMMUNITIES)[request.GET.get('community')]})
+
+    if request.GET.get('location'):
+        context.update({'chosen_location_name': dict(Dialect.LOCATIONS)[request.GET.get('location')]})
 
     return render(request, 'dialectmaps/dialectmap_detail.html', context)
 

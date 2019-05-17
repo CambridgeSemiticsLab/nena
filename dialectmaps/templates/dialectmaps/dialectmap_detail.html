@@ -2,12 +2,15 @@
 
 {% block subtitle %}
     {{ view.name|safe }}
+    {% if entry_filter %}matching "<span class="aramaic">{{entry_filter|safe}}</span>"{% endif %}
+    {% if chosen_location_name %}in {{chosen_location_name}}{% endif %}
+    {% if chosen_community_name %}in {{chosen_community_name}} communities{% endif %}
 {% endblock %}
 
 {% block page_content %}
   <div class="campl-column12">
   <div class="campl-content-container">
-
+      {% include 'dialects/_dialect_filter.html' %}
       {% include "map.html" %}
       <br>
       <br>
