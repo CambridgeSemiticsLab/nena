@@ -358,6 +358,9 @@ ul{
     padding: 0;
     margin: 0;
 }
+.aramaic.marginal {
+    color: #999;
+}
 
 .comment {
   opacity: 0.6;
