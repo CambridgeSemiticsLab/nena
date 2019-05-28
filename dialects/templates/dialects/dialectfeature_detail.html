@@ -39,6 +39,21 @@
       {% endfor %}
     </ul>
 
+    <br>
+
+    {% if examples %}
+    Examples:
+    <ul class="campl-unstyled-list">
+      {% for example in examples %}
+          <li>
+            {{ example.example }} - "{{ example.comment }}"
+          </li>
+      {% empty %}
+          <li><i>No examples recorded</i></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
     <p>
       <br>
       <br>

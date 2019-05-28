@@ -16,7 +16,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.db.models import Case, When, F, Count
 from django.forms import modelform_factory, inlineformset_factory
 
-from dialects.models import Dialect, DialectFeature, DialectFeatureEntry
+from dialects.models import Dialect, DialectFeature, DialectFeatureEntry, DialectFeatureExample
 from grammar.models import Feature
 from gallery.models import Photo
 from audio.models import Audio
@@ -413,7 +413,8 @@ class DialectFeatureDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(DialectFeatureDetailView, self).get_context_data(**kwargs)
         context.update({
-            'entries': DialectFeatureEntry.objects.filter(feature=context['object'].id)
+            'entries': DialectFeatureEntry.objects.filter(feature=context['object'].id),
+            'examples': DialectFeatureExample.objects.filter(feature=context['object'].id),
         })
         return context
 
