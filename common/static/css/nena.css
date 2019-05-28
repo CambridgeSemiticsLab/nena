@@ -289,12 +289,21 @@ ul{
 #map .group_28:before {content:'29';}
 #map .group_29:before {content:'30';}
 
-#toggle-colors {
+#toggle-colors, #toggle-names {
   float: right;
   position: relative;
+  margin-left: 140px;
 }
 #toggle-colors:before {
   content: 'Toggle colours';
+  position: absolute;
+  width: 100px;
+  right: 150%;
+  top: -3px;
+  text-align: right;
+}
+#toggle-names:before {
+  content: 'Toggle names';
   position: absolute;
   width: 100px;
   right: 150%;
@@ -308,9 +317,10 @@ ul{
 #toggle-colors:checked + #map .group_4:before {content:''; background-color: hsla(45,30%,40%,0.8);}
 #toggle-colors:checked + #map .group_5:before {content:''; background-color: hsla(225,30%,40%,0.8);}
 
-
 #toggle-colors:checked + #map .icon_C:before {content: ''; border-radius: 0;}
 #toggle-colors:checked + #map .icon_J:before {content: '';}
+
+#toggle-names:checked + input + #map .leaflet-tooltip-pane {display:none;}
 
 .country1 {
     stroke: #999;
