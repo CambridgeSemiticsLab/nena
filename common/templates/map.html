@@ -163,6 +163,8 @@
         $(this).attr('data-marker-class', 'original_group_'+i)
       })
 
+      $('#map label.printable').removeClass('printable') // resets all controls so only those checked will show in print view
+
       // clear any class that starts "group_" from both toggle labels and map markers
       toggle_panel.find('.label')
         .add('#map .icon_base')
@@ -170,6 +172,7 @@
 
       // run through the checkboxes adding updated "group_x" classes to related label and markers
       toggle_panel.find('input:checked').each(function(i){
+        $(this).parents('label').eq(0).addClass('printable') // marks the control from the group so it doesn't get hidden in print view
         marker_class = $(this).parent().find('.label').attr('data-marker-class')
         $(this).parent().find('.group_off')
           .add('#map .'+marker_class)

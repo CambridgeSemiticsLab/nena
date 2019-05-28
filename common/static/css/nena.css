@@ -180,6 +180,9 @@ ul{
 #map.print .map_tooltip .dialect {
   font-size: 100%;
 }
+#map.print .leaflet-control-layers-overlays label:not(.printable) {
+  display:none;
+}
 
 #map .icon_base:before,
 #map .label:before {
