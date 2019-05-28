@@ -4,12 +4,6 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 DEBUG = env.bool('DJANGO_DEBUG', default=False)
 
-ALLOWED_HOSTS = [
-                'nena.usertest.mws3.csx.cam.ac.uk',
-                'mws-32015.mws3.csx.cam.ac.uk',
-                'mws-priv-218.mws3.csx.cam.ac.uk',
-]
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
