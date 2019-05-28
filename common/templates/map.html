@@ -2,6 +2,9 @@
 {#  - `map_data_json` is a json string containing a plottable set of data consumed by `L.geoJSON()`   #}
 {#  - `map_center` is a two value list (longitude, latitude)                                          #}
 
+{% if not hide_color_toggle %}
+<input type="checkbox" id="toggle-colors">
+{% endif %}
 <div id="map">
   <div class="key">
     <span class="icon_base icon_C">Christian</span> &nbsp;

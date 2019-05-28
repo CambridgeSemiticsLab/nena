@@ -218,14 +218,12 @@ ul{
 #map .icon_base:hover:before {
     border: 2px solid white;
 }
-#map .icon_C:before {
-    content: ' ';
-    background: rgba(255,0,0,1);
-}
-#map .icon_J:before {
-    content: ' ';
-    background: rgba(0,0,255,1);
-}
+
+#map .icon_C:before {content: ' '; background: rgba(255,0,0,1);}
+#map .icon_J:before {content: ' '; background: rgba(0,0,255,1);}
+
+#toggle-colors:checked + #map .icon_C:before {background: gray;}
+#toggle-colors:checked + #map .icon_J:before {background: gray;}
 
 #map.print .icon_C:before {
     background: black;
@@ -291,6 +289,28 @@ ul{
 #map .group_28:before {content:'29';}
 #map .group_29:before {content:'30';}
 
+#toggle-colors {
+  float: right;
+  position: relative;
+}
+#toggle-colors:before {
+  content: 'Toggle colours';
+  position: absolute;
+  width: 100px;
+  right: 150%;
+  top: -3px;
+  text-align: right;
+}
+#toggle-colors:checked + #map .group_0:before {content:''; background-color: hsla(0,30%,40%,0.8);}
+#toggle-colors:checked + #map .group_1:before {content:''; background-color: hsla(180,30%,40%,0.8);}
+#toggle-colors:checked + #map .group_2:before {content:''; background-color: hsla(90,30%,40%,0.8);}
+#toggle-colors:checked + #map .group_3:before {content:''; background-color: hsla(270,30%,40%,0.8);}
+#toggle-colors:checked + #map .group_4:before {content:''; background-color: hsla(45,30%,40%,0.8);}
+#toggle-colors:checked + #map .group_5:before {content:''; background-color: hsla(225,30%,40%,0.8);}
+
+
+#toggle-colors:checked + #map .icon_C:before {content: ''; border-radius: 0;}
+#toggle-colors:checked + #map .icon_J:before {content: '';}
 
 .country1 {
     stroke: #999;
