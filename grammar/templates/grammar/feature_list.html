@@ -5,14 +5,26 @@
 {% block page_wrapper_class %}{% if dialects|length > 2 %}fullwidth{% endif %}{% endblock %}
 
 {% block subtitle %}
-  {% if section and dialects %}
+  {% if section %}
     {% if bulk_edit %}Edit {% endif %}
-    {{section|safe}} in
-    {% for dialect in dialects %}
-      {{dialect.name}}{% if not forloop.last %}{% if bulk_edit %} based on {% else %},{% endif %}{% endif %}
-    {% endfor %}
-  {% elif section %}
-    {{section|safe}}
+
+    {% for heading, number in breadcrumb_bits %}{% spaceless %}
+    <a href="{% spaceless %}
+              {% if dialects %}
+                {% url 'dialects:dialect-grammar-section' dialect_ids|join:',' heading %}
+              {% else %}
+                {% url 'grammar:feature-list-section' heading %}
+              {% endif %}
+              {% endspaceless %}" title="show just this section">{{ number }}</a>
+    {% endspaceless %}{% endfor %}
+    {{section.name|safe}}
+
+    {% if dialects %}
+      in
+      {% for dialect in dialects %}
+        {{dialect.name}}{% if not forloop.last %}{% if bulk_edit %} based on {% else %},{% endif %}{% endif %}
+      {% endfor %}
+    {% endif %}
   {% elif dialects %}
     Grammatical description of
     {% for dialect in dialects %}
