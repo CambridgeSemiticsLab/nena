@@ -15,7 +15,7 @@
               {% else %}
                 {% url 'grammar:feature-list-section' heading %}
               {% endif %}
-              {% endspaceless %}" title="show just this section">{{ number }}</a>
+              {% endspaceless %}" title="up to higher section">{{ number }}</a>
     {% endspaceless %}{% endfor %}
     {{section.name|safe}}
 
@@ -36,9 +36,9 @@
 {% endblock %}
 
 {% block page_content %}
-  {% if dialects|length < 2 and not bulk_edit %}
+  {% if dialects|length == 1 and not bulk_edit %}
   <p class="p-3">
-    {% if section and dialect %}
+    {% if section %}
     This section has {{num_features}} of the
     <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
     detailed for the dialect

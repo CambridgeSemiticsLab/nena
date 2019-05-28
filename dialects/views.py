@@ -199,6 +199,21 @@ def get_section_root(section):
     return root
 
 
+def make_breadcrumb_bits(feature):
+    """ takes a feature and returns a breakdown of its parents features suitable for turning
+        into a breadcrumb trail; a list of tuples like ('fullheading', 'number to link on')
+        eg. 3.2.1 turns into (('3.0', '3'), ('3.2', '2'), ('3.2.1', '1'))
+    """
+    if feature:
+        heading_numbers = feature.fullheading.split('.')[0:-1]
+        breadcrumb_bits = (('.'.join(heading_numbers[0:i+1]), x + '.') for i, x in enumerate(heading_numbers))
+        breadcrumb_bits = ((x[0]+('.0' if i == 0 else ''), x[1]) for i, x in enumerate(breadcrumb_bits))
+    else:
+        breadcrumb_bits = []
+
+    return breadcrumb_bits
+
+
 @login_required
 def features_of_dialect(request, dialect_id_string, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
@@ -352,17 +367,11 @@ def features_of_dialect(request, dialect_id_string, section=None):
                     empty_level = level
                     feature_list[j][1]['has_empty'] = True
 
-    if chosen_root:
-        heading_numbers = chosen_root.fullheading.split('.')[0:-1]
-        breadcrumb_bits = (('.'.join(heading_numbers[0:i+1]), x + '.') for i, x in enumerate(heading_numbers))
-    else:
-        breadcrumb_bits = []
-
     context = {
         'dialect_ids':  dialect_ids,
         'dialects':     dialects,
         'section':      chosen_root,
-        'breadcrumb_bits': breadcrumb_bits,
+        'breadcrumb_bits': make_breadcrumb_bits(chosen_root),
         'feature_list': feature_list,
         'num_features': num_features,
         'all_dialects': Dialect.objects.all() \

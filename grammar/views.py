@@ -11,7 +11,7 @@ from django.shortcuts import render
 
 from grammar.models import Feature
 from dialects.models import Dialect, DialectFeature, DialectFeatureEntry, DialectFeatureExample
-from dialects.views import get_section_root
+from dialects.views import get_section_root, make_breadcrumb_bits
 
 @login_required
 def features(request, section=None):
@@ -32,15 +32,10 @@ def features(request, section=None):
     for i in range(0, len(feature_list)):
         feature_list[i][1]['dialect_count'] = dialect_counts[i][0]
 
-    if chosen_root:
-        heading_numbers = chosen_root.fullheading.split('.')[0:-1]
-        breadcrumb_bits = (('.'.join(heading_numbers[0:i+1]), x + '.') for i, x in enumerate(heading_numbers))
-    else:
-        breadcrumb_bits = []
 
     context = {
         'section': chosen_root,
-        'breadcrumb_bits': breadcrumb_bits,
+        'breadcrumb_bits': make_breadcrumb_bits(chosen_root),
         'feature_list': feature_list,
         'dialect_counts': dialect_counts,
     }
