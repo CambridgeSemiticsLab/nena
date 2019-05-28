@@ -108,7 +108,10 @@
     {% for feature, info in feature_list %}
       {% if info.open and not forloop.first %}
         <div class='folder'></div>
-        <input type="checkbox" class="pop_open" id="pop_open_{{forloop.counter}}" {%if feature_list|length < 100%}checked{%endif%}>
+        <input type="checkbox" class="pop_open" id="pop_open_{{forloop.counter}}"
+          {%if feature_list|length < 100%}checked{%endif%}
+          {%if info.level < 2 %}checked{%endif%}
+          >
         <ul>
       {% elif not forloop.first %}
         </li>
