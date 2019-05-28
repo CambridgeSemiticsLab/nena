@@ -405,7 +405,7 @@ class DialectFeatureDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(DialectFeatureDetailView, self).get_context_data(**kwargs)
         context.update({
-            'examples': DialectFeatureEntry.objects.filter(feature=context['object'].id)
+            'entries': DialectFeatureEntry.objects.filter(feature=context['object'].id)
         })
         return context
 

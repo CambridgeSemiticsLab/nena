@@ -24,18 +24,18 @@
     {% endif %}
 
     <ul class="campl-unstyled-list">
-      {% for example in examples %}
+      {% for entry in entries %}
           <li>
-            Example: "{{ example.entry }}"
-            <a href="{% url 'grammar:feature-detail' object.feature.id %}?entry={{ example.entry }}">
+            Entry: "{{ entry.entry }}"
+            <a href="{% url 'grammar:feature-detail' object.feature.id %}?entry={{ entry.entry }}">
               list all matching &raquo;
             </a>
             <br>
-            Frequency: {{ example.frequency }}<br>
-            Comment: {{ example.comment }}
+            Frequency: {{ entry.frequency }}<br>
+            Comment: {{ entry.comment }}
           </li>
       {% empty %}
-          <li><i>No examples recorded</i></li>
+          <li><i>No entries recorded</i></li>
       {% endfor %}
     </ul>
 

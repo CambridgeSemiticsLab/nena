@@ -29,7 +29,7 @@
           {% for entry in dialect_feature.entries.all %}
             <div>
               {{ entry.entry|safe }}
-              <a class="filter" title="filter examples like this" href="{% url 'grammar:feature-detail' feature.id %}?entry={{ entry.entry }}">
+              <a class="filter" title="filter entries like this" href="{% url 'grammar:feature-detail' feature.id %}?entry={{ entry.entry }}">
                 <svg viewBox="0 0 80 90" focusable=false><path d="m 0,0 30,45 0,30 10,15 0,-45 30,-45 Z"></path></svg>
               </a>
             </div>
