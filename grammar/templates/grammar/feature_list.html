@@ -26,7 +26,7 @@
 {% block page_content %}
   {% if dialects|length < 2 and not bulk_edit %}
   <p class="p-3">
-    {% if section %}
+    {% if section and dialect %}
     This section has {{num_features}} of the
     <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
     detailed for the dialect
