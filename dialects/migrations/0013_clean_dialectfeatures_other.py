@@ -64,7 +64,7 @@ def forwards(apps, schema_editor):
     for regex, cleaning_function in cleaners:
         dfes = DialectFeatureEntry.objects.filter(entry__iregex=regex)
         print('\nLooking for '+regex)
-        for dfe in dfes[0:10000]:
+        for dfe in dfes[0:100000]:
             print('{}) {}'.format(dfe.feature.id, dfe))
             print('  was: ' + dfe.entry[0:100] +('"'+str(dfe.comment)+'"' if dfe.comment is not None else ''))
             cleaning_function(dfe)
