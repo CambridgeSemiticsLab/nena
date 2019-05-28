@@ -293,12 +293,24 @@ ul{
   top: -3px;
   text-align: right;
 }
-#toggle-colors:checked + #map .group_0:before {content:''; background-color: hsla(0,30%,40%,0.8);}
-#toggle-colors:checked + #map .group_1:before {content:''; background-color: hsla(180,30%,40%,0.8);}
-#toggle-colors:checked + #map .group_2:before {content:''; background-color: hsla(90,30%,40%,0.8);}
-#toggle-colors:checked + #map .group_3:before {content:''; background-color: hsla(270,30%,40%,0.8);}
-#toggle-colors:checked + #map .group_4:before {content:''; background-color: hsla(45,30%,40%,0.8);}
-#toggle-colors:checked + #map .group_5:before {content:''; background-color: hsla(225,30%,40%,0.8);}
+
+#toggle-colors:checked + #map .group_0:before {content:''; background-color: hsl(0, 100%, 50%)}
+#toggle-colors:checked + #map .group_1:before {content:''; background-color: hsl(180, 100%, 50%)}
+#toggle-colors:checked + #map .group_2:before {content:''; background-color: hsl(90, 100%, 50%)}
+#toggle-colors:checked + #map .group_3:before {content:''; background-color: hsl(270, 100%, 50%)}
+#toggle-colors:checked + #map .group_4:before {content:''; background-color: hsl(45, 100%, 50%)}
+#toggle-colors:checked + #map .group_5:before {content:''; background-color: hsl(135, 100%, 50%)}
+#toggle-colors:checked + #map .group_6:before {content:''; background-color: hsl(225, 100%, 50%)}
+#toggle-colors:checked + #map .group_7:before {content:''; background-color: hsl(315, 100%, 50%)}
+#toggle-colors:checked + #map .group_8:before {content:''; background-color: hsl(22, 40%, 50%)}
+#toggle-colors:checked + #map .group_9:before {content:''; background-color: hsl(202, 40%, 50%)}
+#toggle-colors:checked + #map .group_10:before {content:''; background-color: hsl(112, 40%, 50%)}
+#toggle-colors:checked + #map .group_11:before {content:''; background-color: hsl(292, 40%, 50%)}
+#toggle-colors:checked + #map .group_12:before {content:''; background-color: hsl(67, 40%, 50%)}
+#toggle-colors:checked + #map .group_13:before {content:''; background-color: hsl(157, 40%, 50%)}
+#toggle-colors:checked + #map .group_14:before {content:''; background-color: hsl(247, 40%, 50%)}
+#toggle-colors:checked + #map .group_15:before {content:''; background-color: hsl(337, 40%, 50%)}
+
 
 #toggle-colors:checked + #map .icon_C:before {content: ''; border-radius: 0;}
 #toggle-colors:checked + #map .icon_J:before {content: '';}
