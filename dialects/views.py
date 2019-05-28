@@ -352,8 +352,11 @@ def features_of_dialect(request, dialect_id_string, section=None):
                     empty_level = level
                     feature_list[j][1]['has_empty'] = True
 
-    heading_numbers = chosen_root.fullheading.split('.')[0:-1]
-    breadcrumb_bits = (('.'.join(heading_numbers[0:i+1]), x + '.') for i, x in enumerate(heading_numbers))
+    if chosen_root:
+        heading_numbers = chosen_root.fullheading.split('.')[0:-1]
+        breadcrumb_bits = (('.'.join(heading_numbers[0:i+1]), x + '.') for i, x in enumerate(heading_numbers))
+    else:
+        breadcrumb_bits = []
 
     context = {
         'dialect_ids':  dialect_ids,
