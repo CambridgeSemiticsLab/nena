@@ -4,13 +4,15 @@
 
 {% block page_content %}
   <br>
-  <div class="campl-column4" style="height: 500px; position: relative;">
-    <p class="aramaic" style="font-size: 3em; line-height: 1.3em;">
-      A nice big intro strap-line explaining what this site's for
+  <div class="campl-column4" style="height: 500px; position: relative; padding-right: 0.4em;">
+    <p class="aramaic" style="font-size: 2em; line-height: 1.3em;">
+      This website gives access to recordings, transcribed texts and
+      grammatical descriptions of the North Eastern Neo-Aramaic dialects.
+      <br>
+      Most of these are now highly endangered and some of have recently
+      become extinct.
     </p>
 
-    <br><a href="">an important link &raquo;</a>
-    <br><a href="">and another &raquo;</a>
     <br>
     <select style="position: absolute; bottom: 0;font-size: 1.2em; width: 95%;height: auto; background-color: #a51137; border-radius: 5px; border-color: #851735; color: white;"
             onchange="window.location='{% url 'dialects:dialect-detail' 0%}'.replace('0', $(this).val())">
@@ -25,43 +27,70 @@
   <div class="campl-column8">
       {% include "map.html" with map_data_json=map_data_json %}
   </div>
-  <div class="campl-column12" style="column-count: 3; padding: 2em 0 5em; text-align: justify;">
-    <p><b>This website gives access to database relating to the North
-    Eastern Neo-Aramaic dialects.</b></p>
-    <p>These "NENA" dialects form a very diverse
-    group of Aramaic dialects that were spoken until
-    modern times in Northern Iraq, North West Iran and South Eastern Turkey by
-    Christian and Jewish communities. These are among the last remaining living
-    vestiges of the Aramaic language, which was one of the major languages of the
-    region in antiquity.</p>
 
-    <p>Over the last few decades most of the speakers of these
-    dialects have been forced to leave their places of residence and have settled
-    in numerous grommunities throughout the world. The younger generations of these
-    communities are increasingly losing competence in these dialects and as a
-    result most of the dialects are now in danger of extinction. It is an urgent
-    task for Semitic philology to study and document the dialects while competent
-    speakers can still be located.</p>
+  <div class="campl-column12" style="margin-top: 3em;">
+  <h1>About the North-Eastern Neo-Aramaic dialects</h1>
+  <div class="campl-content-container" style="column-count: 3; padding: 2em 0 5em; text-align: justify;">
+    <p>
+    The North-Eastern Neo-Aramaic dialects (also known as NENA for short) form a very
+    diverse group of Aramaic dialects that were spoken until modern times in Northern Iraq,
+    North West Iran and South Eastern Turkey by Christian and Jewish communities. These are
+    among the last remaining living vestiges of the Aramaic language, which was one of the
+    major languages of the region in antiquity.
+    </p>
+    <p>
+    A variety of different names are used by the speakers of the dialects to refer to their language.
+    The most common term used by Christians is sureth. In English the Assyrian Christians
+    generally refer to their language as ‘Assyrian’. Other terms include lishanet suraye ‘the
+    language of the suraye’ (Urmi), and names such as <span class="aramaic">ḥadiṯan</span> ‘our speech’
+    (<a href="{% url 'dialects:dialect-detail' 3 %}">Qaraqosh</a>, Iraq)
+    </p>
 
-
-    <p>The construction of the database is taking place at the Faculty of Oriental
-    Studies of Cambridge University within the framework of a five year project
-    that is funded by the British Arts and Humanities Research Council (AHRC)
-    (October 2004 - September 2009). One of the main objectives of the project is
-    to produce sketches of the individual dialects according to a fixed
-    questionnaire format and make these sketches available to the public through
-    this website. It will be possible to make comparative searches across the
-    dialects and to create customized electronic map displays of the distribution
-    of linguistic features. The website will also contain audio recordings of the
-    dialects. The sketches of each dialect are being prepared on the basis of
-    fieldwork carried out by a team of researchers. Grammatical material that has
-    been published already will also be used as a source for the data. We plan to
-    publish collections of articles about the dialects we have investigated in hard
-    copy form. It is our hope that other scholars who are actively researching the
-    NENA dialects will contribute articles to these collections and that this
-    initiative will act as a stimulus for them to publish data that they have
-    collected. This will ensure that the database will have the maximal coverage of
-    the dialect group.</p>
+    <p>
+    Jews use a several different terms, e.g. lishana deni (Zakho and surrounding region), lishanət
+    noshan, lishana nosha (north eastern Iraq, western Iran), lishana didan (north-west Iran), all
+    meaning ‘our language’. Some names reflect the consciousness of it being a specifically
+    Jewish language, e.g. lishan hozaye ‘the language of the Jews’ (Zakho), and hulaula (western
+    Iran).
+    </p>
+    <p>
+    Over the last few decades most of the speakers of these dialects have been forced to leave
+    their places of residence and have settled in numerous places throughout the world. The
+    younger generations of these communities are increasingly losing competence in these
+    dialects and as a result most of the dialects are now in danger of extinction. The extinction of
+    these ancient dialects will be an immeasurable loss for the communities whose ancestors
+    spoke the dialects, since language is a core component of their community identity and
+    heritage. In addition, each dialect provides unique and important information for academic
+    research that will be lost for future generations. Indeed, a rich oral culture of folktales, poetry,
+    songs, as well as the memories of lexicon of traditional village life and the natural
+    environment of the communities will vanish along with the dialects.
+    </p>
 
   </div>
+  </div>
+
+  <div class="campl-column12" style="margin-top: 1em;">
+  <h3>More information</h3>
+
+  <object data="http://www.youtube.com/embed/hzy_fcWRIOU?t=1324s" width="580px" height="400px" style="display:inline-block;"></object>
+  <object data="http://www.youtube.com/embed/iPmsMRcl_Gw" width="580px" height="400px" style="display:inline-block;"></object>
+  <div class="campl-content-container" style="column-count: 2; padding: 2em 0 5em; text-align: justify;">
+    <p>
+    Khan, Geoffrey. 2007. “The North-Eastern Neo-Aramaic Dialects.” Journal of Semitic Studies 52
+    (1): 1–20.
+    Khan, Geoffrey. 2011. “North-Eastern Neo-Aramaic.” In The Semitic Languages: An
+    International Handbook, edited by Stefan Weninger, Geoffrey Khan, Michael Streck, and
+    Janet Watson, 708–24. Berlin-Boston: De Gruyter Mouton.
+    Khan, Geoffrey. 2018. “Jewish Neo-Aramaic in Kurdistan and Iran.” In Languages in Jewish
+    Communities, Past and Present, edited by Benjamin Hary and Sarah Bunin Benor, 9–34.
+    Contributions to the Sociology of Language 112. Berlin: De Gruyter.
+    Mutzafi, Hezy. 2014. “Jewish Neo-Aramaic.” In Encyclopedia of the Jews of the Islamic World,
+    online edition. Brill.
+    Haig, Geoffrey, and Geoffrey Khan, eds. 2018. The Languages and Linguistics of Western Asia:
+    An Areal Perspective. The World of Linguistics 6. Berlin: De Gruyter.
+    </p>
+
+  </div>
+  </div>
+
 {% endblock %}

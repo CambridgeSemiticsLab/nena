@@ -17,17 +17,28 @@ a.plain {
 }
 
 /* overrides for campl theme stuff */
-.campl-theme-6 .campl-page-header {
-    background-image: url(/static/images/bg.jpg);
-    background-size: 200px;
-    }
 
-.campl-theme-6 .campl-page-header:nth-of-type(1) {
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5) inset;
+.campl-content {
+  background-color: #cddc39;
 }
-.campl-theme-6 .campl-page-header:nth-of-type(2) {
-    box-shadow: 0 -20px 40px rgba(0,0,0,0.5) inset;
+
+.campl-theme-6 .campl-page-header, .campl-theme-6 .campl-local-footer {
+  background: #8bc34a;
+  background-size: 200px;
 }
+
+
+.campl-theme-6 .campl-local-navigation,
+.campl-theme-6 .campl-local-navigation a {
+    background: #8bc34a;
+    border-bottom: 1px solid #8aa33a;
+    border-top: 1px solid #8aa33a;
+}
+
+.campl-theme-6 .campl-local-navigation a:focus, .campl-theme-6 .campl-local-navigation a:hover, .campl-theme-6 .campl-local-navigation a:active {
+    background-color: #8bc34a;
+}
+
 body .campl-page-title {
     display: inline-block;
     padding: 10px;
