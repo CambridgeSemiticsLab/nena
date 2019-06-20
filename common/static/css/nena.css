@@ -667,7 +667,7 @@ a.plain {
   height: 0px;
 }
 .df_form .add_new:before {
-  content: '+ add another example';
+  content: '+ add another entry';
   position: absolute;
 }
 .df_form .add_new:checked {
