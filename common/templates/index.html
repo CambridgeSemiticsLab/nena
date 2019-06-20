@@ -1,4 +1,5 @@
 {% extends 'nena.html' %}
+{% load static %}
 
 {% block subtitle_div %}{% endblock %}
 
@@ -28,9 +29,9 @@
       {% include "map.html" with map_data_json=map_data_json %}
   </div>
 
-  <div class="campl-column12" style="margin-top: 3em;">
+  <div class="campl-column8" style="margin-top: 3em;">
   <h1>About the North-Eastern Neo-Aramaic dialects</h1>
-  <div class="campl-content-container" style="column-count: 3; column-gap: 2em; padding: 2em 0 5em; text-align: justify;">
+  <div class="campl-content-container" style="column-count: 2; column-gap: 2em; padding: 2em 0 5em; text-align: justify;">
     <p>
     The North-Eastern Neo-Aramaic dialects (also known as NENA for short) form a very
     diverse group of Aramaic dialects that were spoken until modern times in Northern Iraq,
@@ -38,6 +39,7 @@
     among the last remaining living vestiges of the Aramaic language, which was one of the
     major languages of the region in antiquity.
     </p>
+
     <p>
     A variety of different names are used by the speakers of the dialects to refer to their language.
     The most common term used by Christians is sureth. In English the Assyrian Christians
@@ -46,6 +48,7 @@
     and names such as <span class="aramaic">ḥadiṯan</span> ‘our speech’
     (<a href="{% url 'dialects:dialect-detail' 3 %}">Qaraqosh</a>, Iraq)
     </p>
+
 
     <p>
     Jews use a several different terms, e.g. <span class="aramaic">lishana deni</span>
@@ -69,6 +72,7 @@
     songs, as well as the memories of lexicon of traditional village life and the natural
     environment of the communities will vanish along with the dialects.
     </p>
+    <img src='{% static 'images/Zakho.jpg' %}' title="Zakho" />
 
   </div>
   </div>
