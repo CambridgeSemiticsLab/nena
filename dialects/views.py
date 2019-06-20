@@ -35,6 +35,16 @@ def homepage(request):
     }
     return render(request, 'index.html', context)
 
+def about(request):
+    context = {
+    }
+    return render(request, 'about.html', context)
+
+def contribute(request):
+    context = {
+    }
+    return render(request, 'contribute.html', context)
+
 def object_to_map_point(object, lon=None, lat=None, properties={}):
     return {
         'id': object['id'],

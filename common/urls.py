@@ -25,6 +25,8 @@ import dialects.views
 
 urlpatterns = [
     url(r'^$', dialects.views.homepage , name='index'),
+    url(r'^about/$', dialects.views.about , name='about'),
+    url(r'^contribute/$', dialects.views.contribute , name='contribute'),
     url(r'', include('ucamwebauth.urls')),
     url(r'^admin/login/$', RedirectView.as_view(pattern_name='raven_login', permanent=True, query_string=True)),
     url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='index', permanent=True, query_string=True)),

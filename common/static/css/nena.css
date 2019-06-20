@@ -125,6 +125,12 @@ ul{
     list-style-type: none;
 }
 
+.instruction_list {
+  margin: 2em 6em;
+}
+.instruction_list > li {
+  margin: 1em;
+}
 /* map stuff */
 
 #map {

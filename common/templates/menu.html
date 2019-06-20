@@ -2,10 +2,13 @@
         <div class="campl-wrap clearfix campl-local-navigation" id="local-nav">
             <div class="campl-local-navigation-container campl-mobile">
                 <ul class="campl-unstyled-list">
+                    <li><a href="{% url 'index' %}">Introduction</a></li>
                     <li><a href="{% url 'dialects:dialect-list' %}">Dialects</a></li>
                     <li><a href="{% url 'grammar:feature-list' %}">Compare Dialects</a></li>
                     <li><a href="{% url 'audio:audio-list' %}">Audio Material</a></li>
                     <li><a href="{% url 'gallery:photo-list' %}">Image Gallery</a></li>
+                    <li><a href="{% url 'about' %}">About</a></li>
+                    <li><a href="{% url 'contribute' %}">Contribute</a></li>
                     {% if user.is_staff %}
                     <li style="float:right;"><a href="{% url 'dialects:problems' %}">Problems</a></li>
                     <li style="float:right;"><a href="{% url 'admin:auth_user_changelist' %}" target="_BLANK">Users</a></li>
