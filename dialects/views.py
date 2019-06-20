@@ -306,7 +306,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
                                              .values('id', 'dialect_id', 'feature_id', 'feature__path', 'feature__fullheading',
                                                      'is_absent', 'introduction', 'comment', 'category',
                                                      'entries__id', 'entries__entry', 'entries__frequency', 'entries__comment') \
-                                             .order_by('feature__path')
+                                             .order_by('feature__path', 'entries__frequency')
 
     if is_bulk_edit:  # Only provide examples at one level for bulk edit (can't bulk edit in subfolders)
         feature_examples = feature_examples.filter(feature__depth=max_depth)
