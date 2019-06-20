@@ -225,8 +225,9 @@ def make_breadcrumb_bits(feature):
 
 
 @login_required
-def features_of_dialect(request, dialect_id_string, section=None):
-    '''The grammar features of a chosen dialect, in tree format '''
+def setup_comparison(request, dialect_id_string, section=None):
+    ''' add or remove dialects from the features tree
+    '''
     dialect_ids = [int(x) for x in dialect_id_string.split(',')]
 
     # Clean the request url by adding or removing dialects
@@ -244,6 +245,11 @@ def features_of_dialect(request, dialect_id_string, section=None):
             view_name = 'dialects:dialect-grammar-section'
             args.append(section)
         return HttpResponseRedirect(reverse(view_name, args=args))
+
+@login_required
+def features_of_dialect(request, dialect_id_string, section=None):
+    '''The grammar features of a chosen dialect, in tree format '''
+    dialect_ids = [int(x) for x in dialect_id_string.split(',')]
 
     is_bulk_edit = request.GET.get('edit') or False
     base_dialect_id = int(request.GET.get('base_on', 0))

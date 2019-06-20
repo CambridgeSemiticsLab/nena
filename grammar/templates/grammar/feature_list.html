@@ -93,7 +93,7 @@
         {% for d in dialects %}
         <span class="dialect_header">
           <a class="plain" href="{% url 'dialects:dialect-detail' d.id %}">{{d.name}}</a>
-          <a href="?remove_compare={{d.id}}&section={{section.fullheading}}">&times;</a>
+          <a href="{% url 'dialects:setup-comparison' dialect_ids|join:',' %}?remove_compare={{d.id}}&section={{section.fullheading}}">&times;</a>
         </span>
         {% endfor %}
       {% elif user.is_staff and section %}
@@ -102,7 +102,7 @@
         </a>
       {% endif %}
       {% if dialects %}
-        <form id="compare_form" action="" method="GET">
+        <form id="compare_form" action="{% url 'dialects:setup-comparison' dialect_ids|join:',' %}" method="GET">
           Compare with
           <select name="compare_with" onchange="$('#compare_form').submit()" style="font-family: monospace">
             <option>-- choose dialect --</option>
