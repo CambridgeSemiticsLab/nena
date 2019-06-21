@@ -499,22 +499,22 @@ def features_of_dialect(request, dialect_id_string, section=None):
                                            .values('feature__id', 'id', 'entry', 'frequency', 'comment') \
                                            .order_by('feature__feature__path', 'frequency')
 
-    examples = DialectFeatureExample.objects.filter(feature__dialect__in=dialect_ids) \
-                                            .filter(feature__feature__path__startswith=base_path) \
-                                            .values('feature__id', 'id', 'example') \
-                                            .order_by('feature__feature__path')
-
-
-    if is_bulk_edit:  # Only provide examples at one level for bulk edit (can't bulk edit in subfolders)
-        entries = entries.filter(feature__feature__depth=max_depth)
-
     entries_dict = {}
     for x in entries:
         entries_dict.setdefault(x['feature__id'], []).append(x)
 
+
     examples_dict = {}
-    for x in examples:
-        examples_dict.setdefault(x['feature__id'], []).append(x)
+    if is_bulk_edit:  # Only provide entries at one level for bulk edit (can't bulk edit in subfolders)
+        entries = entries.filter(feature__feature__depth=max_depth)
+    elif len(dialects) == 1:
+        examples = DialectFeatureExample.objects.filter(feature__dialect__in=dialect_ids) \
+                                                .filter(feature__feature__path__startswith=base_path) \
+                                                .values('feature__id', 'id', 'example') \
+                                                .order_by('feature__feature__path')
+        for x in examples:
+            examples_dict.setdefault(x['feature__id'], []).append(x)
+
 
     num_features = 0
     dialectfeatures_dict = {}
@@ -529,8 +529,6 @@ def features_of_dialect(request, dialect_id_string, section=None):
     for i, feature in enumerate(feature_list):
         feature_list[i] = (feature[0], feature[1], dialectfeatures_dict.get(feature[0].id, []))
 
-
-    #raise Exception(feature_list[1:3])
 
     context = {
         'dialect_ids':  dialect_ids,

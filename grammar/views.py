@@ -31,6 +31,8 @@ def features(request, section=None):
 
     for i in range(0, len(feature_list)):
         feature_list[i][1]['dialect_count'] = dialect_counts[i][0]
+        feature_list[i] = (*feature_list[i], [])
+
 
 
     context = {

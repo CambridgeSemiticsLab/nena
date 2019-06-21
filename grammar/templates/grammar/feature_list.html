@@ -36,17 +36,32 @@
 {% endblock %}
 
 {% block page_content %}
-  {% if dialects|length == 1 and not bulk_edit %}
-  <p class="p-3">
-    {% if section %}
-    This section has {{num_features}} of the
-    <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
-    detailed for the dialect
-    {% else %}
-    This dialect has {{num_features}} features
+  {% if not bulk_edit %}
+  <form id="compare_form" style="" action="{% url 'dialects:setup-comparison' dialect_ids|join:',' %}" method="GET">
+    {% if dialects|length == 1 %}
+    <span style="float: left;">
+      {% if section %}
+      This section has {{num_features}} of the
+      <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
+      detailed for the dialect
+      {% else %}
+      This dialect has {{num_features}} features
+      {% endif %}
+    </span>
     {% endif %}
-  </p>
+
+    {% if dialects %}
+      Compare with
+      <select name="compare_with" onchange="$('#compare_form').submit()" style="font-family: monospace">
+        <option>-- choose dialect --</option>
+        {% for id, name, feature_count in all_dialects %}
+        <option value="{{id}}">{{name|ljust:"30"|nbsp}} {{feature_count}} feature{{feature_count|pluralize}}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </form>
   {% endif %}
+
 
   {% if bulk_edit %}
   <form action="" method="POST">
@@ -101,17 +116,6 @@
           Bulk edit
         </a>
       {% endif %}
-      {% if dialects %}
-        <form id="compare_form" action="{% url 'dialects:setup-comparison' dialect_ids|join:',' %}" method="GET">
-          Compare with
-          <select name="compare_with" onchange="$('#compare_form').submit()" style="font-family: monospace">
-            <option>-- choose dialect --</option>
-            {% for id, name, feature_count in all_dialects %}
-            <option value="{{id}}">{{name|ljust:"30"|nbsp}} {{feature_count}} feature{{feature_count|pluralize}}</option>
-            {% endfor %}
-          </select>
-        </form>
-      {% endif %}
     {% endif %}
   </div>
 
@@ -128,9 +132,7 @@
         </li>
       {% endif %}
 
-      <li class="level_{{info.level}} has_entry {% spaceless %}
-                   {% if info.has_entry or dialectfeatures %} has_entry {% endif %}
-                   {% if info.has_empty or num_features == 0 %} has_empty {% endif %}{% endspaceless %}">
+      <li class="level_{{info.level}}">
 
         <label for="pop_open_{{forloop.counter|add:'1'}}">
           {{feature|safe}}
@@ -151,12 +153,12 @@
           {% endif %}
         {% elif dialects %}
           {% for dialectfeature in dialectfeatures %}
-            <div class="example" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.id feature.fullheading %}">
+            <div class="example dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.id feature.fullheading %}">
                 {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialectfeature.dialect_id df=dialectfeature feature_heading=feature.fullheading%}
             </div>
           {% empty %}
             {% if feature.fullheading %}
-            <div class="example" data-src="{% url 'dialects:dialect-feature-pane' dialects.0.id feature.fullheading %}">
+            <div class="example no_dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialects.0.id feature.fullheading %}">
               {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialects.0.id feature_heading=feature.fullheading%}
             </div>
             {% endif %}
@@ -247,6 +249,13 @@
         $(this).val(val.slice(0, rows).join("\n"));
         txt.setSelectionRange(cursor_position, cursor_position);
       }
+    })
+
+    $('.example.dialectfeature').each(function(){
+      $(this).parents('li').addClass('has_entry')
+    })
+    $('.example.no_dialectfeature').each(function(){
+      $(this).parents('li').addClass('has_empty')
     })
   })
   </script>

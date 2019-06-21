@@ -468,8 +468,8 @@ a.plain {
     width: 543px;
 }
 #compare_form {
-    display: inline-block;
-    float:right;
+    display: block;
+    text-align:right;
 }
 #grammar_tree_heading .dialect_header {
     font-size: 2em;
