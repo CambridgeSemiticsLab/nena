@@ -225,7 +225,7 @@ def make_breadcrumb_bits(feature):
 
 
 @login_required
-def setup_comparison(request, dialect_id_string, section=None):
+def setup_comparison(request, dialect_id_string):
     ''' add or remove dialects from the features tree
     '''
     dialect_ids = [int(x) for x in dialect_id_string.split(',')]
@@ -241,13 +241,13 @@ def setup_comparison(request, dialect_id_string, section=None):
         id_string = ','.join([str(x) for x in dialect_ids])
         view_name = 'dialects:dialect-grammar'
         args = [id_string]
-        if section:
+        if request.GET.get('section'):
             view_name = 'dialects:dialect-grammar-section'
-            args.append(section)
+            args.append(request.GET.get('section'))
         return HttpResponseRedirect(reverse(view_name, args=args))
 
 @login_required
-def features_of_dialect(request, dialect_id_string, section=None):
+def features_of_dialectOLD(request, dialect_id_string, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
     dialect_ids = [int(x) for x in dialect_id_string.split(',')]
 
@@ -417,6 +417,154 @@ def features_of_dialect(request, dialect_id_string, section=None):
             dialect_idx = 1 if base_dialect_id else 0
             dialect     = info['dialects'][dialects[dialect_idx].id]
             entries     = dialect['entries'] if 'entries' in dialect else []
+            raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
+
+        raw_text = '\n'.join(raw_rows)
+        context.update({
+            'raw_text':     raw_text,
+            'example_text': 'kaθu  P "he writes" ~ kaθ <span style="color:red">M</span>',
+        })
+    if chosen_root:
+        context['total_features'] = DialectFeature.objects.filter(dialect__in=dialect_ids).count()
+
+    return render(request, 'grammar/feature_list.html', context)
+
+
+@login_required
+def features_of_dialect(request, dialect_id_string, section=None):
+    '''The grammar features of a chosen dialect, in tree format '''
+    dialect_ids = [int(x) for x in dialect_id_string.split(',')]
+
+    is_bulk_edit = request.GET.get('edit') or False
+    base_dialect_id = int(request.GET.get('base_on', 0))
+    if is_bulk_edit and base_dialect_id:
+        dialect_ids.append(base_dialect_id)
+
+    preserved    = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
+    dialects     = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved)
+    chosen_root  = get_section_root(section)
+
+    # annotated lists are an efficient way of getting a big chunk of a treebeard tree
+    # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
+    max_depth    = chosen_root.depth + 1 if is_bulk_edit else None
+    feature_list = Feature.get_annotated_list(parent=chosen_root, max_depth=max_depth)
+
+    # process bulk save if that's what's happening
+    # todo - separate this out into a different function, with own url and pass feature id list
+    #        through form so it doesn't rely on the above code
+    bulk_text   = request.POST.get('bulk_edit', None)
+    entry_regex = r'^\s*(?P<entry>.+?)\s*(?P<frequency>\b[MPmp]\b){0,1}\s*(?P<comment>\".+\")?\s*$'
+    if bulk_text is not None:
+        row_texts = bulk_text.split('\n')
+        for row_text, feature in zip_longest(row_texts, feature_list[1:], fillvalue=''):  # skip first feature as it matches the top-level group
+            dfes = []
+            for entry_text in row_text.split('~'):
+                matches = re.match(entry_regex, entry_text.strip('\r').strip(' '))
+                if not matches:
+                    continue
+                matches_dict = matches.groupdict()
+                if len(matches_dict['entry'].strip(' ')) < 1:
+                    continue
+                matches_dict['frequency'] = matches_dict['frequency'].upper() if matches_dict['frequency'] else 'P'
+                matches_dict['comment']   = matches_dict['comment'].strip('"') if matches_dict['comment'] else None
+                dfes.append(DialectFeatureEntry(**matches_dict))
+
+            # load the existing DialectFeature or prepare a new one
+            df = DialectFeature.objects.filter(dialect=dialects[0].id, feature=feature[0].id).first()
+            if not df:
+                df = DialectFeature(dialect_id=dialects[0].id, feature_id=feature[0].id)
+                df.save()
+
+            df.entries.all().delete()  # clear any existing entries
+            df.entries.set(dfes, bulk=False)
+
+            if len(dfes) < 1:  # delete the Dialect Feature if no entries were submitted
+                df.delete()
+
+        return HttpResponseRedirect(reverse('dialects:dialect-grammar-section', args=(dialects[0].id, section)))
+
+
+    # ( feature, stuff, [{df: _, entries: [], examples: []}, {df: _, entries: [], examples: []}, ...] )
+
+    base_path = chosen_root.path if chosen_root else ''
+    preserved = Case(*[When(dialect_id=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
+    dialectfeatures = DialectFeature.objects.filter(dialect__in=dialect_ids) \
+                                            .filter(feature__path__startswith=base_path) \
+                                            .values('id', 'dialect_id', 'feature_id', 'feature__path', 'feature__fullheading',
+                                                    'is_absent', 'introduction', 'comment', 'category') \
+                                            .order_by('feature__path', preserved)
+
+    entries = DialectFeatureEntry.objects.filter(feature__dialect__in=dialect_ids) \
+                                           .filter(feature__feature__path__startswith=base_path) \
+                                           .values('feature__id', 'id', 'entry', 'frequency', 'comment') \
+                                           .order_by('feature__feature__path', 'frequency')
+
+    examples = DialectFeatureExample.objects.filter(feature__dialect__in=dialect_ids) \
+                                            .filter(feature__feature__path__startswith=base_path) \
+                                            .values('feature__id', 'id', 'example') \
+                                            .order_by('feature__feature__path')
+
+
+    if is_bulk_edit:  # Only provide examples at one level for bulk edit (can't bulk edit in subfolders)
+        entries = entries.filter(feature__feature__depth=max_depth)
+
+    entries_dict = {}
+    for x in entries:
+        entries_dict.setdefault(x['feature__id'], []).append(x)
+
+    examples_dict = {}
+    for x in examples:
+        examples_dict.setdefault(x['feature__id'], []).append(x)
+
+    num_features = 0
+    dialectfeatures_dict = {}
+    for x in dialectfeatures:
+        num_features += 1
+        x.update({
+            'entries': entries_dict.get(x['id'], []),
+            'examples': examples_dict.get(x['id'], []),
+        })
+        dialectfeatures_dict.setdefault(x['feature_id'], []).append(x)
+
+    for i, feature in enumerate(feature_list):
+        feature_list[i] = (feature[0], feature[1], dialectfeatures_dict.get(feature[0].id, []))
+
+
+    #raise Exception(feature_list[1:3])
+
+    context = {
+        'dialect_ids':  dialect_ids,
+        'dialects':     dialects,
+        'section':      chosen_root,
+        'breadcrumb_bits': make_breadcrumb_bits(chosen_root),
+        'feature_list': feature_list,
+        'num_features': num_features,
+        'all_dialects': Dialect.objects.all() \
+                                       .filter(features__feature__path__startswith=base_path) \
+                                       .exclude(id__in=dialect_ids) \
+                                       .annotate(feature_count=Count('features'))
+                                       .values_list('id', 'name', 'feature_count'),
+        'bulk_edit':    is_bulk_edit,
+    }
+
+
+    if context['bulk_edit']:
+        def encode_entry(entry):
+            encoded_entry = entry['entry']
+            if entry['frequency'] not in ('P', None):
+                encoded_entry += ' {}'.format(entry['frequency'])
+            if entry['comment']:
+                encoded_entry += ' "{}"'.format(entry['comment'])
+            return encoded_entry
+
+        raw_rows = []
+        for feature, info, dialectfeatures in feature_list[1:]:
+            if not dialectfeatures:
+                raw_rows.append('')
+                continue
+
+            dialect_idx = 1 if base_dialect_id else 0
+            entries     = dialectfeatures[dialect_idx].get('entries', [])
             raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
 
         raw_text = '\n'.join(raw_rows)
