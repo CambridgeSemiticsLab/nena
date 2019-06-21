@@ -36,7 +36,7 @@
 {% endblock %}
 
 {% block page_content %}
-  {% if not bulk_edit %}
+  {% if not bulk_edit and dialects %}
   <form id="compare_form" style="" action="{% url 'dialects:setup-comparison' dialect_ids|join:',' %}" method="GET">
     {% if dialects|length == 1 %}
     <span style="float: left;">
@@ -50,15 +50,13 @@
     </span>
     {% endif %}
 
-    {% if dialects %}
-      Compare with
-      <select name="compare_with" onchange="$('#compare_form').submit()" style="font-family: monospace">
-        <option>-- choose dialect --</option>
-        {% for id, name, feature_count in all_dialects %}
-        <option value="{{id}}">{{name|ljust:"30"|nbsp}} {{feature_count}} feature{{feature_count|pluralize}}</option>
-        {% endfor %}
-      </select>
-    {% endif %}
+    Compare with
+    <select name="compare_with" onchange="$('#compare_form').submit()" style="font-family: monospace">
+      <option>-- choose dialect --</option>
+      {% for id, name, feature_count in all_dialects %}
+      <option value="{{id}}">{{name|ljust:"30"|nbsp}} {{feature_count}} feature{{feature_count|pluralize}}</option>
+      {% endfor %}
+    </select>
   </form>
   {% endif %}
 
