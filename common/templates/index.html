@@ -15,8 +15,7 @@
     </p>
 
     <br>
-    <select style="position: absolute; bottom: 0;font-size: 1.2em; width: 95%;height: auto; background-color: #a51137; border-radius: 5px; border-color: #851735; color: white;"
-            onchange="window.location='{% url 'dialects:dialect-detail' 0%}'.replace('0', $(this).val())">
+    <select class="dialect_select" onchange="window.location='{% url 'dialects:dialect-detail' 0%}'.replace('0', $(this).val())">
       <option value=0>Find dialect...</option>
       <option value=0> --- </option>
     {% for dialect in dialects %}

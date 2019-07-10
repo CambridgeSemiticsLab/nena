@@ -1,3 +1,15 @@
+:root {
+  --bg: #f0f0db;
+  --bg9: #f5f5eb;
+  --header: #8bc34a;
+  --header0: #8aa33a;
+  --link: #d18f00;
+}
+
+body {
+  background-color: var(--main-bg-color);
+}
+
 /* basic reset*/
 * {
   box-sizing: border-box;
@@ -18,25 +30,50 @@ a.plain {
 
 /* overrides for campl theme stuff */
 
+
+
+a, a:visited {
+  color: var(--link);
+}
+
 .campl-content {
-  background-color: #cddc39;
+  background-color: var(--bg);
 }
 
 .campl-theme-6 .campl-page-header, .campl-theme-6 .campl-local-footer {
-  background: #8bc34a;
+  background: var(--header);
   background-size: 200px;
 }
+.campl-theme-6 .campl-page-header a, .campl-theme-6 .campl-local-footer a {
+  color: white;
+}
 
+.campl-theme-6 .campl-main-content h1, .campl-theme-6 .campl-main-content h2 {
+    color: var(--header);
+}
 
 .campl-theme-6 .campl-local-navigation,
 .campl-theme-6 .campl-local-navigation a {
-    background: #8bc34a;
-    border-bottom: 1px solid #8aa33a;
-    border-top: 1px solid #8aa33a;
+    background: var(--header);
+    border-bottom: 1px solid var(--header0);
+    border-top: 1px solid var(--header0);
+    border-right: 1px solid var(--header0);
 }
 
 .campl-theme-6 .campl-local-navigation a:focus, .campl-theme-6 .campl-local-navigation a:hover, .campl-theme-6 .campl-local-navigation a:active {
-    background-color: #8bc34a;
+    background-color: var(--header);
+}
+
+.campl-theme-6 th {
+    background-color: var(--header);
+}
+
+.campl-theme-6 .campl-table-striped tbody tr:nth-child(odd) td, .campl-theme-6 .campl-table-striped tbody tr:nth-child(odd) th {
+    background-color: var(--bg9);
+}
+
+.campl-theme-6 table, .campl-theme-6 .campl-table-bordered {
+    border-bottom: 2px solid var(--header);
 }
 
 body .campl-page-title {
@@ -131,6 +168,20 @@ ul{
 .instruction_list > li {
   margin: 1em;
 }
+
+
+.dialect_select {
+  position: absolute;
+  bottom: 0;
+  font-size: 1.2em;
+  width: 95%;
+  height: auto;
+  background-color: var(--header);
+  border-radius: 5px;
+  border-color: var(--header0);
+  color: white;
+}
+
 /* map stuff */
 
 #map {
@@ -352,7 +403,7 @@ ul{
     text-align: center;
     transition: color 0.1s linear;
     border-radius: 0.2em;
-    background: #a51137;
+    background: var(--header);
     color: #f0f0f0;
 }
 
@@ -366,7 +417,7 @@ ul{
 }
 
 .button:hover {
-    background: #d61746;
+    background: var(--header0);
 }
 
 .button.dull {
@@ -460,8 +511,8 @@ a.plain {
     position: sticky;
     top: -2px;
     z-index: 3;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(255,255,255,1);
+    background-color: var(--bg);
+    'box-shadow: 0 2px 5px rgba(255,255,255,1);
 }
 #grammar_tree_heading .controls {
     display: inline-block;
@@ -491,7 +542,7 @@ a.plain {
 #grammar_tree li {
         position: relative;
         padding: 2px 2px 8px 2px;
-        background-color: white;
+        background-color: var(--bg);
         color: #ccc;
         }
 #grammar_tree.bulk_edit li.level_1 {
@@ -523,7 +574,7 @@ a.plain {
             display: inline-block;
             }
 #grammar_tree .section_link:hover {
-            color: #a51137;
+            color: var(--header);
             }
 #grammar_tree_heading .dialect_header,
 #grammar_tree .example {
@@ -587,7 +638,7 @@ a.plain {
 #grammar_tree.show_empties:not(.show_entries) .folder{ background-color: #ccc; } /* when only showing empties make folders faded */
 #grammar_tree .has_entry { color: black; } /* if a node has entries beneath it don't fade it */
 #grammar_tree.grammar_only .folder,
-#grammar_tree .has_entry>.folder { background-color: #a51137; } /* if we're just showing grammar, or folder has entries show colours */
+#grammar_tree .has_entry>.folder { background-color: var(--header); } /* if we're just showing grammar, or folder has entries show colours */
 
 /* entry content */
 #grammar_tree .details_link { margin-left: 20px; visibility: hidden; float: right; }
@@ -719,7 +770,7 @@ input[type=checkbox].chex:checked:after {
     top: -0.6em;
     font-size: 2em;
     padding: 4px;
-    color: #a51137;
+    color: var(--header);
     text-shadow: 1px 2px 2px rgba(0,0,0,0.3);
     }
 input[type=checkbox].chex:hover:after {
@@ -785,7 +836,7 @@ input[type=checkbox].chex_delete:checked:before {
   left: 8px;
   width: 16px;
   height: 17px;
-  fill: #a51137;
+  fill: var(--header);
 }
 *:hover > .filter {
   visibility: visible;
