@@ -524,6 +524,7 @@ a.plain {
 #grammar_tree_heading .controls {
     display: inline-block;
     width: 543px;
+    margin-bottom: 6px;
 }
 #compare_form {
     display: block;
