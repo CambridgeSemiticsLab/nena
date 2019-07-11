@@ -1,18 +1,32 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
-    {{ view.name }}: {{ object.name }}
+    {{ object.title }}
 {% endblock %}
 
 {% block page_content %}
     {% block content_column_4 %}
-        <div class='campl-column3'>
-            <img src="{{ object.original_image.url }}" />
-            <table>
-            <tr><td>{{object.name}}</td></tr>
-            <tr><td>{{object.description}}</td></tr>
-            <tr><td><b>Dialect:</b></td><td>{{ object.dialect }}</td></tr>
-            </table>
-        </div>
+      <div class='campl-column12'>
+        <img src="{{ object.original_image.url }}" />
+        <p>
+          {{object.description}}
+        </p>
+        <p>
+          <b>Dialect:</b>
+          <a href="{% url 'dialects:dialect-detail' object.dialect_id %}">{{ object.dialect }}</a>
+        </p>
+      </div>
+
+      {% if user.is_staff %}
+      <div class='campl-column12'>
+      <div class="campl-content-container">
+          <div style="background-color: #fec9; padding: 6px;">
+            Staff-only buttons: <br>
+            <a class="button" href="{% url 'gallery:photo-edit' object.id %}">Edit photo details</a>
+            <a class="button" href="{% url 'gallery:photo-delete' object.id %}">Delete photo</a>
+          </div>
+      </div>
+      </div>
+      {% endif %}
     {% endblock %}
 {% endblock %}

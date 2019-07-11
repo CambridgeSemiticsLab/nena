@@ -11,15 +11,15 @@
         <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
             <thead>
                 <tr>
-                    <th>Dialect</th>
                     <th>Title</th>
+                    <th>Dialect</th>
                     <th>Preview</th>
                 </tr>
             </thead>
         {% for photo in photos  %}
             <tr>
-                <td><a href={% url 'dialects:dialect-detail' photo.dialect.pk  %}>{{ photo.dialect }}</a></td>
                 <td><a href={% url 'gallery:photo-detail' photo.pk  %}>{{ photo.title }}</a></td>
+                <td><a href={% url 'dialects:dialect-detail' photo.dialect.pk  %}>{{ photo.dialect }}</a></td>
                 <td><a href={% url 'gallery:photo-detail' photo.pk  %}><img src="{{ photo.thumbnail.url }}"></a></td>
             </tr>
         {% endfor %}
@@ -35,7 +35,7 @@
     <div class="campl-content-container">
         <div style="background-color: #fec9; padding: 6px;">
           Staff-only buttons: <br>
-          <a class="button" href="{% url 'gallery:photo-create' %}">New photo</a>
+          <a class="button" href="{% url 'gallery:photo-create' %}">Add photo</a>
         </div>
     </div>
     </div>
