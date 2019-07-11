@@ -20,9 +20,10 @@
 
 {% for entry in df.entries %}
   {% if entry.entry %}
-    <a class="plain aramaic {% if entry.frequency == 'M'%}marginal" title="Marginal{% endif %}" href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">
+    <a class="plain aramaic" href="{% url 'dialects:dialect-feature' df.dialect_id df.id %}">
     {{entry.entry|safe}}
     </a>
+    {% if entry.frequency == 'M'%}<span style="opacity: 0.6;">(Marginal)</span>{% endif %}
   {% endif %}
   {% if entry.comment %}
     <span class="comment" data-text="{{entry.comment}}">💬</span>

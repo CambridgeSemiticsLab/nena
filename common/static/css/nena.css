@@ -1,9 +1,10 @@
 :root {
-  --bg: #f0f0db;
-  --bg9: #f5f5eb;
-  --header: #8bc34a;
-  --header0: #8aa33a;
+  --bg: #f7f4ed;
+  --bg9: #f7f4ed;
+  --header: #3f801e;
+  --header0: #4f902e;
   --link: #d18f00;
+  --dull: #aaa;
 }
 
 body {
@@ -28,6 +29,11 @@ a.plain {
   cursor: pointer;
 }
 
+p {
+  line-height: 1.5em;
+
+}
+
 /* overrides for campl theme stuff */
 
 
@@ -50,6 +56,12 @@ a, a:visited {
 
 .campl-theme-6 .campl-main-content h1, .campl-theme-6 .campl-main-content h2 {
     color: var(--header);
+    font-size: 2.4em;
+}
+
+.campl-theme-6 .campl-main-content h2 {
+    font-size: 1.9em;
+    font-weight: normal;
 }
 
 .campl-theme-6 .campl-local-navigation,
@@ -80,7 +92,7 @@ body .campl-page-title {
     display: inline-block;
     padding: 10px;
     margin: -10px 0 0 -20px;
-    font-size: 26px;
+    font-size: 36px;
     line-height: 22px;
     font-weight: bold;
 }
@@ -89,12 +101,6 @@ body .campl-page-title {
     float: right;
     padding: 3px 6px;
 }
-.login_status,
-body .campl-page-title {
-    background: #557d;
-    text-shadow: 0 0 10px rgba(0,0,0,1);
-    box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
-    }
 
 body .campl-wrap.fullwidth {
     width: auto;
@@ -138,7 +144,7 @@ h3 {
   width: 100px;
   height: 100px;
   margin: 4px;
-  background: no-repeat #ccc;
+  background: no-repeat var(--dull);
   background-size: cover;
 }
 .thumbnail.add {
@@ -421,7 +427,7 @@ ul{
 }
 
 .button.dull {
-    background: #ccc;
+    background: var(--dull);
     color: #fff;
 }
 .button.dull:hover {
@@ -458,6 +464,7 @@ ul{
 .comment {
   opacity: 0.6;
   position: relative;
+  float: right;
   cursor: default;
   padding: 0.3em;
   border-top-left-radius: 0.3em;
@@ -543,12 +550,12 @@ a.plain {
         position: relative;
         padding: 2px 2px 8px 2px;
         background-color: var(--bg);
-        color: #ccc;
+        color: var(--dull);
         }
 #grammar_tree.bulk_edit li.level_1 {
         max-height: 3.018em;
         white-space: nowrap;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid var(--dull);
 }
 #grammar_tree .pop_open {
         display:none
@@ -566,7 +573,7 @@ a.plain {
         line-height: 1.4em;
         }
 #grammar_tree .section_link {
-        color: #ccc;
+        color: var(--dull);
         text-decoration: none;
         display: none;
         }
@@ -599,7 +606,7 @@ a.plain {
 /* folder is the big stripe down the LHS of an expanded section */
 #grammar_tree .folder{
         padding: 9px 5px;
-        background-color: #ccc;
+        background-color: var(--dull);
         position: absolute;
         top: 2px;
         left: 2px;
@@ -635,7 +642,7 @@ a.plain {
 #grammar_tree.grammar_only li{ display: block; color: black; }
 #grammar_tree.show_entries li.has_entry { display: block }
 #grammar_tree.show_empties li.has_empty { display: block }
-#grammar_tree.show_empties:not(.show_entries) .folder{ background-color: #ccc; } /* when only showing empties make folders faded */
+#grammar_tree.show_empties:not(.show_entries) .folder{ background-color: var(--dull); } /* when only showing empties make folders faded */
 #grammar_tree .has_entry { color: black; } /* if a node has entries beneath it don't fade it */
 #grammar_tree.grammar_only .folder,
 #grammar_tree .has_entry>.folder { background-color: var(--header); } /* if we're just showing grammar, or folder has entries show colours */
@@ -787,7 +794,7 @@ input[type=checkbox].chex_delete:before {
     content: '🗙';
     display: block;
     position: absolute;
-    color: #ccc;
+    color: var(--dull);
     font-size: 1.6em;
     }
 input[type=checkbox].chex_delete:hover:after {
@@ -795,7 +802,7 @@ input[type=checkbox].chex_delete:hover:after {
     display: block;
     position: absolute;
     left: 100%;
-    color: #ccc;
+    color: var(--dull);
     font-size: 1em;
     }
 input[type=checkbox].chex_delete:hover:before {
@@ -813,6 +820,7 @@ input[type=checkbox].chex_delete:checked:before {
 .translation_table td {
   width: 50%;
   padding: 0.3em 0.6em;
+  background: none;
 }
 
 .audio_form #id_translation {
