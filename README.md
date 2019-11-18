@@ -43,4 +43,17 @@ need to add `--fake` to the above command.
 
 ### Deploy to production
 
-TODO
+The application is currently deployed on the Managed Web Service (MWS) provided
+by the University Information Service. Two instances are deployed: one staging
+and one production. Each counts as a 'site' in MWS parlance and they can be found
+under `/replicated/www/nena[-staging]`.
+
+In each site's dir all of our code lives in `//docroot/code`, with assets copied
+out to `//docroot/[media,static]` by Django's `collectstatic` process. The MWS
+provides a pre-configured Apache server which routes requests to the appropriate
+`//docroot`, as determined by the "Web Sites" list available through the control
+panel: https://panel.mws3.csx.cam.ac.uk/vhosts/337/
+
+To pull the latest changes and deploy them, run `./deploy-mws[-staging].sh`. This
+will do its best to clear out caches and will also run any database migrations and
+publish any changes to our assets or media.
