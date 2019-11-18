@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/
 import os
 import sys
 
-sys.path.append('/var/www/nena-staging/docroot/nena')
+sys.path.append('/var/www/nena-staging/docroot/code')
 sys.path.append('/var/www/nena-staging/admindir/venv/lib/python3.5/site-packages')
 
 from django.core.wsgi import get_wsgi_application

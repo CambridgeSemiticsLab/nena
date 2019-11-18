@@ -1,6 +1,0 @@
-AddHandler wsgi-script .py
-Options FollowSymlinks ExecCGI MultiViews Indexes
-MultiviewsMatch Handlers
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ nena/common/mws-staging.py/$1 [QSA,PT,L]
