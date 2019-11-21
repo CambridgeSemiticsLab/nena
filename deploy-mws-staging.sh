@@ -16,5 +16,5 @@ find /var/www/nena-staging/admindir -name \*.py[co] -delete
 /var/www/nena-staging/admindir/venv/bin/pip3 install -r requirements/production.txt
 /var/www/nena-staging/admindir/venv/bin/python3 manage.py migrate --settings=common.settings.production
 /var/www/nena-staging/admindir/venv/bin/python manage.py collectstatic --noinput --settings=common.settings.production
-
+./set-updated-date.sh
 # then restart server through MWS control panel "settings" button: https://panel.mws3.csx.cam.ac.uk/settings/337/

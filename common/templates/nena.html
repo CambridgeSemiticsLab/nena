@@ -48,7 +48,9 @@ developed by fixbork
 {% endblock %}
 {% block footer2 %}
 <div>
-<b>Page last updated</b><br />26 February 2017
+{% if LAST_UPDATED_DATE %}
+<b>Last updated</b><br />{{LAST_UPDATED_DATE}}
+{% endif %}
 </div>
 {% endblock %}
 {% block global_footer %}{% endblock %}
