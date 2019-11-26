@@ -34,11 +34,11 @@ class AudioDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(AudioDetailView, self).get_context_data(**kwargs)
         clip = context['clip']
-        regex = '\((?=\d+\))'
+        regex = '(\(\d+(?:@\d+:\d+)?\))'
         transcript_chunks = re.split(regex, clip.transcript or '')
         if len(transcript_chunks) > 1:
             translation_chunks = re.split(regex, clip.translation or '')
-            text_chunks = zip(transcript_chunks[1:], translation_chunks[1:])
+            text_chunks = zip(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2])
         else:
             text_chunks = None
 

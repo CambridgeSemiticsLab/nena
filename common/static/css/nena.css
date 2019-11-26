@@ -823,6 +823,15 @@ input[type=checkbox].chex_delete:checked:before {
   padding: 0.3em 0.6em;
   background: none;
 }
+.translation_table td.heading {
+  width: 10%;
+}
+.translation_table .jump_to_time {
+  cursor: pointer;
+}
+.translation_table .current_section {
+  border: 1px solid #3f801e;
+}
 
 .audio_form #id_translation {
   font-size: 1.2em;

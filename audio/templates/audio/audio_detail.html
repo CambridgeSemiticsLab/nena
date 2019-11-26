@@ -7,19 +7,23 @@
 {% block page_content %}
   <div class='campl-column12'>
   <div class="campl-content-container">
-    <video style="height: 28px; width: 50%; margin-bottom: 2em;" src="{{ clip.data.url }}" controls=""></video>
+    <video id="audio_clip" style="height: 28px; width: 50%; margin-bottom: 2em;" src="{{ clip.data.url }}" controls=""></video>
 
     {% if clip.transcript %}
       <table class="translation_table">
       <tr>
+        {% if text_chunks %}
+        <td class="heading" ></td>
+        {% endif %}
         <td><h2>Transcript</h2></td>
         <td><h2>Translation</h2></td>
       </tr>
       {% if text_chunks %}
-        {% for transcript_chunk, translation_chunk in text_chunks %}
+        {% for heading, transcript_chunk, translation_chunk in text_chunks %}
         <tr>
-          <td><p class="aramaic">({{transcript_chunk|safe}}</p></td>
-          <td><p>({{translation_chunk|safe}}</p></td>
+          <td class="heading {% if '@' in heading %}jump_to_time{% endif %}">{{heading|safe}}</p></td>
+          <td><p class="aramaic">{{transcript_chunk|safe}}</p></td>
+          <td><p>{{translation_chunk|safe}}</p></td>
         </tr>
         {% endfor %}
       {% else %}
@@ -49,4 +53,44 @@
     {% endif %}
   </div>
   </div>
+
+  <script>
+    function get_seconds_from_marker(marker_text){
+      if(matches = marker_text.match(/@(\d+):(\d+)/))
+      {
+        return matches[1]*60 + matches[2]*1;
+      }
+      return false;
+    }
+
+    $(function(){
+      player = document.getElementById('audio_clip');
+
+      $('.translation_table').on('click', '.jump_to_time', function(e){
+        seconds = get_seconds_from_marker(e.target.textContent)
+        if(seconds !== false)
+        {
+          player.currentTime = seconds;
+          player.play()
+        }
+      })
+
+      times_marked = []
+      $('.jump_to_time').each(function(){
+        seconds = get_seconds_from_marker($(this).get(0).textContent);
+        times_marked.push(seconds);
+        $(this).parents('tr').addClass('time_marker_'+seconds);
+      })
+
+      if(times_marked){
+        player.ontimeupdate = function(event){
+          seconds = Math.max(...times_marked.filter(x => x < player.currentTime));
+          $('.current_section').removeClass('current_section');
+          $('.time_marker_'+seconds).addClass('current_section');
+        }
+      }
+
+
+    })
+  </script>
 {% endblock %}
