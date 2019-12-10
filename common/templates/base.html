@@ -5,6 +5,16 @@
 <!--[if IE 8]>       <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js"><!--<![endif]-->
 <head>
+  {% if GOOGLE_ANALYTICS_REFERENCE %}
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{GOOGLE_ANALYTICS_REFERENCE}}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{GOOGLE_ANALYTICS_REFERENCE}}');
+    </script>
+  {% endif %}
   {% block campl_block_head %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>{% block head_title %}NENA{% endblock %}</title>

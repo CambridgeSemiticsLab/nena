@@ -53,7 +53,6 @@ THIRD_PARTY_APPS = (
     'ucamprojectlight',
     'ucamwebauth',
     'ckeditor',
-
     'rest_framework',
     'django_filters',
     'widget_tweaks',
@@ -103,6 +102,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'common.context_processors.google_analytics_reference',
                 'common.context_processors.last_updated_date',
             ],
         },
@@ -174,3 +174,4 @@ REST_FRAMEWORK = {
 }
 
 LAST_UPDATED_DATE = env('DJANGO_LAST_UPDATED_DATE', default='')
+GOOGLE_ANALYTICS_REFERENCE = env('DJANGO_GOOGLE_ANALYTICS_REFERENCE', default=None)
