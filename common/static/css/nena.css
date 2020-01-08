@@ -640,7 +640,7 @@ a.plain {
 
 /* show and hide based on having entries or not */
 #grammar_tree li { display: none; }
-#grammar_tree.grammar_only li{ display: block; color: black; }
+#grammar_tree.grammar_only li, #grammar_tree.bulk_edit li{ display: block; color: black; }
 #grammar_tree.show_entries li.has_entry { display: block }
 #grammar_tree.show_empties li.has_empty { display: block }
 #grammar_tree.show_empties:not(.show_entries) .folder{ background-color: var(--dull); } /* when only showing empties make folders faded */
