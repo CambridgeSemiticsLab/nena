@@ -486,6 +486,7 @@ def problems(request):
         ('span_cropr',       '^ *\<span class=aramaic\>.*?\<\/span[^\>]*$'),
         ('span_span',        '^ *\<span class=aramaic\>.*?\<span\> *$'),
         ('spana_spana',      '^\<span class=aramaic\>.*?\<span class=aramaic\>$'),
+        ('any_span',         '^.*?span.*?$'),
         ('span_incomplete',  '^\<span class=aramaic\>[^\<]+$'),
         ('double_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
         ('triple_span',      '^\<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\> ~ \<span class=aramaic\>.*?\<\/span\>$'),
@@ -516,17 +517,18 @@ def problems(request):
         (type,
          os.filter(entry__iregex=regex).count(),
          os.filter(entry__iregex=regex) \
-           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:3]
+           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:30]
         ) for type, regex in types
     ]
 
-    cantfix = DialectFeatureEntry.objects
-    for type, regex in types:
-        cantfix = cantfix.exclude(entry__iregex=regex)
-    cantfix = cantfix.values_list('entry', 'feature__dialect_id', 'feature_id')
+    # Temporarily removed
+    # cantfix = DialectFeatureEntry.objects
+    # for type, regex in types:
+        # cantfix = cantfix.exclude(entry__iregex=regex)
+    # cantfix = cantfix.values_list('entry', 'feature__dialect_id', 'feature_id')
     context = {
         'canfix': canfix,
-        'cantfix': cantfix[0:1000],
-        'cantfix_count': cantfix.count(),
+        # 'cantfix': cantfix[0:1000],
+        # 'cantfix_count': cantfix.count(),
     }
     return render(request, 'dialects/problems.html', context)
