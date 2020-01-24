@@ -1,6 +1,6 @@
 {# expects `communities` and `locations` with format ((code, name),)#}
 {# `chosen_community` and `chosen_location` set default selection   #}
-<form action="" method="GET">
+<form class="dialect_filter_form" action="" method="GET">
   <select name="community">
     <option value="">-- choose community --</option>
     {% for code, name in communities %}

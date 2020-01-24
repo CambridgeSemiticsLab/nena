@@ -92,11 +92,19 @@ def map_of_feature(request, pk):
                                          .filter(feature__dialect__longitude__isnull=False,
                                                  feature__dialect__latitude__isnull=False) \
                                          .values('id', 'entry', 'feature_id',
+                                                 dialect_id=F('feature__dialect__id'),
                                                  dialect=F('feature__dialect__name'),
                                                  community=F('feature__dialect__community'),
                                                  longitude=F('feature__dialect__longitude'),
                                                  latitude=F('feature__dialect__latitude'),
                                                  group=F('entry'))
+
+    group_map = None
+    if request.POST:
+        group_numbers = request.POST.getlist('group_number')
+        dialect_ids   = request.POST.getlist('dialect_id')
+        group_map = {int(x):y for x, y in zip(dialect_ids, group_numbers) if y != '0'}
+        entries = entries.filter(feature__dialect__id__in=group_map.keys())
 
     # todo: combine this filtering logic with similar in dialects.DialectListView
     if request.GET.get('community'):
@@ -110,6 +118,11 @@ def map_of_feature(request, pk):
 
     feature = Feature.objects.get(pk=pk)
     map_data = [entry_to_map_point(e) for e in entries]
+
+    if group_map:
+        for i, _ in enumerate(map_data):
+            map_data[i]['properties']['group'] = group_map[map_data[i]['properties']['dialect_id']]
+
     context = {
         'feature': feature,
         'map_data_json': json.dumps(map_data, indent=2),

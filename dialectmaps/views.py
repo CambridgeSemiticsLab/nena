@@ -36,6 +36,7 @@ class DialectMapDetailView(DetailView):
                                              .filter(feature__dialect__longitude__isnull=False,
                                                      feature__dialect__latitude__isnull=False) \
                                              .values('id', 'entry', 'feature_id',
+                                                     dialect_id=F('feature__dialect__id'),
                                                      dialect=F('feature__dialect__name'),
                                                      community=F('feature__dialect__community'),
                                                      longitude=F('feature__dialect__longitude'),
@@ -56,6 +57,7 @@ def entry_to_map_point(entry, focus=False):
         'type':      'entry',
         'group':     entry['group'],
         'entry':     entry['entry'],
+        'dialect_id':entry['dialect_id'],
         'dialect':   entry['dialect'],
         'community': entry['community'],
         'url':       reverse('dialects:dialect-feature', args=[entry['id'], entry['feature_id']]),

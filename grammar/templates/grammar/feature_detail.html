@@ -10,14 +10,23 @@
 {% block page_content %}
   <div class="campl-column12 clearfix" id="feature_detail">
   <div class="campl-content-container">
-    <a class="button fr" href="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}">
-        See map of this feature
-    </a>
     {% include 'dialects/_dialect_filter.html' %}
+    <form action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="post">
+    {% csrf_token %}
+    <input class="button fr" type="submit" value="See map of this feature">
+    <a id="add_to_group" class="button fr">
+        Add to map group
+    </a>
     <table class="campl-table campl-table-condensed campl-table-striped">
       {% for dialect_feature in dialect_features %}
       {% with dialect=dialect_feature.dialect entries=dialect_feature.entries %}
         <tr>
+          <td style="width: 5em;">
+            <input type="checkbox" class="chex row_select">
+            <input type="hidden" name="dialect_id" value="{{dialect.id}}">
+            <input type="hidden" name="group_number" value="0">
+            <span class="map_group"></span>
+          </td>
           <td>
             <a href="{% url 'dialects:dialect-detail' dialect.id %}">{{ dialect.name }}</a>
           </td>
@@ -44,7 +53,27 @@
       {% endwith %}
       {% endfor %}
     </table>
+    </form>
 
   </div>
   </div>
+
+
+<style>
+.dialect_filter_form {margin-bottom: -2.6em;}
+.map_group { width: 1.5em; height: 1.5em; background:white; border: 2px solid black; border-radius:50%; text-align:center; font-weight: bold; display:none;}
+</style>
+
+<script>
+$(function(){
+  $('#feature_detail').on('click', '#add_to_group', function(){
+    group_number = prompt('Which group number? ("0" to remove from group)');
+    $('.row_select:checked').each(function(){
+      $(this).siblings('[name="group_number"]').val(group_number)
+      $(this).siblings('.map_group').html(group_number).css('display', 'inline-block')
+      $(this).prop('checked', false )
+    })
+  })
+})
+</script>
 {% endblock %}

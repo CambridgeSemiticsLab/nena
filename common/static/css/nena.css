@@ -782,7 +782,7 @@ input[type=checkbox].chex:checked:after {
     text-shadow: 1px 2px 2px rgba(0,0,0,0.3);
     }
 input[type=checkbox].chex:hover:after {
-    color: #d61746;
+    //color: #d61746; // commenting out as I don't know why we turn this red on hover
     }
 
 /*   .chex_delete turns checkbox into an `x` for inline deletion, with optional tooltip taken attribute `data-chex` */
