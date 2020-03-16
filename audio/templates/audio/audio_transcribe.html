@@ -1,0 +1,248 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+    {{ object.dialect }}: {{ object.title }}
+{% endblock %}
+
+{% block page_content %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+
+
+    <div class="sticky-bar">
+      <button class="button play-button" data-action="play"><i class="material-icons">play_arrow</i></button>
+      <div id="waveform"></div>
+      <div id="playback-time">0:00</div>
+    </div>
+
+    <form class="transcribe_form" action="" method="post">
+    {% csrf_token %}
+      <table class="translation_table">
+      <thead>
+      <tr>
+        <td><h2>Section</h2></td>
+        <td><h2>Transcript</h2></td>
+        <td><h2>Translation</h2></td>
+      </tr>
+      </thead>
+      <tbody>
+        {% for heading, transcript_chunk, translation_chunk in text_chunks %}
+        <tr>
+          <td><textarea {{form|yesno:',disabled'}}>{{heading|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}}class="aramaic">{{transcript_chunk|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% if form %}
+      <tfoot>
+        <tr>
+          <td>
+            <a class="button" onclick="$('tbody').append($('.blank_row').eq(0)[0].outerHTML)">Add section</a>
+          </td>
+          <td colspan=2>
+            <input class="button" type="submit" value="Save" />
+            <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}">Cancel</a>
+          </td>
+        </tr>
+        <tr class="blank_row">
+          <td><textarea placeholder="time"></textarea></td>
+          <td><textarea placeholder="transcript" class="aramaic"></textarea></td>
+          <td><textarea placeholder="translation"></textarea></td>
+        </tr>
+      </tfoot>
+      {% endif%}
+      </table>
+
+      <br>
+      <br>
+      <br>
+      show raw texts <input type="checkbox" class="pop_open">
+      <div>
+        {% if form %}
+        <a class="button compile">Compile the raw texts from the above sections</a>
+        <br>
+        {{form}}
+        {% else %}
+        <label for="id_transcript">Transcript:</label>
+        <textarea name="transcript" cols="40" rows="10" id="id_transcript">{{clip.transcript}}</textarea>
+        <label for="id_translation">Translation:</label>
+        <textarea name="translation" cols="40" rows="10" id="id_translation">{{clip.translation}}</textarea>
+        {% endif %}
+      </div>
+    </form>
+
+  </div>
+  </div>
+
+  {% if not form %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+    {% if user.is_staff %}
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'audio:audio-edit' clip.id %}">Change audio file or title</a>
+        <a class="button" href="{% url 'audio:audio-transcribe' clip.id %}">Edit transcript or translation</a>
+        <a class="button" href="{% url 'audio:audio-delete' clip.id %}">Delete audio, transcript and translation</a>
+      </div>
+    {% endif %}
+  </div>
+  </div>
+  {% endif %}
+
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .sticky-bar {
+      position:sticky;
+      top: 0;
+      background-color: #f7f4ed;
+      padding: 0.5em 0;
+    }
+    .play-button {
+      display: inline-block;
+      width: 2.6em;
+      height: 2.6em;
+      margin: 2em 0.7em;
+      border-radius: 50%;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0.5em 0;
+    }
+    #playback-time {
+      position:absolute;
+      bottom:0;
+      left: 0;
+      width: 3.4em;
+      text-align: center;
+      color: #3f801e;
+      font-size: 1.2em;
+    }
+    #waveform {
+      position: relative;
+      display: inline-block;
+      width: 90%;
+      vertical-align: middle;
+    }
+
+    .translation_table {
+      width: 100%;
+      border-bottom-width: 0!important;
+      margin-top: 2em;
+    }
+    .translation_table td {
+      padding: 0.5em;
+    }
+    .transcribe_form tbody, .transcribe_form thead {
+      background-color: white;
+    }
+    .transcribe_form textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 3em;
+      padding: 0.5em;
+      font-size: 1.3em;
+      line-height: 1.5em;
+      margin: 0!important;
+      background-color: white;
+      border-width: 0;
+      resize: none;
+    }
+    .transcribe_form textarea:disabled {
+      cursor: text;
+    }
+
+    .translation_table tfoot .blank_row {
+      display: none;
+    }
+
+    .translation_table tr > td:nth-child(1) {
+      width: 15%;
+    }
+    .translation_table td {
+      width: auto;
+    }
+
+    .pop_open + * { display: none;}
+    .pop_open:checked + * { display: block; margin: 2em 0;}
+
+  </style>
+
+
+  <script src="https://unpkg.com/wavesurfer.js@3.3.1/dist/wavesurfer.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.min.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
+  <script charset="utf-8">
+    function get_seconds_from_marker(marker_text){
+      if(matches = marker_text.match(/@(\d+):(\d+)/))
+      {
+        return matches[1]*60 + matches[2]*1;
+      }
+      return false;
+    }
+
+    function compile_raw_texts(){
+      form = $('.transcribe_form').eq(0)
+      transcript_bits = form.find('tbody tr').map(function(){
+        tas = $(this).find('textarea');
+        return tas.eq(0).val() + tas.eq(1).val()
+      }).get()
+      $('[name="transcript"]').val(transcript_bits.join(''))
+
+      translation_bits = form.find('tbody tr').map(function(){
+        tas = $(this).find('textarea');
+        return tas.eq(0).val() + tas.eq(2).val()
+      }).get()
+      $('[name="translation"]').val(translation_bits.join(''))
+    }
+
+    $(function(){
+      // expand textareas to fit contents
+      $('body').on('keyup', 'textarea', function(){
+        elem = $(this)[0]
+        if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
+      })
+      $('textarea').trigger('keyup');
+
+      // form compilation and saving
+      $('.transcribe_form').on('submit', compile_raw_texts)
+      $('.compile').on('click', compile_raw_texts);
+
+      // audio visualisation
+      var wavesurfer = WaveSurfer.create({
+          container: '#waveform',
+          progressColor: '#aaa',
+          cursorColor: '#d18f00',
+          cursorWidth: '3px',
+          waveColor: '#3f801e',
+          loopSelection: true,
+          normalize: false,
+          responsive: true,
+          barRadius: 2,
+          barHeight: 1.3,
+          barWidth: 4,
+          plugins: [
+            WaveSurfer.cursor.create({}),
+            WaveSurfer.regions.create({})
+          ],
+      });
+      wavesurfer.load('{{ clip.data.url }}');
+      var button = document.querySelector('[data-action="play"]');
+      button.addEventListener('click', wavesurfer.playPause.bind(wavesurfer));
+      wavesurfer.on('pause', function () {
+        button.innerHTML = '<i class="material-icons">play_arrow</i>';
+      });
+      wavesurfer.on('play', function () {
+        button.innerHTML = '<i class="material-icons">pause</i>';
+      });
+      window.setInterval(function(){
+        time = wavesurfer.getCurrentTime();
+        $('#playback-time').html(parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0'))
+      }, 100);
+
+
+
+    })
+  </script>
+
+{% endblock %}
