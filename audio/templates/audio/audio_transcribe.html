@@ -28,8 +28,8 @@
       <tbody>
         {% for heading, transcript_chunk, translation_chunk in text_chunks %}
         <tr>
-          <td><textarea {{form|yesno:',disabled'}}>{{heading|safe}}</textarea></td>
-          <td><textarea {{form|yesno:',disabled'}}class="aramaic">{{transcript_chunk|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} class="time-code">{{heading|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} class="aramaic">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
         </tr>
         {% endfor %}
@@ -46,9 +46,9 @@
           </td>
         </tr>
         <tr class="blank_row">
-          <td><textarea placeholder="time"></textarea></td>
-          <td><textarea placeholder="transcript" class="aramaic"></textarea></td>
-          <td><textarea placeholder="translation"></textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic"></textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
         </tr>
       </tfoot>
       {% endif%}
@@ -57,7 +57,7 @@
       <br>
       <br>
       <br>
-      show raw texts <input type="checkbox" class="pop_open">
+      show raw texts <input type="checkbox" class="pop_open chex">
       <div>
         {% if form %}
         <a class="button compile">Compile the raw texts from the above sections</a>
@@ -65,9 +65,9 @@
         {{form}}
         {% else %}
         <label for="id_transcript">Transcript:</label>
-        <textarea name="transcript" cols="40" rows="10" id="id_transcript">{{clip.transcript}}</textarea>
+        <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript}}</textarea>
         <label for="id_translation">Translation:</label>
-        <textarea name="translation" cols="40" rows="10" id="id_translation">{{clip.translation}}</textarea>
+        <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation}}</textarea>
         {% endif %}
       </div>
     </form>
@@ -151,6 +151,14 @@
     .transcribe_form textarea:disabled {
       cursor: text;
     }
+    .translation_table textarea:disabled {
+      cursor: pointer;
+    }
+
+    .translation_table tr.now-playing * {
+      background-color: #cef;
+    }
+
 
     .translation_table tfoot .blank_row {
       display: none;
@@ -173,12 +181,40 @@
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.min.js"></script>
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
   <script charset="utf-8">
-    function get_seconds_from_marker(marker_text){
-      if(matches = marker_text.match(/@(\d+):(\d+)/))
+    var wavesurfer;
+    function time_string_to_seconds(time_string){
+      // takes str("1:23") and returns int(83)
+      if(matches = time_string.match(/@(\d+):(\d+)/))
       {
         return matches[1]*60 + matches[2]*1;
       }
       return false;
+    }
+
+    function set_now_playing(row){
+      $('.now-playing').removeClass('now-playing');
+      row.addClass('now-playing');
+
+      [start_seconds, end_seconds] = get_start_end_seconds(row);
+      wavesurfer.clearRegions();
+      wavesurfer.addRegion({
+        start: start_seconds,
+        end: end_seconds,
+        color: "rgba(200, 230, 255, 0.4)",
+        drag: false,
+        resize: false,
+        loop: false,
+      });
+    }
+
+    function get_start_end_seconds(row){
+      start_seconds = time_string_to_seconds(row.find('.time-code').val());
+      if(row.next().length){
+        end_seconds = time_string_to_seconds(row.next().find('.time-code').val());
+      }else{
+        end_seconds = wavesurfer.getDuration();
+      }
+      return [start_seconds, end_seconds];
     }
 
     function compile_raw_texts(){
@@ -209,7 +245,7 @@
       $('.compile').on('click', compile_raw_texts);
 
       // audio visualisation
-      var wavesurfer = WaveSurfer.create({
+      wavesurfer = WaveSurfer.create({
           container: '#waveform',
           progressColor: '#aaa',
           cursorColor: '#d18f00',
@@ -218,9 +254,9 @@
           loopSelection: true,
           normalize: false,
           responsive: true,
-          barRadius: 2,
+          barRadius: 0,
           barHeight: 1.3,
-          barWidth: 4,
+          barWidth: 0,
           plugins: [
             WaveSurfer.cursor.create({}),
             WaveSurfer.regions.create({})
@@ -237,10 +273,24 @@
       });
       window.setInterval(function(){
         time = wavesurfer.getCurrentTime();
-        $('#playback-time').html(parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0'))
+        $('#playback-time').html(parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0'));
+
+       $($('tbody tr').get().reverse()).each(function(){
+        time_code = $(this).find('.time-code').val()
+        if(time_code && time_string_to_seconds(time_code) < time){
+          set_now_playing($(this));
+          return false;
+        }
+       })
+
       }, 100);
 
-
+      // playback for viewing not editing
+      $('.translation_table').on('mouseup', 'textarea:disabled', function(){
+        row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds(row);
+        wavesurfer.play(start_seconds, end_seconds);
+      });
 
     })
   </script>
