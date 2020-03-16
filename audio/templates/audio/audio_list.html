@@ -14,18 +14,18 @@
         <table class="campl-table campl-table-bordered campl-table-condensed campl-table-striped">
             <thead>
                 <tr>
-                    <th>Dialect</th>
                     <th>Title</th>
+                    <th>Dialect</th>
+                    <th>Transcript</th>
+                    <th>Translation</th>
                 </tr>
             </thead>
         {% for clip in clips %}
             <tr>
+                <td><a href="{% url 'audio:audio-detail' clip.id %}">{{ clip.title }}</a></td>
                 <td><a href="{% url 'dialects:dialect-detail' clip.dialect__id %}">{{ clip.dialect__name }}</a></td>
-                <td>
-                  <a href="{% url 'audio:audio-detail' clip.id %}">{{ clip.title }}</a>
-                  {{ clip.transcript|yesno:"[transcript]," }}
-                  {{ clip.translation|yesno:"[translation]," }}
-                </td>
+                <td style="text-align: center;">{{ clip.transcript|yesno:"✔," }}</td>
+                <td style="text-align: center;">{{ clip.translation|yesno:"✔," }}</td>
             </tr>
         {% endfor %}
         </table>
