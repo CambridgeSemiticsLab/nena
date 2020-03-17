@@ -37,7 +37,9 @@ def chunk_translation_text(audio):
     else:
         text_chunks = (('(1@0:00)', audio.transcript, audio.translation),)
 
-    text_chunks = ((x.rstrip(')').lstrip('(0123456789').lstrip('@'),y,z) for x,y,z in text_chunks)
+    text_chunks = [[x.rstrip(')').lstrip('(0123456789').lstrip('@'),y,z] for x,y,z in text_chunks]
+
+    text_chunks[0][0] = text_chunks[0][0] or '0:00'
 
     return text_chunks
 

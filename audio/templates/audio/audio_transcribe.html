@@ -11,6 +11,9 @@
 
     <div class="sticky-bar">
       <button class="button play-button" data-action="play"><i class="material-icons">play_arrow</i></button>
+      {% if form %}
+      <div>Use backtick <a class="key">`</a> and escape <a class="key">Esc</a> keys to play and pause while editing section</div>
+      {% endif %}
       <div id="waveform"></div>
       <div id="playback-time">0:00</div>
     </div>
@@ -20,7 +23,7 @@
       <table class="translation_table">
       <thead>
       <tr>
-        <td><h2>Section</h2></td>
+        <td><h2></h2></td>
         <td><h2>Transcript</h2></td>
         <td><h2>Translation</h2></td>
       </tr>
@@ -102,6 +105,7 @@
       z-index: 11;
     }
     .play-button {
+      position: relative;
       display: inline-block;
       width: 2.6em;
       height: 2.6em;
@@ -110,7 +114,33 @@
       vertical-align: middle;
       text-align: center;
       padding: 0.5em 0;
+      z-index: 7;
     }
+    .play-button + div {
+      display: none;
+      position: absolute;
+      left: 2em;
+      top: 3.8em;
+      background: #d18f00;
+      padding: 0.3em 1em 0.3em 2em;
+      color: white;
+      z-index: 6;
+    }
+    .play-button:hover + div {display: block;}
+    .play-button + div .key {
+      background-color: #eee;
+      color: black;
+      font-size: 0.8em;
+      padding: 0.1em;
+      border-radius: 0.2em;
+      box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+      width: 2em;
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+    }
+
+
     #playback-time {
       position:absolute;
       bottom: 0.5em;
@@ -167,7 +197,7 @@
     }
 
     .translation_table tr > td:nth-child(1) {
-      width: 15%;
+      width: 10%;
     }
     .translation_table td {
       width: auto;
@@ -207,6 +237,10 @@
       }
       return false;
     }
+    function seconds_to_time_string(seconds){
+      // takes int(83) and returns str("1:23")
+      return parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0');
+    }
 
     function set_now_playing(row){
       $('.now-playing').removeClass('now-playing');
@@ -225,6 +259,7 @@
     }
 
     function get_start_end_seconds(row){
+      region_buffer = 0.1 // a fraction of a second buffer to prevent end of one region from spilling into the next
       start_seconds = time_string_to_seconds(row.find('.time-code').val());
       next_time_code = false;
       row.nextAll().find('.time-code').each(function(){
@@ -233,7 +268,7 @@
           return false;
         }
       });
-      end_seconds = next_time_code ? time_string_to_seconds(next_time_code) : wavesurfer.getDuration();
+      end_seconds = next_time_code ? time_string_to_seconds(next_time_code) - region_buffer : wavesurfer.getDuration();
       return [start_seconds, end_seconds];
     }
 
@@ -251,6 +286,11 @@
       $('[name="translation"]').val(compile_raw_text(2));
     }
 
+    $.fn.focusEnd = function(){
+      $(this)[0].selectionStart = $(this).val().length;
+      return $(this).focus();
+    }
+
     $(function(){
       // expand textareas to fit contents
       $('body').on('keyup', 'textarea', function(){
@@ -258,6 +298,7 @@
         if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
       })
       $('textarea').trigger('keyup');
+      $('textarea').eq(1).focusEnd();
 
       // form compilation and saving
       $('.transcribe_form').on('submit', compile_raw_texts)
@@ -292,14 +333,14 @@
       });
       window.setInterval(function(){
         time = wavesurfer.getCurrentTime();
-        $('#playback-time').html(parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0'));
+        $('#playback-time').html(seconds_to_time_string(time));
 
        $($('tbody tr').get().reverse()).each(function(){
         time_code = $(this).find('.time-code').val();
         if(!time_code){
           return;
         }
-        if(time_string_to_seconds(time_code) < time){
+        if(time_string_to_seconds(time_code) <= time){
           set_now_playing($(this));
           return false;
         }
@@ -311,7 +352,24 @@
       $('.translation_table').on('mouseup', 'textarea:disabled', function(){
         $row = $(this).parents('tr').eq(0);
         [start_seconds, end_seconds] = get_start_end_seconds($row);
-        wavesurfer.play(start_seconds, end_seconds);
+        if(start_seconds !== false){
+          wavesurfer.play(start_seconds, end_seconds);
+        }
+      });
+
+      // playback for editing
+      $('.translation_table').on('focus', 'textarea', function(){
+        $row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds($row);
+        if(start_seconds !== false){
+          current_time = wavesurfer.getCurrentTime();
+          if(wavesurfer.isPlaying() && current_time >= start_seconds && current_time <= end_seconds){
+            // don't jump the time around if we're already playing the section in focus
+          }else{
+            wavesurfer.setCurrentTime(start_seconds);
+          }
+        }
+        wavesurfer.setPlayEnd(end_seconds);
       });
 
       // keyboard shortcuts for non-keyboard characters (eg. ā ă á à e ə ē ī ð ū č ḍ ṭ ṣ š ḥ ʦ ʣ θ ṛ ʾ ʿ)
@@ -324,9 +382,28 @@
 
       $('body').on('keydown', 'textarea', function(e){
         chosen_key   = e.key;
+        //console.log(chosen_key);
         last_char    = $(this).val().charAt(this.selectionStart-1);
         $current_row = $(this).parents('tr').eq(0);
         textarea_idx = $current_row.find('textarea').index($(this))
+        set_now_playing($current_row);
+
+        if(chosen_key == '`'){
+          [start_seconds, end_seconds] = get_start_end_seconds($current_row);
+          wavesurfer.play(start_seconds, end_seconds);
+          return false;
+        }
+
+        if(chosen_key == 'Escape'){
+          wavesurfer.pause();
+          if($current_row.next()){
+            $next_time_code = $current_row.next().find('.time-code').eq(0);
+            if(!$next_time_code.val()){
+              $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()))
+            }
+          }
+          return false;
+        }
 
         if(chosen_key == 'Enter' && last_char == '\n'){
           blank_row = $($('.blank_row').eq(0)[0].outerHTML);
@@ -337,8 +414,7 @@
 
         if(chosen_key == 'Backspace' && $(this).val() == ''){
           $prev_textarea = $current_row.prev().find('textarea').eq(textarea_idx);
-          $prev_textarea[0].selectionStart = $prev_textarea.val().length;
-          $prev_textarea.focus();
+          $prev_textarea.focusEnd();
           $current_row.remove();
           return false;
         }
