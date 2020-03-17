@@ -14,7 +14,7 @@
       {% if form %}
       <div class="tip">Use backtick <a class="key">`</a> and escape <a class="key">Esc</a> keys to play and pause while editing section</div>
       {% endif %}
-      <div id="waveform"></div>
+      <div id="waveform" class="loading"></div>
       <div id="playback-time">0:00</div>
     </div>
 
@@ -147,8 +147,6 @@
       text-align: center;
       text-decoration: none;
     }
-
-
     #playback-time {
       position:absolute;
       bottom: 0.5em;
@@ -163,6 +161,15 @@
       display: inline-block;
       width: 90%;
       vertical-align: middle;
+    }
+    #waveform.loading:before {
+      content: 'loading audio...';
+      position: absolute;
+      width: 100%;
+      top: 45%;
+      font-size: 3em;
+      text-align: center;
+      color: #aaa;
     }
 
     .translation_table {
@@ -253,17 +260,25 @@
     function set_now_playing(row){
       $('.now-playing').removeClass('now-playing');
       row.addClass('now-playing');
-
       [start_seconds, end_seconds] = get_start_end_seconds(row);
-      wavesurfer.clearRegions();
-      wavesurfer.addRegion({
-        start: start_seconds,
-        end: end_seconds,
-        color: "rgba(200, 230, 255, 0.4)",
-        drag: false,
-        resize: false,
-        loop: false,
-      });
+
+      region = false;
+      for(i in wavesurfer.regions.list){
+        region = wavesurfer.regions.list[i];
+      }
+      if(region && region.start == start_seconds && region.end == end_seconds){
+        // don't recreate region
+      }else{
+        wavesurfer.clearRegions();
+        wavesurfer.addRegion({
+          start: start_seconds,
+          end: end_seconds,
+          color: "rgba(200, 230, 255, 0.4)",
+          drag: false,
+          resize: false,
+          loop: false,
+        });
+      }
     }
 
     function get_start_end_seconds(row){
@@ -300,6 +315,8 @@
     }
 
     $(function(){
+      $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
+
       // expand textareas to fit contents
       $('body').on('keyup', 'textarea', function(){
         elem = $(this)[0]
@@ -338,6 +355,9 @@
       });
       wavesurfer.on('play', function () {
         button.innerHTML = '<i class="material-icons">pause</i>';
+      });
+      wavesurfer.on('ready', function () {
+        $('#waveform').removeClass('loading');
       });
       window.setInterval(function(){
         time = wavesurfer.getCurrentTime();
@@ -404,19 +424,20 @@
 
         if(chosen_key == 'Escape'){
           wavesurfer.pause();
-          if($current_row.next()){
-            $next_time_code = $current_row.next().find('.time-code').eq(0);
-            if(!$next_time_code.val()){
-              $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()))
-            }
+          if(!$current_row.next().length){
+            $current_row.after($blank_row.clone());
+          }
+          $next_time_code = $current_row.next().find('.time-code').eq(0);
+          if(!$next_time_code.val()){
+            $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()))
           }
           return false;
         }
 
         if(chosen_key == 'Enter' && last_char == '\n'){
-          blank_row = $($('.blank_row').eq(0)[0].outerHTML);
-          $current_row.after(blank_row);
-          blank_row.find('textarea').eq(textarea_idx).focus();
+          $new_row = $blank_row.clone()
+          $current_row.after($new_row);
+          $new_row.find('textarea').eq(textarea_idx).focus();
           return false;
         }
 
