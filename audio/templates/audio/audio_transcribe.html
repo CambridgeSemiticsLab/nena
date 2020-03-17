@@ -37,9 +37,7 @@
       {% if form %}
       <tfoot>
         <tr>
-          <td>
-            <a class="button" onclick="$('tbody').append($('.blank_row').eq(0)[0].outerHTML)">Add section</a>
-          </td>
+          <td></td>
           <td colspan=2>
             <i class="material-icons">info</i>
             use 'Alt' + keyboard character to cycle through alternative characters (Alt+'a' &rarr; ă)
@@ -185,6 +183,21 @@
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
   <script charset="utf-8">
     var wavesurfer;
+    var alt_characters = {
+      'a': 'āăáà',
+      'e': 'əē',
+      'i': 'ī',
+      'o': 'ð',
+      'u': 'ū',
+      'c': 'č',
+      'd': 'ḍʣ',
+      'h': 'ḥ',
+      'r': 'ṛ',
+      's': 'ṣšʦθ',
+      't': 'ṭʦ',
+      "'": "ʾʿ",
+    }
+
     function time_string_to_seconds(time_string){
       // takes str("1:23") and returns int(83)
       if(matches = time_string.match(/@(\d+):(\d+)/))
@@ -290,8 +303,8 @@
 
       // playback for viewing not editing
       $('.translation_table').on('mouseup', 'textarea:disabled', function(){
-        row = $(this).parents('tr').eq(0);
-        [start_seconds, end_seconds] = get_start_end_seconds(row);
+        $row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds($row);
         wavesurfer.play(start_seconds, end_seconds);
       });
 
@@ -302,35 +315,40 @@
         input.selectionStart = start + string.length;
         input.selectionEnd = start + string.length;
       }
-      $('body').on('keydown', 'textarea.aramaic', function(e){
-        alternatives = {
-          'a': 'āăáà',
-          'e': 'əē',
-          'i': 'ī',
-          'o': 'ð',
-          'u': 'ū',
-          'c': 'č',
-          'd': 'ḍʣ',
-          'h': 'ḥ',
-          'r': 'ṛ',
-          's': 'ṣšʦθ',
-          't': 'ṭʦ',
-          "'": "ʾʿ",
+
+      $('body').on('keydown', 'textarea', function(e){
+        chosen_key   = e.key;
+        last_char    = $(this).val().charAt(this.selectionStart-1);
+        $current_row = $(this).parents('tr').eq(0);
+        textarea_idx = $current_row.find('textarea').index($(this))
+
+        if(chosen_key == 'Enter' && last_char == '\n'){
+          blank_row = $($('.blank_row').eq(0)[0].outerHTML);
+          $current_row.after(blank_row);
+          blank_row.find('textarea').eq(textarea_idx).focus();
+          return false;
         }
 
-        chosen_key = e.key;
-        last_char  = $(this).val().charAt(this.selectionStart-1);
+        if(chosen_key == 'Backspace' && $(this).val() == ''){
+          $prev_textarea = $current_row.prev().find('textarea').eq(textarea_idx);
+          $prev_textarea[0].selectionStart = $prev_textarea.val().length;
+          $prev_textarea.focus();
+          $current_row.remove();
+          return false;
+        }
+
         if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
           // alt+arrow just cycles the last character
-          for(i in alternatives){
-            if(i == last_char || alternatives[i].indexOf(last_char) >= 0){
+          for(i in alt_characters){
+            if(i == last_char || alt_characters[i].indexOf(last_char) >= 0){
               chosen_key = i;
               break;
             }
           }
         }
-        if(e.altKey && chosen_key in alternatives) {
-          alts = chosen_key + alternatives[chosen_key]
+
+        if(e.altKey && chosen_key in alt_characters) {
+          alts = chosen_key + alt_characters[chosen_key]
           idx = alts.indexOf(last_char);
           replace_length = idx < 0 ? 0 : 1;
           simulate_typing_string(this, alts[(idx+1)%alts.length], replace_length);
