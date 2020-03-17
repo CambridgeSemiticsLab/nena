@@ -9,10 +9,10 @@
   <div class="campl-content-container">
 
 
-    <div class="sticky-bar">
+    <div class="sticky-top-bar">
       <button class="button play-button" data-action="play"><i class="material-icons">play_arrow</i></button>
       {% if form %}
-      <div>Use backtick <a class="key">`</a> and escape <a class="key">Esc</a> keys to play and pause while editing section</div>
+      <div class="tip">Use backtick <a class="key">`</a> and escape <a class="key">Esc</a> keys to play and pause while editing section</div>
       {% endif %}
       <div id="waveform"></div>
       <div id="playback-time">0:00</div>
@@ -37,25 +37,23 @@
         </tr>
         {% endfor %}
       </tbody>
-      {% if form %}
       <tfoot>
-        <tr>
-          <td></td>
-          <td colspan=2>
-            <i class="material-icons">info</i>
-            use 'Alt' + keyboard character to cycle through alternative characters (Alt+'a' &rarr; ă)
-            <input class="button" type="submit" value="Save" style="float:right;"/>
-            <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}" style="float:right;">Cancel</a>
-          </td>
-        </tr>
         <tr class="blank_row">
           <td><textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea></td>
           <td><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
           <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
         </tr>
       </tfoot>
-      {% endif%}
       </table>
+
+      {% if form %}
+      <div class="sticky-bottom-bar">
+        <i class="material-icons">info</i>
+        use 'Alt' + keyboard character to cycle through alternative characters (Alt+'a' &rarr; ă)
+        <input class="button" type="submit" value="Save" style="float:right;"/>
+        <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}" style="float:right;">Cancel</a>
+      </div>
+      {% endif%}
 
       <br>
       <br>
@@ -97,12 +95,22 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     .material-icons { vertical-align: middle; }
-    .sticky-bar {
+    .sticky-top-bar {
       position:sticky;
       top: 0;
       background-color: #f7f4ed;
       padding: 0.5em 0;
       z-index: 11;
+    }
+    .sticky-bottom-bar {
+      position:sticky;
+      bottom: -2em;
+      background-color: #f7f4ed;
+      padding: 0.5em 0 1em;
+      z-index: 11;
+    }
+    .sticky-bottom-bar:hover {
+      bottom: 0;
     }
     .play-button {
       position: relative;
@@ -116,7 +124,7 @@
       padding: 0.5em 0;
       z-index: 7;
     }
-    .play-button + div {
+    .play-button + .tip {
       display: none;
       position: absolute;
       left: 2em;
@@ -126,8 +134,8 @@
       color: white;
       z-index: 6;
     }
-    .play-button:hover + div {display: block;}
-    .play-button + div .key {
+    .play-button:hover + .tip {display: block;}
+    .play-button + .tip .key {
       background-color: #eee;
       color: black;
       font-size: 0.8em;
