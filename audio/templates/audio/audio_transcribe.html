@@ -29,7 +29,7 @@
         {% for heading, transcript_chunk, translation_chunk in text_chunks %}
         <tr>
           <td><textarea {{form|yesno:',disabled'}} class="time-code">{{heading|safe}}</textarea></td>
-          <td><textarea {{form|yesno:',disabled'}} class="aramaic">{{transcript_chunk|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
         </tr>
         {% endfor %}
@@ -41,13 +41,15 @@
             <a class="button" onclick="$('tbody').append($('.blank_row').eq(0)[0].outerHTML)">Add section</a>
           </td>
           <td colspan=2>
-            <input class="button" type="submit" value="Save" />
-            <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}">Cancel</a>
+            <i class="material-icons">info</i>
+            use 'Alt' + keyboard character to cycle through alternative characters (Alt+'a' &rarr; ă)
+            <input class="button" type="submit" value="Save" style="float:right;"/>
+            <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}" style="float:right;">Cancel</a>
           </td>
         </tr>
         <tr class="blank_row">
           <td><textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea></td>
-          <td><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic"></textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
           <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
         </tr>
       </tfoot>
@@ -93,6 +95,7 @@
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
+    .material-icons { vertical-align: middle; }
     .sticky-bar {
       position:sticky;
       top: 0;
@@ -292,6 +295,49 @@
         wavesurfer.play(start_seconds, end_seconds);
       });
 
+      // keyboard shortcuts for non-keyboard characters (eg. ā ă á à e ə ē ī ð ū č ḍ ṭ ṣ š ḥ ʦ ʣ θ ṛ ʾ ʿ)
+      function simulate_typing_string(input, string, replace_last_n_chars = 0){
+        start = input.selectionStart - replace_last_n_chars;
+        $(input).val($(input).val().slice(0, start) + string + $(input).val().slice(input.selectionEnd));
+        input.selectionStart = start + string.length;
+        input.selectionEnd = start + string.length;
+      }
+      $('body').on('keydown', 'textarea.aramaic', function(e){
+        alternatives = {
+          'a': 'āăáà',
+          'e': 'əē',
+          'i': 'ī',
+          'o': 'ð',
+          'u': 'ū',
+          'c': 'č',
+          'd': 'ḍʣ',
+          'h': 'ḥ',
+          'r': 'ṛ',
+          's': 'ṣšʦθ',
+          't': 'ṭʦ',
+          "'": "ʾʿ",
+        }
+
+        chosen_key = e.key;
+        last_char  = $(this).val().charAt(this.selectionStart-1);
+        if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
+          // alt+arrow just cycles the last character
+          for(i in alternatives){
+            if(i == last_char || alternatives[i].indexOf(last_char) >= 0){
+              chosen_key = i;
+              break;
+            }
+          }
+        }
+        if(e.altKey && chosen_key in alternatives) {
+          alts = chosen_key + alternatives[chosen_key]
+          idx = alts.indexOf(last_char);
+          replace_length = idx < 0 ? 0 : 1;
+          simulate_typing_string(this, alts[(idx+1)%alts.length], replace_length);
+          e.preventDefault();
+          return false;
+        }
+      })
     })
   </script>
 
