@@ -431,11 +431,14 @@
 
       $('body').on('keydown', 'textarea', function(e){
         chosen_key   = e.key;
-        //console.log(chosen_key);
         last_char    = $(this).val().charAt(this.selectionStart-1);
+        //console.log(last_char);
         $current_row = $(this).parents('tr').eq(0);
         textarea_idx = $current_row.find('textarea').index($(this))
-        set_now_playing($current_row);
+
+        if($current_row.find('.time-code').val()){
+          set_now_playing($current_row);
+        }
 
         if(chosen_key == '`'){
           [start_seconds, end_seconds] = get_start_end_seconds($current_row);
@@ -456,15 +459,36 @@
         }
 
         if(chosen_key == 'Enter' && last_char == '\n'){
-          $new_row = $blank_row.clone()
+          val = $(this).val();
+          cusor_position = this.selectionStart;
+          $(this).val(val.slice(0, cusor_position - 1));
+          $(this).css('height', '1px').trigger('keyup');
+          $new_row = $blank_row.clone();
           $current_row.after($new_row);
-          $new_row.find('textarea').eq(textarea_idx).focus();
+          $new_textarea = $new_row.find('textarea').eq(textarea_idx)
+          $new_textarea.focus().val(val.slice(cusor_position));
+          $new_textarea[0].selectionStart = 0;
+          $new_textarea[0].selectionEnd = 0;
           return false;
         }
 
-        if(chosen_key == 'Backspace' && $(this).val() == ''){
-          $prev_textarea = $current_row.prev().find('textarea').eq(textarea_idx);
-          $prev_textarea.focusEnd();
+
+        if(chosen_key == 'Backspace' && last_char == '' && $current_row.prev().length){
+          // merge textarea contents back into previous textareas
+          $prev_textareas = $current_row.prev().find('textarea:not(.time-code)');
+
+          $current_row.find('textarea:not(.time-code)').each(function(idx){
+            $prev_textarea = $prev_textareas.eq(idx)
+            prev_val = $prev_textarea.val();
+            $prev_textarea.val(prev_val + '\n' + $(this).val());
+            if($(this).is(':focus')){
+              $prev_textarea.focus();
+              $prev_textarea[0].selectionStart = prev_val.length + 1;
+              $prev_textarea[0].selectionEnd = prev_val.length + 1;
+            }
+            $prev_textarea.trigger('keyup');
+          })
+
           $current_row.remove();
           return false;
         }
