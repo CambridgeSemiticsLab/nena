@@ -12,7 +12,7 @@
     <div class="sticky-top-bar">
       <button class="button play-button" data-action="play"><i class="material-icons">play_arrow</i></button>
       {% if form %}
-      <div class="tip">Use backtick <a class="key">`</a> and escape <a class="key">Esc</a> keys to play and pause while editing section</div>
+      <div class="tip">Use backtick <a class="key_icon">`</a> and escape <a class="key_icon">Esc</a> keys to play and pause while editing section</div>
       {% endif %}
       <div id="waveform" class="loading"></div>
       <div id="playback-time">0:00</div>
@@ -49,7 +49,9 @@
       {% if form %}
       <div class="sticky-bottom-bar">
         <i class="material-icons">info</i>
-        use 'Alt' + keyboard character to cycle through alternative characters (Alt+'a' &rarr; ă)
+        use <a class="key_icon">Alt</a> + letter key to cycle through alternative characters
+        e.g. <a class="key_icon">Alt</a> + <a class="key_icon">a</a> &rarr; <a class="key_icon">ă</a>,
+        <a class="key_icon">Alt</a> + <a class="key_icon">t</a> &rarr; <a class="key_icon">ʦ</a>
         <input class="button" type="submit" value="Save" style="float:right;"/>
         <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}" style="float:right;">Cancel</a>
       </div>
@@ -135,13 +137,13 @@
       z-index: 6;
     }
     .play-button:hover + .tip {display: block;}
-    .play-button + .tip .key {
+    .key_icon {
       background-color: #eee;
       color: black;
       font-size: 0.8em;
       padding: 0.1em;
       border-radius: 0.2em;
-      box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
       width: 2em;
       display: inline-block;
       text-align: center;
