@@ -99,6 +99,7 @@
       top: 0;
       background-color: #f7f4ed;
       padding: 0.5em 0;
+      z-index: 11;
     }
     .play-button {
       display: inline-block;
@@ -112,7 +113,7 @@
     }
     #playback-time {
       position:absolute;
-      bottom:0;
+      bottom: 0.5em;
       left: 0;
       width: 3.4em;
       text-align: center;
@@ -200,7 +201,7 @@
 
     function time_string_to_seconds(time_string){
       // takes str("1:23") and returns int(83)
-      if(matches = time_string.match(/@(\d+):(\d+)/))
+      if(matches = time_string.match(/(\d+):(\d+)/))
       {
         return matches[1]*60 + matches[2]*1;
       }
@@ -225,27 +226,29 @@
 
     function get_start_end_seconds(row){
       start_seconds = time_string_to_seconds(row.find('.time-code').val());
-      if(row.next().length){
-        end_seconds = time_string_to_seconds(row.next().find('.time-code').val());
-      }else{
-        end_seconds = wavesurfer.getDuration();
-      }
+      next_time_code = false;
+      row.nextAll().find('.time-code').each(function(){
+        if($(this).val()){
+          next_time_code = $(this).val();
+          return false;
+        }
+      });
+      end_seconds = next_time_code ? time_string_to_seconds(next_time_code) : wavesurfer.getDuration();
       return [start_seconds, end_seconds];
     }
 
-    function compile_raw_texts(){
-      form = $('.transcribe_form').eq(0)
-      transcript_bits = form.find('tbody tr').map(function(){
-        tas = $(this).find('textarea');
-        return tas.eq(0).val() + tas.eq(1).val()
+    function compile_raw_text(textarea_idx){
+      transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
+        textareas = $(this).find('textarea');
+        timecode = textareas.eq(0).val() ? '@' + textareas.eq(0).val() : '';
+        return `(${idx+1}${timecode})` + textareas.eq(textarea_idx).val();
       }).get()
-      $('[name="transcript"]').val(transcript_bits.join(''))
+      return transcript_bits.join('');
+    }
 
-      translation_bits = form.find('tbody tr').map(function(){
-        tas = $(this).find('textarea');
-        return tas.eq(0).val() + tas.eq(2).val()
-      }).get()
-      $('[name="translation"]').val(translation_bits.join(''))
+    function compile_raw_texts(){
+      $('[name="transcript"]').val(compile_raw_text(1));
+      $('[name="translation"]').val(compile_raw_text(2));
     }
 
     $(function(){
@@ -292,8 +295,11 @@
         $('#playback-time').html(parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0'));
 
        $($('tbody tr').get().reverse()).each(function(){
-        time_code = $(this).find('.time-code').val()
-        if(time_code && time_string_to_seconds(time_code) < time){
+        time_code = $(this).find('.time-code').val();
+        if(!time_code){
+          return;
+        }
+        if(time_string_to_seconds(time_code) < time){
           set_now_playing($(this));
           return false;
         }
