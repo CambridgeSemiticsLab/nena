@@ -5,7 +5,13 @@ WORKDIR /usr/src/app
 # Install additional Debian packages
 RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
         vim python3 python3-pip python3-dev default-libmysqlclient-dev \
-        openssl libssl-dev libjpeg-dev zlib1g-dev
+        openssl libssl-dev libjpeg-dev zlib1g-dev wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# download the cloudsql proxy
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /usr/src/app/cloud_sql_proxy
+# make cloudsql proxy executable
+RUN chmod +x /usr/src/app/cloud_sql_proxy
 
 # Copy MWS webapp
 COPY . /usr/src/app
@@ -24,4 +30,4 @@ ENV DJANGO_SETTINGS_MODULE=common.settings.local \
     DJANGO_READ_DOT_ENV_FILE=True
 
 EXPOSE 8000
-CMD ["sh", "-c", "/usr/local/bin/gunicorn --bind=0.0.0.0:8000 common.wsgi --reload"]
+CMD ["run.sh"]
