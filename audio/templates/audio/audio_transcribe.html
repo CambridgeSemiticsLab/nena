@@ -42,7 +42,7 @@
         {% for heading, transcript_chunk, translation_chunk in text_chunks %}
         <tr>
           <td><textarea {{form|yesno:',disabled'}} class="time-code">{{heading|safe}}</textarea></td>
-          <td><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
         </tr>
         {% endfor %}
@@ -50,7 +50,7 @@
       <tfoot>
         <tr class="blank_row">
           <td><textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea></td>
-          <td><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
           <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
         </tr>
       </tfoot>
@@ -198,13 +198,20 @@
       border-bottom-width: 0!important;
       margin-top: 2em;
     }
-    .translation_table td {
+    .translation_table thead td {
       padding: 0.5em;
+      background-color: white;
+    }
+    .translation_table tbody td {
+      padding: 0;
+      position: relative;
+      background-color: white;
     }
     .transcribe_form tbody, .transcribe_form thead {
       background-color: white;
     }
-    .transcribe_form textarea {
+    .transcribe_form textarea,
+    .transcribe_form .overlay {
       width: 100%;
       height: 100%;
       min-height: 3em;
@@ -212,9 +219,12 @@
       font-size: 1.3em;
       line-height: 1.5em;
       margin: 0!important;
-      background-color: white;
+      background-color: transparent;
       border-width: 0;
       resize: none;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+
     }
     .transcribe_form textarea:disabled {
       cursor: text;
@@ -223,7 +233,22 @@
       cursor: pointer;
     }
 
-    .translation_table tr.now-playing * {
+    .transcribe_form .overlay {
+      position: absolute;
+      background-color: transparent;
+      pointer-events: none;
+      color: rgba(255,255,0,0.0);
+    }
+    .transcribe_form .overlay .error,
+    .transcribe_form .overlay .word {
+      pointer-events: none;
+      display: inline-block;
+      position: relative;
+    }
+    .transcribe_form .overlay .error { background-color: rgba(255, 0, 0, 0.2);}
+    .transcribe_form .overlay .word  { background-color: rgba(0, 255, 0, 0.0);}
+
+    .translation_table tr.now-playing td {
       background-color: #cef;
     }
 
@@ -248,22 +273,8 @@
   <script src="https://unpkg.com/wavesurfer.js@3.3.1/dist/wavesurfer.js"></script>
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.min.js"></script>
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
-  <script charset="utf-8">
+  <script charset="utf-8"> // wavesurfer stuff
     var wavesurfer;
-    var alt_characters = {
-      'a': 'āăáàắ',
-      'e': 'əē',
-      'i': 'ī',
-      'o': 'ð',
-      'u': 'ū',
-      'c': 'č',
-      'd': 'ḍʣ',
-      'h': 'ḥ',
-      'r': 'ṛ',
-      's': 'ṣšʦθ',
-      't': 'ṭʦ',
-      "'": "ʾʿ",
-    }
 
     function time_string_to_seconds(time_string){
       // takes str("1:23") and returns int(83)
@@ -273,12 +284,16 @@
       }
       return false;
     }
+
     function seconds_to_time_string(seconds){
       // takes int(83) and returns str("1:23")
       return parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0');
     }
 
     function set_now_playing(row){
+      if(row.hasClass('now-playing')){
+        return;
+      }
       $('.now-playing').removeClass('now-playing');
       row.addClass('now-playing');
       [start_seconds, end_seconds] = get_start_end_seconds(row);
@@ -316,40 +331,8 @@
       return [start_seconds, end_seconds];
     }
 
-    function compile_raw_text(textarea_idx){
-      transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
-        textareas = $(this).find('textarea');
-        timecode = textareas.eq(0).val() ? '@' + textareas.eq(0).val() : '';
-        return `(${idx+1}${timecode})` + textareas.eq(textarea_idx).val();
-      }).get()
-      return transcript_bits.join('');
-    }
-
-    function compile_raw_texts(){
-      $('[name="transcript"]').val(compile_raw_text(1));
-      $('[name="translation"]').val(compile_raw_text(2));
-    }
-
-    $.fn.focusEnd = function(){
-      $(this)[0].selectionStart = $(this).val().length;
-      return $(this).focus();
-    }
 
     $(function(){
-      $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
-
-      // expand textareas to fit contents
-      $('body').on('keyup', 'textarea', function(){
-        elem = $(this)[0]
-        if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
-      })
-      $('textarea').trigger('keyup');
-      $('textarea').eq(1).focusEnd();
-
-      // form compilation and saving
-      $('.transcribe_form').on('submit', compile_raw_texts)
-      $('.compile').on('click', compile_raw_texts);
-
       // audio visualisation
       wavesurfer = WaveSurfer.create({
           container: '#waveform',
@@ -421,6 +404,76 @@
         wavesurfer.setPlayEnd(end_seconds);
       });
 
+    })
+  </script>
+  <script charset="utf-8"> // text management stuff
+    var alt_characters = {
+      'a': 'āăáàắ',
+      'e': 'əē',
+      'i': 'ī',
+      'o': 'ð',
+      'u': 'ū',
+      'c': 'č',
+      'd': 'ḍʣ',
+      'h': 'ḥ',
+      'r': 'ṛ',
+      's': 'ṣšʦθ',
+      't': 'ṭʦ',
+      "'": "ʾʿ",
+    };
+
+    function compile_raw_text(textarea_idx){
+      transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
+        textareas = $(this).find('textarea');
+        timecode = textareas.eq(0).val() ? '@' + textareas.eq(0).val() : '';
+        return `(${idx+1}${timecode})` + textareas.eq(textarea_idx).val();
+      }).get()
+      return transcript_bits.join('');
+    }
+
+    function compile_raw_texts(){
+      $('[name="transcript"]').val(compile_raw_text(1));
+      $('[name="translation"]').val(compile_raw_text(2));
+    }
+
+    $.fn.focusEnd = function(){
+      $(this)[0].selectionStart = $(this).val().length;
+      return $(this).focus();
+    }
+
+    $(function(){
+      $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
+
+      // expand textareas to fit contents
+      $('body').on('keyup', 'textarea', function(){
+        elem = $(this)[0]
+        if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
+      })
+      window.setTimeout(function(){$('textarea').trigger('keyup')}, 10);
+      $('textarea').eq(1).focusEnd();
+
+      // form compilation and saving
+      $('.transcribe_form').on('submit', compile_raw_texts)
+      $('.compile').on('click', compile_raw_texts);
+
+
+      // keep overlays up to date with their textareas
+      $('body').on('change keyup', 'textarea', function(e){
+        let val = $(this).val()
+        start_word  = '[word['
+        start_error = '[error['
+        end_delim   = ']]]'
+        val = val.replace(/([\s-]+)/g, end_delim+'$1'+start_word);
+        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[]+)/g, start_error+'$1'+end_delim);
+        val = val.replace(/\n/g, '<br>');
+        val = val.replace(/ /g, '&nbsp;');
+        val = start_word + val + end_delim;
+        val = val.split(start_word).join('<span class="word">');
+        val = val.split(start_error).join('<span class="error">');
+        val = val.split(end_delim).join('</span>');
+        $(this).siblings('.overlay').html(val);
+      })
+
       // keyboard shortcuts for non-keyboard characters (eg. ā ă á à e ə ē ī ð ū č ḍ ṭ ṣ š ḥ ʦ ʣ θ ṛ ʾ ʿ)
       function simulate_typing_string(input, string, replace_last_n_chars = 0){
         start = input.selectionStart - replace_last_n_chars;
@@ -429,6 +482,7 @@
         input.selectionEnd = start + string.length;
       }
 
+      // keyboard management for textareas
       $('body').on('keydown', 'textarea', function(e){
         chosen_key   = e.key;
         last_char    = $(this).val().charAt(this.selectionStart-1);
@@ -459,7 +513,7 @@
         }
 
         if(chosen_key == 'Enter' && last_char == '\n'){
-          val = $(this).val();
+          let val = $(this).val();
           cusor_position = this.selectionStart;
           $(this).val(val.slice(0, cusor_position - 1));
           $(this).css('height', '1px').trigger('keyup');
@@ -471,7 +525,6 @@
           $new_textarea[0].selectionEnd = 0;
           return false;
         }
-
 
         if(chosen_key == 'Backspace' && last_char == '' && $current_row.prev().length){
           // merge textarea contents back into previous textareas
@@ -512,7 +565,9 @@
           return false;
         }
       })
-    })
+
+    });
   </script>
+
 
 {% endblock %}
