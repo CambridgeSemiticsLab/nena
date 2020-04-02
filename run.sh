@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Start the proxy
-/usr/src/cloud_sql_proxy -instances=$CLOUDSQL_INSTANCE=tcp:$DJANGO_DB_PORT -credential_file=/usr/src/app/database/nena-272815-d640c78bedfb.json &
+/usr/src/cloud_sql_proxy -instances=$CLOUDSQL_INSTANCE=tcp:$DJANGO_DB_PORT -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 
 # wait for the proxy to spin up
 sleep 1

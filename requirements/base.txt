@@ -1,7 +1,7 @@
 Django~=2.1.0
 django-environ
 djangorestframework
-django-storages
+django-storages[google]
 django-treebeard
 django-imagekit==4.0.1
 django-ckeditor

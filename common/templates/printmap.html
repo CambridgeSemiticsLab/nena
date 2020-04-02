@@ -1,3 +1,4 @@
+{% load static %}
 <div id="map" style='min-height: 500px'></div>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
@@ -11,10 +12,10 @@
         }
     });
     var jewishIcon = new dialectIcon({iconUrl:
-    '/static/images/smalldot.png', shadowUrl: '/static/images/smalldotshadow.png'}),
+    '{% static "images/smalldot.png" %}', shadowUrl: '{% static "images/smalldotshadow.png" %}'}),
         christianIcon = new dialectIcon({iconUrl:
-        '/static/images/smallsquare.png', shadowUrl: '/static/images/smallsquareshadow.png'});
-   
+        '{% static "images/smallsquare.png" %}', shadowUrl: '{% static "images/smallsquareshadow.png" %}'});
+
     var dialects = [
         { "name": "Sulemaniyya", "lat": 35.55, "long": 45.44, "community": "Jewish" }, { "name": "Qaraqosh", "lat": 36.267, "long": 43.383, "community": "Christian" },
         { "name": "Alqosh", "lat": 36.735, "long": 43.096, "community": "Christian" }, { "name": "Peshabur", "lat": 37.068, "long": 42.458, "community": "Christian" },

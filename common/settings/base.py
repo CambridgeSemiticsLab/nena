@@ -134,30 +134,29 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = 'en-gb'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = str(BASE_DIR('static'))
-#STATICFILES_DIRS = (
-#    str(APPS_DIR.path('static')),
-#)
+DEFAULT_FILE_STORAGE = 'common.storage_backends.GoogleCloudMediaStorage'
+STATICFILES_STORAGE = 'common.storage_backends.GoogleCloudStaticStorage'
+GS_PROJECT_ID = env('GS_PROJECT_ID')
+GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
+GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
+GS_BASE_URL = env('GS_BASE_URL')
+STATIC_URL = '{}/{}/'.format(GS_BASE_URL, GS_STATIC_BUCKET_NAME)
+MEDIA_URL = '{}/{}/'.format(GS_BASE_URL, GS_MEDIA_BUCKET_NAME)
+
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-MEDIA_URL = '/media/'
-MEDIA_ROOT = str(APPS_DIR('media'))
 
 
 REST_FRAMEWORK = {
