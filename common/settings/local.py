@@ -18,7 +18,7 @@ DATABASES = {
         'USER': env('DJANGO_DB_DEFAULT_USER'),
         'PASSWORD': env('DJANGO_DB_DEFAULT_PASSWORD'),
         'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        'PORT': '3306',
+        'PORT': env('DJANGO_DB_PORT', default='3306'),
         'OPTIONS': {
             'init_command': 'SET default_storage_engine=INNODB;',
             'sql_mode': 'STRICT_TRANS_TABLES',

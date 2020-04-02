@@ -15,6 +15,8 @@ services:
       - db
     environment:
       - DJANGO_READ_DOT_ENV_FILE=True
+    env_file:
+      - .env
   db:
     image: mariadb:10.1
     expose:
