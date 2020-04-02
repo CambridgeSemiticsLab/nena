@@ -2,3 +2,4 @@
 mysqlclient
 gunicorn
 django-silk
+django-storages[google]

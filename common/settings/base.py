@@ -56,10 +56,8 @@ THIRD_PARTY_APPS = (
     'rest_framework',
     'django_filters',
     'widget_tweaks',
+    'storages',
 )
-
-if USE_AWS_S3:
-    THIRD_PARTY_APPS = THIRD_PARTY_APPS + ('storages',)
 
 LOCAL_APPS = (
     'common',
