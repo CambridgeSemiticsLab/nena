@@ -34,8 +34,6 @@ DATABASES = {
     },
 }
 
-DATABASE_ROUTERS = ['legacy.router.LegacyRouter']
-
 UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
 UCAMWEBAUTH_CERTS = {2: """

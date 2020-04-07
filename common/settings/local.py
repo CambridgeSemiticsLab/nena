@@ -24,28 +24,11 @@ DATABASES = {
             'sql_mode': 'STRICT_TRANS_TABLES',
         },
     },
-    # 'legacy': {
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': env('DJANGO_DB_LEGACY_NAME'),
-        # 'USER': env('DJANGO_DB_LEGACY_USER'),
-        # 'PASSWORD': env('DJANGO_DB_LEGACY_PASSWORD'),
-        # 'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        # 'PORT': '3306',
-        # 'OPTIONS': {
-            # 'sql_mode': 'STRICT_TRANS_TABLES',
-            # 'init_command': 'SET '
-                # 'storage_engine=INNODB,'
-                # 'character_set_connection=utf8,'
-                # 'collation_connection=utf8_bin'
-        # },
-    # },
 }
 
-DATABASE_ROUTERS = ['legacy.router.LegacyRouter']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

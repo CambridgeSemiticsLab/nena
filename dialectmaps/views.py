@@ -64,27 +64,3 @@ def entry_to_map_point(entry, focus=False):
         'focus':     focus,
     }
     return object_to_map_point(entry, properties=properties)
-
-
-class DialectMapListJSONView(ListView):
-    pass
-
-class DialectMapDetailJSONView(DetailView):
-
-    model = DialectMap
-
-    def get_context_data(self, **kwargs):
-        context = super(DialectMapDetailJSONView, self).get_context_data(**kwargs)
-        context['groups'] = MapGroup.objects.filter(dialectmap=self.kwargs['pk'])
-        context['items'] = MapItem.objects.filter(group__in=context['groups'])
-        return context
-
-    def render_to_response(self, context):
-        data = {'type': 'FeatureCollection'}
-        features = []
-        for d in context['items']:
-            if d.entry.feature.dialect.latitude and d.entry.feature.dialect.longitude:
-                features.append({"id": d.pk, "type": "Feature", "geometry": {"type": "Point", "coordinates": [d.entry.feature.dialect.longitude, d.entry.feature.dialect.latitude]}, "properties": {"name": d.entry.entry,  "class": d.group.label}})
-        data['features'] = features
-        return JsonResponse(data)
-

@@ -43,7 +43,6 @@ DJANGO_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
 )
 
@@ -52,17 +51,12 @@ THIRD_PARTY_APPS = (
     'imagekit',
     'ucamprojectlight',
     'ucamwebauth',
-    'ckeditor',
-    'rest_framework',
-    'django_filters',
-    'widget_tweaks',
     'storages',
+    'widget_tweaks',
 )
 
 LOCAL_APPS = (
     'common',
-    'legacy',
-    'api',
     'dialects',
     'grammar',
     'dialectmaps',
@@ -156,19 +150,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAdminUser',
-    ),
-#    'DEFAULT_FILTER_BACKENDS': (
-#        'django_filters.rest_framework.DjangoFilterBackend',
-#        'rest_framework.filters.OrderingFilter',
-#    ),
-}
 
 LAST_UPDATED_DATE = env('DJANGO_LAST_UPDATED_DATE', default='')
 GOOGLE_ANALYTICS_REFERENCE = env('DJANGO_GOOGLE_ANALYTICS_REFERENCE', default=None)
