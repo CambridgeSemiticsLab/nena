@@ -1,4 +1,4 @@
-FROM python:3.5-slim
+FROM python:3.8-slim
 
 WORKDIR /usr/src/app
 
@@ -21,5 +21,5 @@ RUN pip install --upgrade -r requirements/local.txt --no-cache-dir
 
 COPY . /usr/src/app
 
-EXPOSE 8000
+EXPOSE 80
 CMD ["/usr/src/app/run.sh"]

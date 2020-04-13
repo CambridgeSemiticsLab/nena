@@ -134,16 +134,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-DEFAULT_FILE_STORAGE = 'common.storage_backends.GoogleCloudMediaStorage'
-STATICFILES_STORAGE = 'common.storage_backends.GoogleCloudStaticStorage'
-GS_PROJECT_ID = env('GS_PROJECT_ID')
-GS_BUCKET_NAME = env('GS_BUCKET_NAME')
-GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
-GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
-GS_BASE_URL = env('GS_BASE_URL')
-STATIC_URL = '{}/{}/'.format(GS_BASE_URL, GS_STATIC_BUCKET_NAME)
-MEDIA_URL = '{}/{}/'.format(GS_BASE_URL, GS_MEDIA_BUCKET_NAME)
-
+if env('GS_PROJECT_ID', default=None):
+    DEFAULT_FILE_STORAGE = 'common.storage_backends.GoogleCloudMediaStorage'
+    STATICFILES_STORAGE = 'common.storage_backends.GoogleCloudStaticStorage'
+    GS_PROJECT_ID = env('GS_PROJECT_ID')
+    GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+    GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
+    GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
+    GS_BASE_URL = env('GS_BASE_URL')
+    STATIC_URL = '{}/{}/'.format(GS_BASE_URL, GS_STATIC_BUCKET_NAME)
+    MEDIA_URL = '{}/{}/'.format(GS_BASE_URL, GS_MEDIA_BUCKET_NAME)
+else:
+    STATIC_URL = 'static'
+    MEDIA_URL = 'media'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

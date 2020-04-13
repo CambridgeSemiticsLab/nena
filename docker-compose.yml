@@ -1,33 +1,13 @@
 version: '3'
 services:
-  nena:
+  app:
     build:
       context: .
-    expose:
-      - 8000
     ports:
-      - 8000:8000
-    links:
-      - db:db
+      - 8000:80
     volumes:
       - ./:/usr/src/app
-    depends_on:
-      - db
     environment:
       - DJANGO_READ_DOT_ENV_FILE=True
     env_file:
       - .env
-  db:
-    image: mariadb:10.1
-    expose:
-      - 3306
-    volumes:
-      - ./database:/docker-entrypoint-initdb.d  # Place init .sql file(s) here.
-      - mariadb_data:/var/lib/mysql
-    environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=True
-
-
-volumes:
-  mariadb_data:
-    external: true

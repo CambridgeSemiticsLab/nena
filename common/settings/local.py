@@ -1,7 +1,7 @@
 from .base import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY', default='^_xe!zh^)(7qi^qzzkl&m1ifhwtv==a2tvv5p=0z4*%!ta4(ux')
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
 # set to false to prevent django-silk module from being loaded (it slows performance)

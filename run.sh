@@ -7,4 +7,4 @@
 sleep 1
 
 # Start the server
-/usr/local/bin/gunicorn --bind=0.0.0.0:8000 common.wsgi --reload
+/usr/local/bin/gunicorn --bind=0.0.0.0:80 common.wsgi --reload
