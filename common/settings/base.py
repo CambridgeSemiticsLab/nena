@@ -16,7 +16,6 @@ import environ
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
 WEBROOT_DIR = environ.Path(__file__) - 4
-APPS_DIR = BASE_DIR
 
 env = environ.Env()
 
@@ -30,8 +29,6 @@ if READ_DOT_ENV_FILE:
 
 DEBUG    = env.bool('DJANGO_DEBUG', False)
 USE_SILK = False
-
-USE_AWS_S3 = env.bool('DJANGO_USE_AWS_S3', False)
 
 ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', default='').split(',')
 
@@ -134,10 +131,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-if env('GS_PROJECT_ID', default=None):
+GS_PROJECT_ID = env('GS_PROJECT_ID', default=None) # Set in .env if we're using Google Storage for site assets
+if GS_PROJECT_ID:
     DEFAULT_FILE_STORAGE = 'common.storage_backends.GoogleCloudMediaStorage'
     STATICFILES_STORAGE = 'common.storage_backends.GoogleCloudStaticStorage'
-    GS_PROJECT_ID = env('GS_PROJECT_ID')
     GS_BUCKET_NAME = env('GS_BUCKET_NAME')
     GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
     GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
@@ -145,8 +142,10 @@ if env('GS_PROJECT_ID', default=None):
     STATIC_URL = '{}/{}/'.format(GS_BASE_URL, GS_STATIC_BUCKET_NAME)
     MEDIA_URL = '{}/{}/'.format(GS_BASE_URL, GS_MEDIA_BUCKET_NAME)
 else:
-    STATIC_URL = 'static'
-    MEDIA_URL = 'media'
+    STATIC_ROOT = str(BASE_DIR('static'))
+    STATIC_URL = '/static/'
+    MEDIA_ROOT = str(BASE_DIR('media'))
+    MEDIA_URL = '/media/'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

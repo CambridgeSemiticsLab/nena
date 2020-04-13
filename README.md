@@ -16,11 +16,25 @@ is needed we use MariaDB 10.1.
 You will need to have docker and docker-compose installed and working and
 have access to Docker Hub or have the images downloaded already.
 
+You should create a .env file in the base directory, see `./.env.example` for reference.
+
 The actual data is not included in this repo and is only available on request
 from the Faculty of Asian and Middle-Eastern Studies at the University of
 Cambridge.
 
-### Creating a development environment with local database
+### Creating a development environment with Google Cloud SQL and File Storage  * RECOMMENDED
+
+You need to add details of the google integration into your `./.env` file. `GS_` prefixed
+.env variables relate to Google Cloud Storage. The `GOOGLE_APPLICATION_CREDENTIALS` file
+is an key file for the Service Agent for the project and should be stored in `./secrets/`
+dir. See: https://cloud.google.com/sql/docs/mysql/sql-proxy#create-service-account
+
+You can start the development environment with:
+```bash
+docker-compose up
+```
+
+### Creating a development environment with local database and local files
 
 In the database container, MariaDB data files are mounted into /var/lib/mysql
 from ./database in the checkout root, so you will need to create that

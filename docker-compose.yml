@@ -7,7 +7,9 @@ services:
       - 8000:80
     volumes:
       - ./:/usr/src/app
+      - ./secrets:/usr/src/secrets
     environment:
-      - DJANGO_READ_DOT_ENV_FILE=True
+      - DJANGO_DB_HOST=127.0.0.1
+      - DJANGO_DB_PORT=3306
     env_file:
       - .env

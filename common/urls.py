@@ -39,8 +39,9 @@ urlpatterns = [
     url(r'^gallery/', include(('gallery.urls'), namespace='gallery')),
 ]
 
-if not settings.USE_AWS_S3:
-    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if not settings.GS_PROJECT_ID:  # if we're not using Google Storages to serve files, serve them locally
+    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
+                              + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.USE_SILK and settings.DEBUG:
     urlpatterns = [

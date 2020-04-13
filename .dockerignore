@@ -1,3 +1,5 @@
+/secrets/*
+!README.txt
 db.sqlite3
 .env
 *.env
