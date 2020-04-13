@@ -1,0 +1,573 @@
+{% extends 'nena.html' %}
+{% load static %}
+
+{% block subtitle %}
+    {{ object.dialect }}: {{ object.title }}
+{% endblock %}
+
+{% block page_content %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+
+
+    <div class="sticky-top-bar">
+      <button class="button play-button" data-action="play"><i class="material-icons">play_arrow</i></button>
+      {% if form %}
+      <div class="tip">Use backtick <a class="key_icon">`</a> and escape <a class="key_icon">Esc</a> keys to play and pause while editing section</div>
+      {% endif %}
+      <div id="waveform" class="loading"></div>
+      <div class="downloads">
+        <a class="button dull" href="{{ clip.data.url }}" target="blank" title="download audio file">
+          <i class="material-icons">cloud_download</i> mp3
+        </a>
+        <a class="button dull" href="{% static 'audio/corpus_export_template.docx' %}" target="blank" title="download transcript document">
+          <i class="material-icons">cloud_download</i> docx
+        </a>
+      </div>
+
+      <div id="playback-time">0:00</div>
+    </div>
+
+    <form class="transcribe_form" action="" method="post">
+    {% csrf_token %}
+      <table class="translation_table">
+      <thead>
+      <tr>
+        <td><h2></h2></td>
+        <td><h2>Transcript</h2></td>
+        <td><h2>Translation</h2></td>
+      </tr>
+      </thead>
+      <tbody>
+        {% for heading, transcript_chunk, translation_chunk in text_chunks %}
+        <tr>
+          <td><textarea {{form|yesno:',disabled'}} class="time-code">{{heading|safe}}</textarea></td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="blank_row">
+          <td><textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea></td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
+        </tr>
+      </tfoot>
+      </table>
+
+      {% if form %}
+      <div class="sticky-bottom-bar">
+        <i class="material-icons">info</i>
+        use <a class="key_icon">Alt</a> + letter key to cycle through alternative characters
+        e.g. <a class="key_icon">Alt</a> + <a class="key_icon">a</a> &rarr; <a class="key_icon">ă</a>,
+        <a class="key_icon">Alt</a> + <a class="key_icon">t</a> &rarr; <a class="key_icon">ʦ</a>
+        <input class="button" type="submit" value="Save" style="float:right;"/>
+        <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}" style="float:right;">Cancel</a>
+      </div>
+      {% endif%}
+
+      <br>
+      <br>
+      <br>
+      show raw texts <input type="checkbox" class="pop_open chex">
+      <div>
+        {% if form %}
+        <a class="button compile">Compile the raw texts from the above sections</a>
+        <br>
+        {{form}}
+        {% else %}
+        <label for="id_transcript">Transcript:</label>
+        <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript}}</textarea>
+        <label for="id_translation">Translation:</label>
+        <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation}}</textarea>
+        {% endif %}
+      </div>
+    </form>
+
+  </div>
+  </div>
+
+  {% if not form %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+    {% if user.is_staff %}
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'audio:audio-edit' clip.id %}">Change audio file or title</a>
+        <a class="button" href="{% url 'audio:audio-transcribe' clip.id %}">Edit transcript or translation</a>
+        <a class="button" href="{% url 'audio:audio-delete' clip.id %}">Delete audio, transcript and translation</a>
+      </div>
+    {% endif %}
+  </div>
+  </div>
+  {% endif %}
+
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .material-icons { vertical-align: middle; }
+    .sticky-top-bar {
+      position:sticky;
+      top: 0;
+      background-color: #f7f4ed;
+      padding: 0.5em 0;
+      z-index: 11;
+    }
+    .sticky-bottom-bar {
+      position:sticky;
+      bottom: -2em;
+      background-color: #f7f4ed;
+      padding: 0.5em 0 1em;
+      z-index: 11;
+    }
+    .sticky-bottom-bar:hover {
+      bottom: 0;
+    }
+    .play-button {
+      position: relative;
+      display: inline-block;
+      width: 2.6em;
+      height: 2.6em;
+      margin: 2em 0.7em;
+      border-radius: 50%;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0.5em 0;
+      z-index: 7;
+    }
+    .play-button + .tip {
+      display: none;
+      position: absolute;
+      left: 2em;
+      top: 3.8em;
+      background: #d18f00;
+      padding: 0.3em 1em 0.3em 2em;
+      color: white;
+      z-index: 6;
+    }
+    .play-button:hover + .tip {display: block;}
+    .key_icon {
+      background-color: #eee;
+      color: black;
+      font-size: 0.8em;
+      padding: 0.1em;
+      border-radius: 0.2em;
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      width: 2em;
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+    }
+    #playback-time {
+      position:absolute;
+      bottom: 0.5em;
+      left: 0;
+      width: 3.4em;
+      text-align: center;
+      color: #3f801e;
+      font-size: 1.2em;
+    }
+    #waveform {
+      position: relative;
+      display: inline-block;
+      width: 80%;
+      vertical-align: middle;
+    }
+    #waveform.loading:before {
+      content: 'loading audio...';
+      position: absolute;
+      width: 100%;
+      top: 45%;
+      font-size: 3em;
+      text-align: center;
+      color: #aaa;
+    }
+    .downloads {
+      display: inline-block;
+      float: right;
+      width: 10%;
+      text-align: center;
+    }
+    .downloads > a {
+      margin-top: 1em;
+    }
+
+    .translation_table {
+      width: 100%;
+      border-bottom-width: 0!important;
+      margin-top: 2em;
+    }
+    .translation_table thead td {
+      padding: 0.5em;
+      background-color: white;
+    }
+    .translation_table tbody td {
+      padding: 0;
+      position: relative;
+      background-color: white;
+    }
+    .transcribe_form tbody, .transcribe_form thead {
+      background-color: white;
+    }
+    .transcribe_form textarea,
+    .transcribe_form .overlay {
+      width: 100%;
+      height: 100%;
+      min-height: 3em;
+      padding: 0.5em;
+      font-size: 1.3em;
+      line-height: 1.5em;
+      margin: 0!important;
+      background-color: transparent;
+      border-width: 0;
+      resize: none;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+
+    }
+    .transcribe_form textarea:disabled {
+      cursor: text;
+    }
+    .translation_table textarea:disabled {
+      cursor: pointer;
+    }
+
+    .transcribe_form .overlay {
+      position: absolute;
+      background-color: transparent;
+      pointer-events: none;
+      color: rgba(255,255,0,0.0);
+    }
+    .transcribe_form .overlay .error,
+    .transcribe_form .overlay .word {
+      pointer-events: none;
+      display: inline-block;
+      position: relative;
+    }
+    .transcribe_form .overlay .error { background-color: rgba(255, 0, 0, 0.2);}
+    .transcribe_form .overlay .word  { background-color: rgba(0, 255, 0, 0.0);}
+
+    .translation_table tr.now-playing td {
+      background-color: #cef;
+    }
+
+
+    .translation_table tfoot .blank_row {
+      display: none;
+    }
+
+    .translation_table tr > td:nth-child(1) {
+      width: 10%;
+    }
+    .translation_table td {
+      width: auto;
+    }
+
+    .pop_open + * { display: none;}
+    .pop_open:checked + * { display: block; margin: 2em 0;}
+
+  </style>
+
+
+  <script src="https://unpkg.com/wavesurfer.js@3.3.1/dist/wavesurfer.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.min.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
+  <script charset="utf-8"> // wavesurfer stuff
+    var wavesurfer;
+
+    function time_string_to_seconds(time_string){
+      // takes str("1:23") and returns int(83)
+      if(matches = time_string.match(/(\d+):(\d+)/))
+      {
+        return matches[1]*60 + matches[2]*1;
+      }
+      return false;
+    }
+
+    function seconds_to_time_string(seconds){
+      // takes int(83) and returns str("1:23")
+      return parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0');
+    }
+
+    function set_now_playing(row){
+      if(row.hasClass('now-playing')){
+        return;
+      }
+      $('.now-playing').removeClass('now-playing');
+      row.addClass('now-playing');
+      [start_seconds, end_seconds] = get_start_end_seconds(row);
+
+      region = false;
+      for(i in wavesurfer.regions.list){
+        region = wavesurfer.regions.list[i];
+      }
+      if(region && region.start == start_seconds && region.end == end_seconds){
+        // don't recreate region
+      }else{
+        wavesurfer.clearRegions();
+        wavesurfer.addRegion({
+          start: start_seconds,
+          end: end_seconds,
+          color: "rgba(200, 230, 255, 0.4)",
+          drag: false,
+          resize: false,
+          loop: false,
+        });
+      }
+    }
+
+    function get_start_end_seconds(row){
+      region_buffer = 0.1 // a fraction of a second buffer to prevent end of one region from spilling into the next
+      start_seconds = time_string_to_seconds(row.find('.time-code').val());
+      next_time_code = false;
+      row.nextAll().find('.time-code').each(function(){
+        if($(this).val()){
+          next_time_code = $(this).val();
+          return false;
+        }
+      });
+      end_seconds = next_time_code ? time_string_to_seconds(next_time_code) - region_buffer : wavesurfer.getDuration();
+      return [start_seconds, end_seconds];
+    }
+
+
+    $(function(){
+      // audio visualisation
+      wavesurfer = WaveSurfer.create({
+          container: '#waveform',
+          progressColor: '#aaa',
+          cursorColor: '#d18f00',
+          cursorWidth: '3px',
+          waveColor: '#3f801e',
+          loopSelection: true,
+          normalize: false,
+          responsive: true,
+          barRadius: 0,
+          barHeight: 1.3,
+          barWidth: 0,
+          plugins: [
+            WaveSurfer.cursor.create({}),
+            WaveSurfer.regions.create({})
+          ],
+      });
+      wavesurfer.load('{{ clip.data.url }}');
+      var button = document.querySelector('[data-action="play"]');
+      button.addEventListener('click', wavesurfer.playPause.bind(wavesurfer));
+      wavesurfer.on('pause', function () {
+        button.innerHTML = '<i class="material-icons">play_arrow</i>';
+      });
+      wavesurfer.on('play', function () {
+        button.innerHTML = '<i class="material-icons">pause</i>';
+      });
+      wavesurfer.on('ready', function () {
+        $('#waveform').removeClass('loading');
+      });
+      window.setInterval(function(){
+        time = wavesurfer.getCurrentTime();
+        $('#playback-time').html(seconds_to_time_string(time));
+
+       $($('tbody tr').get().reverse()).each(function(){
+        time_code = $(this).find('.time-code').val();
+        if(!time_code){
+          return;
+        }
+        if(time_string_to_seconds(time_code) <= time){
+          set_now_playing($(this));
+          return false;
+        }
+       })
+
+      }, 100);
+
+      // playback for viewing not editing
+      $('.translation_table').on('mouseup', 'textarea:disabled', function(){
+        $row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds($row);
+        if(start_seconds !== false){
+          wavesurfer.play(start_seconds, end_seconds);
+        }
+      });
+
+      // playback for editing
+      $('.translation_table').on('focus', 'textarea', function(){
+        $row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds($row);
+        if(start_seconds !== false){
+          current_time = wavesurfer.getCurrentTime();
+          if(wavesurfer.isPlaying() && current_time >= start_seconds && current_time <= end_seconds){
+            // don't jump the time around if we're already playing the section in focus
+          }else{
+            wavesurfer.setCurrentTime(start_seconds);
+          }
+        }
+        wavesurfer.setPlayEnd(end_seconds);
+      });
+
+    })
+  </script>
+  <script charset="utf-8"> // text management stuff
+    var alt_characters = {
+      'a': 'āăáàắ',
+      'e': 'əē',
+      'i': 'ī',
+      'o': 'ð',
+      'u': 'ū',
+      'c': 'č',
+      'd': 'ḍʣ',
+      'h': 'ḥ',
+      'r': 'ṛ',
+      's': 'ṣšʦθ',
+      't': 'ṭʦ',
+      "'": "ʾʿ",
+    };
+
+    function compile_raw_text(textarea_idx){
+      transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
+        textareas = $(this).find('textarea');
+        timecode = textareas.eq(0).val() ? '@' + textareas.eq(0).val() : '';
+        return `(${idx+1}${timecode})` + textareas.eq(textarea_idx).val();
+      }).get()
+      return transcript_bits.join('');
+    }
+
+    function compile_raw_texts(){
+      $('[name="transcript"]').val(compile_raw_text(1));
+      $('[name="translation"]').val(compile_raw_text(2));
+    }
+
+    $.fn.focusEnd = function(){
+      $(this)[0].selectionStart = $(this).val().length;
+      return $(this).focus();
+    }
+
+    $(function(){
+      $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
+
+      // expand textareas to fit contents
+      $('body').on('keyup', 'textarea', function(){
+        elem = $(this)[0]
+        if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
+      })
+      window.setTimeout(function(){$('textarea').trigger('keyup')}, 10);
+      $('textarea').eq(1).focusEnd();
+
+      // form compilation and saving
+      $('.transcribe_form').on('submit', compile_raw_texts)
+      $('.compile').on('click', compile_raw_texts);
+
+
+      // keep overlays up to date with their textareas
+      $('body').on('change keyup', 'textarea', function(e){
+        let val = $(this).val()
+        start_word  = '[word['
+        start_error = '[error['
+        end_delim   = ']]]'
+        val = val.replace(/([\s-]+)/g, end_delim+'$1'+start_word);
+        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[]+)/g, start_error+'$1'+end_delim);
+        val = val.replace(/\n/g, '<br>');
+        val = val.replace(/ /g, '&nbsp;');
+        val = start_word + val + end_delim;
+        val = val.split(start_word).join('<span class="word">');
+        val = val.split(start_error).join('<span class="error">');
+        val = val.split(end_delim).join('</span>');
+        $(this).siblings('.overlay').html(val);
+      })
+
+      // keyboard shortcuts for non-keyboard characters (eg. ā ă á à e ə ē ī ð ū č ḍ ṭ ṣ š ḥ ʦ ʣ θ ṛ ʾ ʿ)
+      function simulate_typing_string(input, string, replace_last_n_chars = 0){
+        start = input.selectionStart - replace_last_n_chars;
+        $(input).val($(input).val().slice(0, start) + string + $(input).val().slice(input.selectionEnd));
+        input.selectionStart = start + string.length;
+        input.selectionEnd = start + string.length;
+      }
+
+      // keyboard management for textareas
+      $('body').on('keydown', 'textarea', function(e){
+        chosen_key   = e.key;
+        last_char    = $(this).val().charAt(this.selectionStart-1);
+        //console.log(last_char);
+        $current_row = $(this).parents('tr').eq(0);
+        textarea_idx = $current_row.find('textarea').index($(this))
+
+        if($current_row.find('.time-code').val()){
+          set_now_playing($current_row);
+        }
+
+        if(chosen_key == '`'){
+          [start_seconds, end_seconds] = get_start_end_seconds($current_row);
+          wavesurfer.play(start_seconds, end_seconds);
+          return false;
+        }
+
+        if(chosen_key == 'Escape'){
+          wavesurfer.pause();
+          if(!$current_row.next().length){
+            $current_row.after($blank_row.clone());
+          }
+          $next_time_code = $current_row.next().find('.time-code').eq(0);
+          if(!$next_time_code.val()){
+            $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()))
+          }
+          return false;
+        }
+
+        if(chosen_key == 'Enter' && last_char == '\n'){
+          let val = $(this).val();
+          cusor_position = this.selectionStart;
+          $(this).val(val.slice(0, cusor_position - 1));
+          $(this).css('height', '1px').trigger('keyup');
+          $new_row = $blank_row.clone();
+          $current_row.after($new_row);
+          $new_textarea = $new_row.find('textarea').eq(textarea_idx)
+          $new_textarea.focus().val(val.slice(cusor_position));
+          $new_textarea[0].selectionStart = 0;
+          $new_textarea[0].selectionEnd = 0;
+          return false;
+        }
+
+        if(chosen_key == 'Backspace' && last_char == '' && $current_row.prev().length){
+          // merge textarea contents back into previous textareas
+          $prev_textareas = $current_row.prev().find('textarea:not(.time-code)');
+
+          $current_row.find('textarea:not(.time-code)').each(function(idx){
+            $prev_textarea = $prev_textareas.eq(idx)
+            prev_val = $prev_textarea.val();
+            $prev_textarea.val(prev_val + '\n' + $(this).val());
+            if($(this).is(':focus')){
+              $prev_textarea.focus();
+              $prev_textarea[0].selectionStart = prev_val.length + 1;
+              $prev_textarea[0].selectionEnd = prev_val.length + 1;
+            }
+            $prev_textarea.trigger('keyup');
+          })
+
+          $current_row.remove();
+          return false;
+        }
+
+        if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
+          // alt+arrow just cycles the last character
+          for(i in alt_characters){
+            if(i == last_char || alt_characters[i].indexOf(last_char) >= 0){
+              chosen_key = i;
+              break;
+            }
+          }
+        }
+
+        if(e.altKey && chosen_key in alt_characters) {
+          alts = chosen_key + alt_characters[chosen_key]
+          idx = alts.indexOf(last_char);
+          replace_length = idx < 0 ? 0 : 1;
+          simulate_typing_string(this, alts[(idx+1)%alts.length], replace_length);
+          e.preventDefault();
+          return false;
+        }
+      })
+
+    });
+  </script>
+
+
+{% endblock %}

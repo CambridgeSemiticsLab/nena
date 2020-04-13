@@ -26,21 +26,32 @@ class AudioListView(ListView):
                                   .order_by('dialect__name', 'title')
 
 
+def chunk_translation_text(audio):
+    """ takes an Audio model and returns a (timestamp, transcription_chunk, translation_chunk) list
+    """
+    regex = '(\(\d+(?:@\d+:\d\d)?\))?'
+    transcript_chunks = re.split(regex, audio.transcript or '')
+    if len(transcript_chunks) > 1:
+        translation_chunks = re.split(regex, audio.translation or '')
+        text_chunks = zip(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2])
+    else:
+        text_chunks = (('(1@0:00)', audio.transcript, audio.translation),)
+
+    text_chunks = [[x.rstrip(')').lstrip('(0123456789').lstrip('@'),y or '',z or ''] for x,y,z in text_chunks]
+
+    text_chunks[0][0] = text_chunks[0][0] or '0:00'
+
+    return text_chunks
+
+
 class AudioDetailView(DetailView):
     name = 'Audio'
     model = Audio
     context_object_name = 'clip'
+    template_name = 'audio/audio_transcribe.html'
 
     def get_context_data(self, **kwargs):
         context = super(AudioDetailView, self).get_context_data(**kwargs)
-        clip = context['clip']
-        regex = '(\(\d+(?:@\d+:\d+)?\))'
-        transcript_chunks = re.split(regex, clip.transcript or '')
-        if len(transcript_chunks) > 1:
-            translation_chunks = re.split(regex, clip.translation or '')
-            text_chunks = zip(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2])
-        else:
-            text_chunks = None
 
         # todo - try to find matching words within text
         # words = set(re.findall('\w+', clip.transcript))
@@ -49,7 +60,7 @@ class AudioDetailView(DetailView):
         # dfs = DialectFeatureEntry.objects.filter(feature__dialect_id=clip.dialect_id) \
                                          # .filter(entry__in=words) \
                                          # .values_list('entry', 'feature__dialect_id')
-
+        text_chunks = chunk_translation_text(context['clip'])
         context.update({'text_chunks': text_chunks})
         return context
 
@@ -69,7 +80,7 @@ class DialectAudioView(AudioListView):
 @method_decorator(login_required, name='dispatch')
 class AudioCreateView(CreateView):
     model = Audio
-    fields = '__all__'
+    fields = ('title', 'dialect', 'description', 'data')
 
     def get_success_url(self):
         return reverse('audio:audio-detail', args=(self.object.pk,))
@@ -78,10 +89,23 @@ class AudioCreateView(CreateView):
 @method_decorator(login_required, name='dispatch')
 class AudioUpdateView(UpdateView):
     model = Audio
-    fields = '__all__'
+    fields = ('title', 'dialect', 'description', 'data')
 
     def get_success_url(self):
         return reverse('audio:audio-detail', args=(self.kwargs['pk'],))
+
+
+@method_decorator(login_required, name='dispatch')
+class AudioTranscribeView(AudioUpdateView):
+    template_name = 'audio/audio_transcribe.html'
+    fields = ('transcript', 'translation')
+    context_object_name = 'clip'
+
+    def get_context_data(self, **kwargs):
+        context     = super(AudioUpdateView, self).get_context_data(**kwargs)
+        text_chunks = chunk_translation_text(context['clip'])
+        context.update({'text_chunks': text_chunks})
+        return context
 
 
 @method_decorator(login_required, name='dispatch')
