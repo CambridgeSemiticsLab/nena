@@ -17,7 +17,7 @@ RUN chmod +x /usr/src/cloud_sql_proxy
 COPY requirements requirements
 
 # Update pip and install Python dependencies.
-RUN pip install --upgrade -r requirements/local.txt --no-cache-dir
+RUN pip install --upgrade -r requirements/production.txt --no-cache-dir
 
 COPY . /usr/src/app
 

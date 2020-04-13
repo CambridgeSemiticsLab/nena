@@ -2,14 +2,6 @@ from .base import *
 
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-# set to false to prevent django-silk module from being loaded (it slows performance)
-USE_SILK = env.bool('DJANGO_USE_SILK', default=False)
-
-if USE_SILK and DEBUG:
-    THIRD_PARTY_APPS += ('silk', )
-    INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-    MIDDLEWARE = ['silk.middleware.SilkyMiddleware',] + MIDDLEWARE
-
 UCAMWEBAUTH_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://demo.raven.cam.ac.uk/auth/logout.html'
 UCAMWEBAUTH_CERTS = {901: """-----BEGIN CERTIFICATE-----

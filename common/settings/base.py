@@ -28,7 +28,6 @@ if READ_DOT_ENV_FILE:
 
 
 DEBUG    = env.bool('DJANGO_DEBUG', False)
-USE_SILK = False
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 
