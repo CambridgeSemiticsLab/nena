@@ -28,7 +28,7 @@
       <div id="playback-time">0:00</div>
     </div>
 
-    <form class="transcribe_form" action="" method="post">
+    <form class="transcribe_form {{form|yesno:'editing,'}}" action="" method="post">
     {% csrf_token %}
       <table class="translation_table">
       <thead>
@@ -210,6 +210,7 @@
     .transcribe_form tbody, .transcribe_form thead {
       background-color: white;
     }
+
     .transcribe_form textarea,
     .transcribe_form .overlay {
       width: 100%;
@@ -224,8 +225,10 @@
       resize: none;
       overflow-wrap: break-word;
       white-space: pre-wrap;
-
     }
+    .transcribe_form .overlay {display: none;}
+    .transcribe_form.editing .overlay {display: block;}
+
     .transcribe_form textarea:disabled {
       cursor: text;
     }
@@ -458,13 +461,13 @@
 
 
       // keep overlays up to date with their textareas
-      $('body').on('change keyup', 'textarea', function(e){
+      $('form.editing').on('change keyup', 'textarea', function(e){
         let val = $(this).val()
         start_word  = '[word['
         start_error = '[error['
         end_delim   = ']]]'
         val = val.replace(/([\s-]+)/g, end_delim+'$1'+start_word);
-        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[]+)/g, start_error+'$1'+end_delim);
+        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[ʾášə́əl\-θṭùú…ʿòˈìḥˈăɛṛàṛàèʾ]+)/g, start_error+'$1'+end_delim);
         val = val.replace(/\n/g, '<br>');
         val = val.replace(/ /g, '&nbsp;');
         val = start_word + val + end_delim;
@@ -507,7 +510,8 @@
           }
           $next_time_code = $current_row.next().find('.time-code').eq(0);
           if(!$next_time_code.val()){
-            $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()))
+            $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()));
+            $next_time_code.focus();
           }
           return false;
         }
@@ -562,6 +566,11 @@
           replace_length = idx < 0 ? 0 : 1;
           simulate_typing_string(this, alts[(idx+1)%alts.length], replace_length);
           e.preventDefault();
+          return false;
+        }
+
+        if(e.ctrlKey && chosen_key == 's') {
+          $(this).parents('form').submit();
           return false;
         }
       })
