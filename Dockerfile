@@ -21,5 +21,7 @@ RUN pip install --upgrade -r requirements/local.txt --no-cache-dir
 
 COPY . /usr/src/app
 
+RUN date +'%d %b %Y' > /usr/src/build-date.txt
+
 EXPOSE 80
 CMD ["/usr/src/app/run.sh"]
