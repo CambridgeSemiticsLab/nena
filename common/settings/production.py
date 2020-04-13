@@ -1,38 +1,6 @@
 from .base import *
 
-SECRET_KEY = env('DJANGO_SECRET_KEY')
-
 DEBUG = env.bool('DJANGO_DEBUG', default=False)
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DJANGO_DB_DEFAULT_NAME'),
-        'USER': env('DJANGO_DB_DEFAULT_USER'),
-        'PASSWORD': env('DJANGO_DB_DEFAULT_PASSWORD'),
-        'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        'PORT': env('DJANGO_DB_PORT', default='3306'),
-        'OPTIONS': {
-            'init_command': 'SET default_storage_engine=INNODB;',
-            'sql_mode': 'STRICT_TRANS_TABLES',
-        },
-    },
-    'legacy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DJANGO_DB_LEGACY_NAME'),
-        'USER': env('DJANGO_DB_LEGACY_USER'),
-        'PASSWORD': env('DJANGO_DB_LEGACY_PASSWORD'),
-        'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        'PORT': '3306',
-        'OPTIONS': {
-            'sql_mode': 'STRICT_TRANS_TABLES',
-            'init_command': 'SET '
-                'storage_engine=INNODB,'
-                'character_set_connection=utf8,'
-                'collation_connection=utf8_bin'
-        },
-    },
-}
 
 UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
@@ -60,4 +28,3 @@ W7fgOEEsI4FoLOjQbJgIrgdYR2NIJh6pKKEf+9Ts2q/fuWv2xOLw7w29PIICeFIF
 hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 -----END CERTIFICATE-----
 """}
-

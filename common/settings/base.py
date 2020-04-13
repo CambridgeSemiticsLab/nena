@@ -29,6 +29,8 @@ if READ_DOT_ENV_FILE:
 
 DEBUG    = env.bool('DJANGO_DEBUG', False)
 USE_SILK = False
+SECRET_KEY = env('DJANGO_SECRET_KEY')
+
 
 ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', default='').split(',')
 
@@ -100,6 +102,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'common.wsgi.application'
 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('DJANGO_DB_DEFAULT_NAME'),
+        'USER': env('DJANGO_DB_DEFAULT_USER'),
+        'PASSWORD': env('DJANGO_DB_DEFAULT_PASSWORD'),
+        'HOST': env('DJANGO_DB_HOST', default='localhost'),
+        'PORT': env('DJANGO_DB_PORT', default='3306'),
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB;',
+            'sql_mode': 'STRICT_TRANS_TABLES',
+        },
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -132,16 +150,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 GS_PROJECT_ID = env('GS_PROJECT_ID', default=None) # Set in .env if we're using Google Storage for site assets
-if GS_PROJECT_ID:
+if GS_PROJECT_ID: # Files are stored and served from a bucket in Google Cloud Storage
     DEFAULT_FILE_STORAGE = 'common.storage_backends.GoogleCloudMediaStorage'
     STATICFILES_STORAGE = 'common.storage_backends.GoogleCloudStaticStorage'
     GS_BUCKET_NAME = env('GS_BUCKET_NAME')
     GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
     GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
-    GS_BASE_URL = env('GS_BASE_URL')
-    STATIC_URL = '{}/{}/'.format(GS_BASE_URL, GS_STATIC_BUCKET_NAME)
-    MEDIA_URL = '{}/{}/'.format(GS_BASE_URL, GS_MEDIA_BUCKET_NAME)
-else:
+    GS_CUSTOM_ENDPOINT = env('GS_CUSTOM_ENDPOINT', default='https://storage.googleapis.com')
+    STATIC_URL = '{}/{}/'.format(GS_CUSTOM_ENDPOINT, GS_BUCKET_NAME)
+    MEDIA_URL = '{}/{}/'.format(GS_CUSTOM_ENDPOINT, GS_BUCKET_NAME)
+else: # Files are stored and served locally
     STATIC_ROOT = str(BASE_DIR('static'))
     STATIC_URL = '/static/'
     MEDIA_ROOT = str(BASE_DIR('media'))

@@ -1,43 +1,13 @@
 from .base import *
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY')
-
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
+
 # set to false to prevent django-silk module from being loaded (it slows performance)
 USE_SILK = env.bool('DJANGO_USE_SILK', default=False)
 
 if USE_SILK and DEBUG:
     THIRD_PARTY_APPS += ('silk', )
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DJANGO_DB_DEFAULT_NAME'),
-        'USER': env('DJANGO_DB_DEFAULT_USER'),
-        'PASSWORD': env('DJANGO_DB_DEFAULT_PASSWORD'),
-        'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        'PORT': env('DJANGO_DB_PORT', default='3306'),
-        'OPTIONS': {
-            'init_command': 'SET default_storage_engine=INNODB;',
-            'sql_mode': 'STRICT_TRANS_TABLES',
-        },
-    },
-}
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-if USE_SILK and DEBUG:
     MIDDLEWARE = ['silk.middleware.SilkyMiddleware',] + MIDDLEWARE
 
 UCAMWEBAUTH_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
