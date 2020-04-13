@@ -156,9 +156,9 @@ if GS_PROJECT_ID: # Files are stored and served from a bucket in Google Cloud St
     GS_BUCKET_NAME = env('GS_BUCKET_NAME')
     GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
     GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
-    GS_CUSTOM_ENDPOINT = env('GS_CUSTOM_ENDPOINT', default='https://storage.googleapis.com')
-    STATIC_URL = '{}/{}/'.format(GS_CUSTOM_ENDPOINT, GS_BUCKET_NAME)
-    MEDIA_URL = '{}/{}/'.format(GS_CUSTOM_ENDPOINT, GS_BUCKET_NAME)
+    GS_CUSTOM_ENDPOINT = env('GS_CUSTOM_ENDPOINT', default='https://storage.googleapis.com/'+GS_BUCKET_NAME)
+    STATIC_URL = GS_CUSTOM_ENDPOINT
+    MEDIA_URL = GS_CUSTOM_ENDPOINT
 else: # Files are stored and served locally
     STATIC_ROOT = str(BASE_DIR('static'))
     STATIC_URL = '/static/'
