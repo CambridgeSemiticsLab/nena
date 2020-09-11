@@ -547,12 +547,18 @@
         if(chosen_key == 'Enter' && last_char == '\n'){
           let val = $(this).val();
           cusor_position = this.selectionStart;
-          $(this).val(val.slice(0, cusor_position - 1));
+          $(this).val(val.slice(0, cusor_position - 1).trim());
           $(this).css('height', '1px').trigger('keyup');
-          $new_row = $blank_row.clone();
-          $current_row.after($new_row);
-          $new_textarea = $new_row.find('textarea').eq(textarea_idx)
-          $new_textarea.focus().val(val.slice(cusor_position));
+          $next_row = $current_row.next();
+          if($next_row.length && !$next_row.find('textarea').eq(textarea_idx).val().trim().length)
+          {// if there's an empty box in the existing next row, fill it
+            $target_row = $next_row
+          }else{ // create a new row after the current one
+            $target_row = $blank_row.clone();
+            $current_row.after($target_row);
+          }
+          $new_textarea = $target_row.find('textarea').eq(textarea_idx)
+          $new_textarea.focus().val(val.slice(cusor_position).trim());
           $new_textarea[0].selectionStart = 0;
           $new_textarea[0].selectionEnd = 0;
           return false;
