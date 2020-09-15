@@ -1,4 +1,5 @@
 import re
+from itertools import zip_longest
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
@@ -33,14 +34,17 @@ def chunk_translation_text(audio):
     transcript_chunks = re.split(regex, audio.transcript or '')
     if len(transcript_chunks) > 1:
         translation_chunks = re.split(regex, audio.translation or '')
-        text_chunks = zip(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2])
+        text_chunks = zip_longest(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2],
+                                  fillvalue='')
     else:
         text_chunks = (('(1@0:00)', audio.transcript, audio.translation),)
 
-    text_chunks = [[x.rstrip(')').lstrip('(0123456789').lstrip('@'),y or '',z or ''] for x,y,z in text_chunks]
+    text_chunks = [[x.rstrip(')').lstrip('(0123456789').lstrip('@'),y.strip() or '',z.strip() or ''] for x,y,z in text_chunks]
+
+    if text_chunks[0][1] == '' and len(text_chunks) > 1:
+        text_chunks = text_chunks[1:]
 
     text_chunks[0][0] = text_chunks[0][0] or '0:00'
-
     return text_chunks
 
 
