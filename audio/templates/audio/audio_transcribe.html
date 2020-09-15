@@ -384,6 +384,12 @@
       wavesurfer.load('{{ clip.data.url }}');
       var button = document.querySelector('[data-action="play"]');
       button.addEventListener('click', wavesurfer.playPause.bind(wavesurfer));
+
+      button.addEventListener('mousedown', function(){ // return focus to previously focussed element if button clicked
+        var return_focus_to = document.activeElement
+        window.setTimeout(function(){return_focus_to.focus()}, 10);
+      })
+
       wavesurfer.on('pause', function () {
         button.innerHTML = '<i class="material-icons">play_arrow</i>';
       });
