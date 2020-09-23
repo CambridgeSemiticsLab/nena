@@ -28,23 +28,32 @@ class AudioListView(ListView):
 
 
 def chunk_translation_text(audio):
-    """ takes an Audio model and returns a (timestamp, transcription_chunk, translation_chunk) list
+    """ takes an Audio model and returns a (metadata, transcription_chunk, translation_chunk) list
     """
-    regex = '(\(\d+(?:@\d+:\d\d)?\))'
+    regex = '(\(.*?\))'
     transcript_chunks = re.split(regex, audio.transcript or '')
     if len(transcript_chunks) > 1:
+        # if transcript_chunks[0] == '':
+            # transcrip_chunks = transcript_chunks[1:]
         translation_chunks = re.split(regex, audio.translation or '')
         text_chunks = zip_longest(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2],
                                   fillvalue='')
     else:
-        text_chunks = (('(1@0:00)', audio.transcript, audio.translation),)
+        text_chunks = (('(@0:00)', audio.transcript, audio.translation),)
 
-    text_chunks = [[x.rstrip(')').lstrip('(0123456789').lstrip('@'),y.strip() or '',z.strip() or ''] for x,y,z in text_chunks]
+    def parse_metadata(raw_string):
+        regex = '\((?P<section_number>\d+)? *(@(?P<timestamp>\d+:\d\d))?\)'
+        results = re.search(regex, raw_string)
+        return results.groupdict() if results else {'section_number': '', 'timestamp': ''}
+
+    text_chunks = [[parse_metadata(x), y.strip() or '',z.strip() or ''] for x,y,z in text_chunks]
 
     if text_chunks[0][1] == '' and len(text_chunks) > 1:
         text_chunks = text_chunks[1:]
 
-    text_chunks[0][0] = text_chunks[0][0] or '0:00'
+    if not text_chunks[0][0]['timestamp']:
+        text_chunks[0][0]['timestamp'] = '0:00'
+
     return text_chunks
 
 

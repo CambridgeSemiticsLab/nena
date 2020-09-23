@@ -39,9 +39,12 @@
       </tr>
       </thead>
       <tbody>
-        {% for heading, transcript_chunk, translation_chunk in text_chunks %}
+        {% for metadata, transcript_chunk, translation_chunk in text_chunks %}
         <tr>
-          <td class="time-code-cell"><textarea {{form|yesno:',disabled'}} class="time-code">{{heading|safe}}</textarea></td>
+          <td class="meta-data-cell">
+            <textarea {{form|yesno:',disabled'}} class="time-code">{{metadata.timestamp|default_if_none:''}}</textarea>
+            <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" placeholder="&sect;">
+          </td>
           <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
         </tr>
@@ -49,7 +52,10 @@
       </tbody>
       <tfoot>
         <tr class="blank_row">
-          <td class="time-code-cell"><textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea></td>
+          <td class="meta-data-cell">
+            <textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea>
+            <input class="section-number" value="" placeholder="&sect;">
+          </td>
           <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
           <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
         </tr>
@@ -154,8 +160,8 @@
     }
     .play-button:hover + .tip {display: block;}
     .key_icon,
-    .time-code-cell:before,
-    .time-code-cell:after {
+    .meta-data-cell:before,
+    .meta-data-cell:after {
       background-color: #eee;
       color: black;
       font-size: 0.8em;
@@ -243,20 +249,41 @@
     .translation_table textarea:disabled {
       cursor: pointer;
     }
+    .transcribe_form .time-code {
+      width: 90%;
+      display: inline-block;
+    }
+    .transcribe_form .section-number {
+      position: absolute;
+      top: 7px;
+      right: 2px;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border-width: 0;
+      background-color: #aaa;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+    }
+    .transcribe_form .section-number:placeholder-shown {
+      background-color: #eee;
+    }
 
-    .editing .now-playing .time-code-cell{
+
+    .editing .now-playing .meta-data-cell{
       position: relative;
       z-index: 2;
     }
-    .editing .now-playing .time-code-cell:before,
-    .editing .now-playing .time-code-cell:after{
+    .editing .now-playing .meta-data-cell:before,
+    .editing .now-playing .meta-data-cell:after{
       content: '`';
       position: absolute;
       top: -1em;
       left: -1.5em;
       display: block;
     }
-    .editing .now-playing .time-code-cell:after{
+    .editing .now-playing .meta-data-cell:after{
       content: 'Esc';
       top: unset;
       bottom: -0.5em;
@@ -461,8 +488,10 @@
     function compile_raw_text(textarea_idx){
       transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
         textareas = $(this).find('textarea');
+        section_number = parseInt($(this).find('.section-number').val());
+        section_number = section_number ? section_number : '';
         timecode = textareas.eq(0).val() ? '@' + textareas.eq(0).val() : '';
-        return `(${idx+1}${timecode})` + textareas.eq(textarea_idx).val();
+        return `(${section_number} ${timecode})` + textareas.eq(textarea_idx).val();
       }).get()
       return transcript_bits.join('');
     }
@@ -500,7 +529,7 @@
         start_error = '[error['
         end_delim   = ']]]'
         val = val.replace(/([\s-]+)/g, end_delim+'$1'+start_word);
-        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[ʾášə́əl\-θṭùú…ʿòˈìḥˈăɛṛàṛàèʾ]+)/g, start_error+'$1'+end_delim);
+        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"|\]\[ʾášə́əl\-θṭùú…ʿòˈìḥˈăɛṛàṛàèʾ]+)/g, start_error+'$1'+end_delim);
         val = val.replace(/\n/g, '<br>');
         val = val.replace(/ /g, '&nbsp;');
         val = start_word + val + end_delim;
