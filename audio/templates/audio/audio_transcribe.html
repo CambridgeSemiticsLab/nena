@@ -529,7 +529,7 @@
         start_error = '[error['
         end_delim   = ']]]'
         val = val.replace(/([\s-]+)/g, end_delim+'$1'+start_word);
-        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"|\]\[ʾášə́əl\-θṭùú…ʿòˈìḥˈăɛṛàṛàèʾ]+)/g, start_error+'$1'+end_delim);
+        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[ʾášə́əl\-θṭùú…ʿòˈìḥˈăɛṛàṛàèʾ]+)/g, start_error+'$1'+end_delim);
         val = val.replace(/\n/g, '<br>');
         val = val.replace(/ /g, '&nbsp;');
         val = start_word + val + end_delim;
