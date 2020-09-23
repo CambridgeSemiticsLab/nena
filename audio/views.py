@@ -30,7 +30,7 @@ class AudioListView(ListView):
 def chunk_translation_text(audio):
     """ takes an Audio model and returns a (metadata, transcription_chunk, translation_chunk) list
     """
-    regex = '(\(.*?\))'
+    regex = '(\([1-9@].*?\))'
     transcript_chunks = re.split(regex, audio.transcript or '')
     if len(transcript_chunks) > 1:
         # if transcript_chunks[0] == '':
