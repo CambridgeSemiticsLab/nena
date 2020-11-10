@@ -522,20 +522,43 @@
       $('.compile').on('click', compile_raw_texts);
 
 
+      // Valid regex set by Nena format standards: https://github.com/CambridgeSemiticsLab/nena_corpus/blob/8dfcf53/standards/NFD_regexes.json
+      valid_chars_regexps = {
+          "alphabet": "(b|B|c|C|č|Č|c̭|C̭|č̣|Č̣|č̭|Č̭|d|D|ḍ|Ḍ|f|F|g|G|ġ|Ġ|h|H|ḥ|Ḥ|j|J|k|K|k̭|K̭|l|L|ḷ|Ḷ|m|M|ṃ|Ṃ|n|N|p|P|p̣|P̣|p̭|P̭|q|Q|r|R|ṛ|Ṛ|s|S|š|Š|ṣ|Ṣ|t|T|ṭ|Ṭ|ṱ|Ṱ|v|V|w|W|x|X|y|Y|z|Z|ž|Ž|ẓ|Ẓ|ð|Ð|ð̣|Ð̣|ɟ|ʾ|ʿ|θ|Θ|a|A|à|À|á|Á|ā|Ā|ă|Ă|ā̀|Ā̀|ā́|Ā́|ằ|Ằ|ắ|Ắ|e|E|è|È|é|É|ē|Ē|ḕ|Ḕ|ḗ|Ḗ|i|I|ì|Ì|í|Í|ī|Ī|ī̀|Ī̀|ī́|Ī́|o|O|ò|Ò|ó|Ó|ō|Ō|ṑ|Ṑ|ṓ|Ṓ|u|U|ù|Ù|ú|Ú|ū|Ū|ŭ|Ŭ|ū̀|Ū̀|ū́|Ū́|ŭ̀|Ŭ̀|ŭ́|Ŭ́|ə|Ə|ə̀|Ə̀|ə́|Ə́|ɛ|Ɛ|ɛ̀|Ɛ̀|ɛ́|Ɛ́|ɛ̄|Ɛ̄)(?![̀-ͯ])",
+          "punctuation": "⁺|\"|\\ |\\-|=|ˈ|,|\\.\\.\\.|:|—|;|\\.|\\?|!|\"| "
+      };
+      alphabet = valid_chars_regexps['alphabet'].normalize('NFD');
+      punctuation = valid_chars_regexps['punctuation'].normalize('NFD');
+      valid_chars_regexp = new RegExp("(("+alphabet+")|("+punctuation+"))+", "g");
+
       // keep overlays up to date with their textareas
       $('form.editing').on('change keyup', 'textarea', function(e){
-        let val = $(this).val()
-        start_word  = '[word['
-        start_error = '[error['
-        end_delim   = ']]]'
-        val = val.replace(/([\s-]+)/g, end_delim+'$1'+start_word);
-        val = val.replace(/([^\d\w \n\.\,\-:;\~\?'"\(\)|\]\[ʾášə́əl\-θṭùú…ʿòˈìḥˈăɛṛàṛàèʾ]+)/g, start_error+'$1'+end_delim);
+        if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
+          // alt+arrow just cycles the last character so we don't need to re-validate
+          return true;
+        }
+
+        let val = $(this).val().normalize('NFD');
+        // these delimiters are composed of valid characters but unlikely to appear in the actual texts
+        // thus they can be injected into the content without breaking validation then replaced with spans later
+        start_word  = '!!START-WORD!!'
+        start_error = '!!START-ERROR!!'
+        end_word    = '!!END-WORD!!'
+        end_error   = '!!END-ERROR!!'
+        // each word will be wrapped in a span tag to let us mimic the wrapping behaviour of the textarea
+        val = val.replace(/([\s-…]+)/g, end_word+'$1'+start_word);
+        // each run of valid characters closes the previos error context and opens a new on at its end
+        // we originally planned to (more logically) search for runs of invalid chars and wrap them
+        // but regex matching for not(this|that) is non-trivial for multi-code-point terms
+        // ([^abc] only works in the negative because the terms "a", "b", "c" are single-code-points)
+        val = val.replace(valid_chars_regexp, end_error+'$&'+start_error);
         val = val.replace(/\n/g, '<br>');
         val = val.replace(/ /g, '&nbsp;');
-        val = start_word + val + end_delim;
+        val = start_word + start_error + val + end_error + end_word;
         val = val.split(start_word).join('<span class="word">');
         val = val.split(start_error).join('<span class="error">');
-        val = val.split(end_delim).join('</span>');
+        val = val.split(end_word).join('</span>');
+        val = val.split(end_error).join('</span>');
         $(this).siblings('.overlay').html(val);
       })
 
