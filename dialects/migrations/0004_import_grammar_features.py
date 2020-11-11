@@ -7,7 +7,8 @@ from django.apps import apps as global_apps
 from django.db import migrations
 from dialects.models import Dialect, DialectFeature
 from grammar.models import Feature
-from legacy.models import GrammarFeatures
+# removed dependency in 75224e - this migration will not run without it being reinstated
+# from legacy.models import GrammarFeatures
 
 def dialect_features_forward(global_apps, schema_editor):
     for gf in GrammarFeatures.objects.all():
@@ -18,7 +19,7 @@ def dialect_features_forward(global_apps, schema_editor):
                 i = ''
             if gf.comment is None:
                 c = ''
-            c = gf.comment 
+            c = gf.comment
             df = DialectFeature(
                 id=gf.feature_id,
                 introduction=gf.introduction,
@@ -40,7 +41,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('dialects','0003_dialectfeature_dialectfeatureentry_dialectfeatureexample'),
-        ('legacy','0001_initial'),
+        # removed dependency in 75224e - this migration will not run without it being reinstated
+        # ('legacy','0001_initial'),
         ('grammar','0001_initial'),
     ]
 

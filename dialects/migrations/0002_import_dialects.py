@@ -43,7 +43,7 @@ def dialect_forward(global_apps, schema_editor):
     for id in [e.pk for e in OldModel.objects.all()]: # using legacy
         try:
             obj = OldModel.objects.get(pk=id) # using legacy
-            new_obj = NewModel(id=obj.dialect_id, name=fixup(obj.dialect), latitude=obj.latitude, longitude=obj.longitude) 
+            new_obj = NewModel(id=obj.dialect_id, name=fixup(obj.dialect), latitude=obj.latitude, longitude=obj.longitude)
             new_obj.community = enum(obj.community, COMMUNITIES)
             new_obj.country = enum(obj.country, COUNTRIES)
             new_obj.location = enum(obj.location, LOCATIONS)
@@ -69,7 +69,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('dialects','0001_initial'),
-        ('legacy','0001_initial'),
+        # removed dependency in 75224e - this migration will not run without it being reinstated
+        # ('legacy','0001_initial'),
     ]
 
     operations = [
