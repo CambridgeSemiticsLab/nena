@@ -111,13 +111,19 @@ class AudioUpdateView(UpdateView):
 @method_decorator(login_required, name='dispatch')
 class AudioTranscribeView(AudioUpdateView):
     template_name = 'audio/audio_transcribe.html'
-    fields = ('transcript', 'translation')
+    fields = ('transcript', 'translation', 'speakers', 'place', 'transcriber', 'source', 'text_id')
     context_object_name = 'clip'
+
+    def get_success_url(self):
+        return reverse('audio:audio-transcribe', args=(self.kwargs['pk'],))
 
     def get_context_data(self, **kwargs):
         context     = super(AudioUpdateView, self).get_context_data(**kwargs)
         text_chunks = chunk_translation_text(context['clip'])
-        context.update({'text_chunks': text_chunks})
+        context.update({
+            'text_chunks': text_chunks,
+            'inline_fields': (context['form'][f] for f in ('transcriber', 'source', 'text_id', 'speakers', 'place'))
+            })
         return context
 
 
