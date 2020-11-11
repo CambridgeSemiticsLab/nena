@@ -37,6 +37,7 @@ class Dialect(models.Model):
         (SETR, 'SE Turkey'),
     )
     name = models.CharField(max_length=40)
+    code = models.CharField(max_length=40, blank=True, null=True)
     community = models.CharField(max_length=1, choices=COMMUNITIES,
                 default='', blank=False, null=False)
     country = models.CharField(max_length=2, choices=COUNTRIES,

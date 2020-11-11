@@ -30,6 +30,24 @@
 
     <form class="transcribe_form {{form|yesno:'editing,'}}" action="" method="post">
     {% csrf_token %}
+
+      <h2 style="margin-top:0.5em;">Metadata</h2>
+      {% for inline_field in inline_fields %}
+      <div class="inline_field">
+          {{ inline_field.errors }}
+          <label for="{{ inline_field.id_for_label }}">{{inline_field.label}}:</label>
+          {{ inline_field }}
+          {% if inline_field.help_text %}
+          <p class="help_text"><sup>&uarr;</sup> {{ inline_field.help_text }}</p>
+          {% endif %}
+      </div>
+      {% endfor %}
+      <style>
+        .inline_field label {height: initial; display: inline-block; width: 15%}
+        .inline_field input {height: initial; display: inline-block; width: 70%}
+        .inline_field .help_text{display: block; margin-left: 15%; padding-left: 6px; padding-top:0; width: 70%; font-size: 80%; opacity: 0.8; font-style:italic;}
+      </style>
+
       <table class="translation_table">
       <thead>
       <tr>
@@ -88,13 +106,11 @@
         {% if form %}
         <a class="button compile">Compile the raw texts from the above sections</a>
         <br>
-        {{form}}
-        {% else %}
+        {% endif %}
         <label for="id_transcript">Transcript:</label>
         <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript}}</textarea>
         <label for="id_translation">Translation:</label>
         <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation}}</textarea>
-        {% endif %}
       </div>
     </form>
 
@@ -327,7 +343,7 @@
   </style>
 
 
-  <script src="https://unpkg.com/wavesurfer.js@4.0.1/dist/wavesurfer.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js@4.2.0/dist/wavesurfer.js"></script>
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.min.js"></script>
   <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
   <script charset="utf-8"> // wavesurfer stuff
@@ -553,7 +569,7 @@
         // ([^abc] only works in the negative because the terms "a", "b", "c" are single-code-points)
         val = val.replace(valid_chars_regexp, end_error+'$&'+start_error);
         val = val.replace(/\n/g, '<br>');
-        val = val.replace(/ /g, '&nbsp;');
+        //val = val.replace(/ /g, '&nbsp;'); // was used to prevent multi-space shortening in html, maybe not needed
         val = start_word + start_error + val + end_error + end_word;
         val = val.split(start_word).join('<span class="word">');
         val = val.split(start_error).join('<span class="error">');
