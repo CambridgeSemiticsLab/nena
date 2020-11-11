@@ -8,7 +8,8 @@ from django.db.models import Q
 
 from common.utils import fixup, enum
 
-from legacy.models import Headers
+# removed dependency in 75224e - this migration will not run without it being reinstated
+# from legacy.models import Headers
 from grammar.models import Feature
 
 para = {0: '-', 1:'|'}
