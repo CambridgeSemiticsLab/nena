@@ -30,7 +30,8 @@ class AudioListView(ListView):
 def chunk_translation_text(audio):
     """ takes an Audio model and returns a (metadata, transcription_chunk, translation_chunk) list
     """
-    regex = '(\([1-9@].*?\))'
+    # This will match any term in round brackets which starts with 2/3 capital letters, or a number, or an @ symbol
+    regex = '(\((?:[A-Z]{2,3}|[0-9@]+).*?\))'
     transcript_chunks = re.split(regex, audio.transcript or '')
     if len(transcript_chunks) > 1:
         # if transcript_chunks[0] == '':
@@ -39,12 +40,19 @@ def chunk_translation_text(audio):
         text_chunks = zip_longest(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2],
                                   fillvalue='')
     else:
-        text_chunks = (('(@0:00)', audio.transcript, audio.translation),)
+        text_chunks = (('(0:00)', audio.transcript, audio.translation),)
 
     def parse_metadata(raw_string):
-        regex = '\((?P<section_number>\d+)? *(@(?P<timestamp>\d+:\d\d))?\)'
-        results = re.search(regex, raw_string)
-        return results.groupdict() if results else {'section_number': '', 'timestamp': ''}
+        section_number_match = re.search('(?<=[ \(])\d+(?=[ \)])', raw_string)
+        section_number = section_number_match.group(0) if section_number_match else ''
+
+        timestamp_match = re.search('(?<=[ @\(])\d+:\d{2}(?=[ \)])', raw_string)
+        timestamp = timestamp_match.group(0) if timestamp_match else ''
+
+        speaker_match = re.search('(?<=[ \(])[A-Z]{2,4}(?=[ \)])', raw_string)
+        speaker = speaker_match.group(0) if speaker_match else ''
+
+        return {'section_number': section_number, 'timestamp': timestamp, 'speaker': speaker}
 
     text_chunks = [[parse_metadata(x), y.strip() or '',z.strip() or ''] for x,y,z in text_chunks]
 

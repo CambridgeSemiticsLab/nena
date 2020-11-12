@@ -62,6 +62,7 @@
           <td class="meta-data-cell">
             <textarea {{form|yesno:',disabled'}} class="time-code">{{metadata.timestamp|default_if_none:''}}</textarea>
             <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" placeholder="&sect;">
+            <span class="speaker {{metadata.speaker|yesno:'set,'}}">👤{{metadata.speaker|default_if_none:''}}</span>
           </td>
           <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
@@ -267,6 +268,7 @@
     }
     .transcribe_form .time-code {
       width: 90%;
+      height: 1em;
       display: inline-block;
     }
     .transcribe_form .section-number {
@@ -285,7 +287,21 @@
     .transcribe_form .section-number:placeholder-shown {
       background-color: #eee;
     }
-
+    .transcribe_form .speaker {
+      position: absolute;
+      top: 44px;
+      right: 0px;
+      width: 40px;
+      height: 20px;
+      font-size: 0.8em;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0.3;
+    }
+    .transcribe_form .speaker.set {
+      opacity: 1;
+    }
 
     .editing .now-playing .meta-data-cell{
       position: relative;
@@ -503,11 +519,22 @@
 
     function compile_raw_text(textarea_idx){
       transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
-        textareas = $(this).find('textarea');
+        metadata = [];
         section_number = parseInt($(this).find('.section-number').val());
-        section_number = section_number ? section_number : '';
-        timecode = textareas.eq(0).val() ? '@' + textareas.eq(0).val() : '';
-        return `(${section_number} ${timecode})` + textareas.eq(textarea_idx).val();
+        if(section_number){
+          metadata.push(section_number)
+        }
+        timecode = $(this).find('.time-code').val()
+        if(timecode){
+          metadata.push(timecode)
+        }
+        speaker = $(this).find('.speaker').text().replace('👤', '')
+        if(speaker){
+          metadata.push(speaker)
+        }
+
+        textareas = $(this).find('textarea');
+        return "("+ metadata.join(" ") +")" + textareas.eq(textarea_idx).val();
       }).get()
       return transcript_bits.join('');
     }
@@ -524,6 +551,31 @@
 
     $(function(){
       $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
+
+      // update section speaker
+      $('body').on('click', '.speaker', function(){
+        initials = prompt("Please type the speaker's initials");
+
+        speakers_string = $('[name=speakers]').val();
+        speaker_list = speakers_string.split(',').reduce(function(result, item, index, array) {
+          [a, b] = item.split("=");
+          result[a.trim()] = b.trim();
+          return result;
+        }, {});
+
+        if(initials && initials.toUpperCase() in speaker_list === false)
+        {
+          name = prompt("'"+initials+"' not found in current speaker list. Enter their full name to add them to the list.");
+          if(name){
+            $('[name=speakers]').val(speakers_string+ ", "+initials+"="+name);
+          }else{
+            return false
+          }
+        }
+
+        $(this).text('👤' + initials);
+        $(this).toggleClass('set', initials != '');
+      })
 
       // expand textareas to fit contents
       $('body').on('keyup', 'textarea', function(){
