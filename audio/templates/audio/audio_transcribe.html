@@ -62,7 +62,9 @@
           <td class="meta-data-cell">
             <textarea {{form|yesno:',disabled'}} class="time-code">{{metadata.timestamp|default_if_none:''}}</textarea>
             <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" placeholder="&sect;">
-            <span class="speaker {{metadata.speaker|yesno:'set,'}}">👤{{metadata.speaker|default_if_none:''}}</span>
+            {% if form or metadata.speaker %}
+            <span class="speaker {{metadata.speaker|yesno:'set,'}} {{form|yesno:"editable,"}}">👤{{metadata.speaker|default_if_none:''}}</span>
+            {% endif %}
           </td>
           <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
@@ -553,7 +555,7 @@
       $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
 
       // update section speaker
-      $('body').on('click', '.speaker', function(){
+      $('body').on('click', '.speaker.editable', function(){
         initials = prompt("Please type the speaker's initials");
 
         speakers_string = $('[name=speakers]').val();
