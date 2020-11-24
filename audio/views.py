@@ -40,7 +40,7 @@ def chunk_translation_text(audio):
         text_chunks = zip_longest(transcript_chunks[1::2], transcript_chunks[2::2], translation_chunks[2::2],
                                   fillvalue='')
     else:
-        text_chunks = (('(0:00)', audio.transcript, audio.translation),)
+        text_chunks = (('(0:00)', audio.transcript or '', audio.translation or ''),)
 
     def parse_metadata(raw_string):
         section_number_match = re.search('(?<=[ \(])\d+(?=[ \)])', raw_string)
@@ -54,7 +54,7 @@ def chunk_translation_text(audio):
 
         return {'section_number': section_number, 'timestamp': timestamp, 'speaker': speaker}
 
-    text_chunks = [[parse_metadata(x), y.strip() or '',z.strip() or ''] for x,y,z in text_chunks]
+    text_chunks = [[parse_metadata(x), y.strip(), z.strip()] for x,y,z in text_chunks]
 
     if text_chunks[0][1] == '' and len(text_chunks) > 1:
         text_chunks = text_chunks[1:]
