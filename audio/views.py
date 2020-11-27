@@ -31,7 +31,8 @@ def chunk_translation_text(audio):
     """ takes an Audio model and returns a (metadata, transcription_chunk, translation_chunk) list
     """
     # This will match any term in round brackets which starts with 2/3 capital letters, or a number, or an @ symbol
-    regex = '(\((?:[A-Z]{2,3}|[0-9@]+).*?\))'
+    # it will also match empty round brackets, so: "()", "(GK ...)", "(12 ...)", "(1:23 ...)", "(@1:23 ...)"
+    regex = '(\((?:[A-Z]{2,3}.*?|[0-9@]+.*?|)\))'
     transcript_chunks = re.split(regex, audio.transcript or '')
     if len(transcript_chunks) > 1:
         # if transcript_chunks[0] == '':
