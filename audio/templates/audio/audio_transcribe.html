@@ -20,7 +20,7 @@
         <a class="button dull" href="{{ clip.data.url }}" target="blank" title="download audio file">
           <i class="material-icons">cloud_download</i> mp3
         </a>
-        <a class="button dull" href="{% static 'audio/corpus_export_template.docx' %}" target="blank" title="download transcript document">
+        <a class="button dull" href="{% static 'audio/corpus_export_template.docx' %}" target="blank" title="download transcription document">
           <i class="material-icons">cloud_download</i> docx
         </a>
       </div>
@@ -52,7 +52,7 @@
       <thead>
       <tr>
         <td><h2></h2></td>
-        <td><h2>Transcript</h2></td>
+        <td><h2>Transcription</h2></td>
         <td><h2>Translation</h2></td>
       </tr>
       </thead>
@@ -77,7 +77,7 @@
             <textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea>
             <input class="section-number" value="" placeholder="&sect;">
           </td>
-          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} placeholder="transcript" class="aramaic" spellcheck="false"></textarea></td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} placeholder="transcription" class="aramaic" spellcheck="false"></textarea></td>
           <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
         </tr>
       </tfoot>
@@ -110,7 +110,7 @@
         <a class="button compile">Compile the raw texts from the above sections</a>
         <br>
         {% endif %}
-        <label for="id_transcript">Transcript:</label>
+        <label for="id_transcript">Transcription:</label>
         <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript}}</textarea>
         <label for="id_translation">Translation:</label>
         <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation}}</textarea>
@@ -127,8 +127,8 @@
       <div style="background-color: #fec9; padding: 6px;">
         Staff-only buttons: <br>
         <a class="button" href="{% url 'audio:audio-edit' clip.id %}">Change audio file or title</a>
-        <a class="button" href="{% url 'audio:audio-transcribe' clip.id %}">Edit transcript or translation</a>
-        <a class="button" href="{% url 'audio:audio-delete' clip.id %}">Delete audio, transcript and translation</a>
+        <a class="button" href="{% url 'audio:audio-transcribe' clip.id %}">Edit transcription or translation</a>
+        <a class="button" href="{% url 'audio:audio-delete' clip.id %}">Delete audio, transcription and translation</a>
       </div>
     {% endif %}
   </div>
@@ -646,7 +646,6 @@
         last_char    = $(this).val().charAt(this.selectionStart-1);
         //console.log(last_char);
         $current_row = $(this).parents('tr').eq(0);
-        textarea_idx = $current_row.find('textarea').index($(this))
 
         if($current_row.find('.time-code').val()){
           set_now_playing($current_row);
@@ -675,40 +674,66 @@
         if(chosen_key == 'Enter' && last_char == '\n'){
           let val = $(this).val();
           cusor_position = this.selectionStart;
-          $(this).val(val.slice(0, cusor_position - 1).trim());
+          first_text = val.slice(0, cusor_position - 1).trim();
+          second_text = val.slice(cusor_position).trim();
+          $(this).val(first_text);
           $(this).css('height', '1px').trigger('keyup');
-          $next_row = $current_row.next();
-          if($next_row.length && !$next_row.find('textarea').eq(textarea_idx).val().trim().length)
-          {// if there's an empty box in the existing next row, fill it
-            $target_row = $next_row
-          }else{ // create a new row after the current one
-            $target_row = $blank_row.clone();
-            $current_row.after($target_row);
+          shuntTextDown(second_text, $(this))
+
+          function shuntTextDown(text, $textarea){
+            let $current_row = $textarea.parents('tr').eq(0);
+            let $next_row = $current_row.next();
+            let textarea_idx = $current_row.find('textarea').index($textarea)
+            if($next_row.length){ // if we're not at the last row shunt it's value down if needed
+              var $target_row = $next_row
+              $next_textarea = $next_row.find('textarea').eq(textarea_idx);
+              next_text = $next_textarea.val().trim();
+              if(next_text.length){
+                shuntTextDown(next_text, $next_textarea)
+              }
+            }else{ // create a new row after the current one
+              var $target_row = $blank_row.clone();
+              $current_row.after($target_row);
+            }
+            let $new_textarea = $target_row.find('textarea').eq(textarea_idx)
+
+            $new_textarea.focus();
+            $new_textarea.val(text);
+            $new_textarea[0].selectionEnd = 0;
+            $new_textarea[0].selectionStart = 0;
+            $new_textarea.trigger('keyup');
           }
-          $new_textarea = $target_row.find('textarea').eq(textarea_idx)
-          $new_textarea.focus().val(val.slice(cusor_position).trim());
-          $new_textarea[0].selectionStart = 0;
-          $new_textarea[0].selectionEnd = 0;
           return false;
         }
 
         if(chosen_key == 'Backspace' && last_char == '' && $current_row.prev().length){
           // merge textarea contents back into previous textareas
-          $prev_textareas = $current_row.prev().find('textarea:not(.time-code)');
+          shuntTextUp($(this))
+          function shuntTextUp($textarea){
+            console.log($textarea)
+            let $current_row = $textarea.parents('tr').eq(0);
+            let $prev_row = $current_row.prev();
+            let textarea_idx = $current_row.find('textarea').index($textarea)
 
-          $current_row.find('textarea:not(.time-code)').each(function(idx){
-            $prev_textarea = $prev_textareas.eq(idx)
-            prev_val = $prev_textarea.val();
-            $prev_textarea.val(prev_val + '\n' + $(this).val());
-            if($(this).is(':focus')){
+            $prev_textarea = $prev_row.find('textarea').eq(textarea_idx);
+            prev_text = $prev_textarea.val().trim();
+
+            $prev_textarea.val((prev_text + '\n' + $textarea.val()).trim());
+            $textarea.val('')
+            if($textarea.is(':focus')){
               $prev_textarea.focus();
-              $prev_textarea[0].selectionStart = prev_val.length + 1;
-              $prev_textarea[0].selectionEnd = prev_val.length + 1;
+              cursor_pos = prev_text.length;
+              if(prev_text.length){cursor_pos += 1;} // add an extra step to the cursor to account for joining newline
+              $prev_textarea[0].selectionStart = cursor_pos;
+              $prev_textarea[0].selectionEnd = cursor_pos;
             }
             $prev_textarea.trigger('keyup');
-          })
+            if($current_row.next().length){
+              shuntTextUp($current_row.next().find('textarea').eq(textarea_idx))
+            }
+          }
 
-          $current_row.remove();
+          //$current_row.remove();
           return false;
         }
 
