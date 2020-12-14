@@ -1,0 +1,777 @@
+{% extends 'nena.html' %}
+{% load static %}
+
+{% block subtitle %}
+    {{ object.dialect }}: {{ object.title }}
+{% endblock %}
+
+{% block page_content %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+
+
+    <div class="sticky-top-bar">
+      <button class="button play-button" data-action="play"><i class="material-icons">play_arrow</i></button>
+      {% if form %}
+      <div class="tip">Use backtick <a class="key_icon">`</a> and escape <a class="key_icon">Esc</a> keys to play and pause while editing section</div>
+      {% endif %}
+      <div id="waveform" class="loading"></div>
+      <div class="downloads">
+        <a class="button dull" href="{{ clip.data.url }}" target="blank" title="download audio file">
+          <i class="material-icons">cloud_download</i> mp3
+        </a>
+        <a class="button dull" href="{% static 'audio/corpus_export_template.docx' %}" target="blank" title="download transcription document">
+          <i class="material-icons">cloud_download</i> docx
+        </a>
+      </div>
+
+      <div id="playback-time">0:00</div>
+    </div>
+
+    <form class="transcribe_form {{form|yesno:'editing,'}}" action="" method="post">
+    {% csrf_token %}
+
+      <h2 style="margin-top:0.5em;">Metadata</h2>
+      {% for inline_field in inline_fields %}
+      <div class="inline_field">
+          {{ inline_field.errors }}
+          <label for="{{ inline_field.id_for_label }}">{{inline_field.label}}:</label>
+          {{ inline_field }}
+          {% if inline_field.help_text %}
+          <p class="help_text"><sup>&uarr;</sup> {{ inline_field.help_text }}</p>
+          {% endif %}
+      </div>
+      {% endfor %}
+      <style>
+        .inline_field label {height: initial; display: inline-block; width: 15%}
+        .inline_field input {height: initial; display: inline-block; width: 70%}
+        .inline_field .help_text{display: block; margin-left: 15%; padding-left: 6px; padding-top:0; width: 70%; font-size: 80%; opacity: 0.8; font-style:italic;}
+      </style>
+
+      <table class="translation_table">
+      <thead>
+      <tr>
+        <td><h2></h2></td>
+        <td><h2>Transcription</h2></td>
+        <td><h2>Translation</h2></td>
+      </tr>
+      </thead>
+      <tbody>
+        {% for metadata, transcript_chunk, translation_chunk in text_chunks %}
+        <tr>
+          <td class="meta-data-cell">
+            <textarea {{form|yesno:',disabled'}} class="time-code">{{metadata.timestamp|default_if_none:''}}</textarea>
+            <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" placeholder="&sect;">
+            {% if form or metadata.speaker %}
+            <span class="speaker {{metadata.speaker|yesno:'set,'}} {{form|yesno:"editable,"}}">👤{{metadata.speaker|default_if_none:''}}</span>
+            {% endif %}
+          </td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
+          <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="blank_row">
+          <td class="meta-data-cell">
+            <textarea {{form|yesno:',disabled'}} placeholder="time" class="time-code"></textarea>
+            <input class="section-number" value="" placeholder="&sect;">
+          </td>
+          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} placeholder="transcription" class="aramaic" spellcheck="false"></textarea></td>
+          <td><textarea {{form|yesno:',disabled'}} placeholder="translation"></textarea></td>
+        </tr>
+      </tfoot>
+      </table>
+
+      {% if form %}
+      <div class="sticky-bottom-bar">
+        <i class="material-icons">info</i>
+        • Use <a class="key_icon">Alt</a> + letter key to cycle through alternative characters
+        e.g. <a class="key_icon">Alt</a> + <a class="key_icon">a</a> &rarr; <a class="key_icon">ă</a>,
+        <a class="key_icon">Alt</a> + <a class="key_icon">t</a> &rarr; <a class="key_icon">ʦ</a>
+        <input class="button" type="submit" value="Save" style="float:right;"/>
+        <a class="button dull" href="{% url 'audio:audio-detail' form.instance.id %}" style="float:right;">Cancel</a>
+      </div>
+      <p>
+        &nbsp; &nbsp; &nbsp; • Use <a class="key_icon">`</a> to play current section from start, <a class="key_icon">Esc</a> to pause playback<br>
+        &nbsp; &nbsp; &nbsp; • If playback is stopped or next section has no start-time set, press <a class="key_icon">Esc</a> to use current playback position as start of next section<br>
+        &nbsp; &nbsp; &nbsp; • Use <a class="key_icon">Tab</a> and <a class="key_icon">Shft</a>+<a class="key_icon">Tab</a> to move through editing sections<br>
+        &nbsp; &nbsp; &nbsp; • Use <a class="key_icon">&uarr;</a> and <a class="key_icon">&darr;</a> to move between time inputs<br>
+        &nbsp; &nbsp; &nbsp; • Use <a class="key_icon">Ctrl</a> + <a class="key_icon">s</a> to save changes <br>
+      </p>
+      {% endif%}
+
+      <br>
+      <br>
+      <br>
+      show raw texts <input type="checkbox" class="pop_open chex">
+      <div>
+        {% if form %}
+        <a class="button compile">Compile the raw texts from the above sections</a>
+        <br>
+        {% endif %}
+        <label for="id_transcript">Transcription:</label>
+        <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript}}</textarea>
+        <label for="id_translation">Translation:</label>
+        <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation}}</textarea>
+      </div>
+    </form>
+
+  </div>
+  </div>
+
+  {% if not form %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+    {% if user.is_staff %}
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <a class="button" href="{% url 'audio:audio-edit' clip.id %}">Change audio file or title</a>
+        <a class="button" href="{% url 'audio:audio-transcribe' clip.id %}">Edit transcription or translation</a>
+        <a class="button" href="{% url 'audio:audio-delete' clip.id %}">Delete audio, transcription and translation</a>
+      </div>
+    {% endif %}
+  </div>
+  </div>
+  {% endif %}
+
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .material-icons { vertical-align: middle; }
+    .sticky-top-bar {
+      position:sticky;
+      top: 0;
+      background-color: #f7f4ed;
+      padding: 0.5em 0;
+      z-index: 11;
+      margin-left: -2em;
+      padding-left: 2em;
+    }
+    .sticky-bottom-bar {
+      position:sticky;
+      bottom: 0;
+      background-color: #f7f4ed;
+      padding: 0.5em 0 1em;
+      z-index: 10;
+    }
+    .play-button {
+      position: relative;
+      display: inline-block;
+      width: 2.6em;
+      height: 2.6em;
+      margin: 2em 0.7em;
+      border-radius: 50%;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0.5em 0;
+      z-index: 7;
+    }
+    .play-button + .tip {
+      display: none;
+      position: absolute;
+      left: 2em;
+      top: 3.8em;
+      background: #d18f00;
+      padding: 0.3em 1em 0.3em 2em;
+      color: white;
+      z-index: 6;
+    }
+    .play-button:hover + .tip {display: block;}
+    .key_icon,
+    .meta-data-cell:before,
+    .meta-data-cell:after {
+      background-color: #eee;
+      color: black;
+      font-size: 0.8em;
+      padding: 0.1em;
+      border-radius: 0.2em;
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      width: 2em;
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+    }
+    #playback-time {
+      position:absolute;
+      bottom: 0.5em;
+      left: 0.7em;
+      width: 3.4em;
+      text-align: center;
+      color: #3f801e;
+      font-size: 1.2em;
+    }
+    #waveform {
+      position: relative;
+      display: inline-block;
+      width: 80%;
+      vertical-align: middle;
+    }
+    #waveform.loading:before {
+      content: 'loading audio...';
+      position: absolute;
+      width: 100%;
+      top: 45%;
+      font-size: 3em;
+      text-align: center;
+      color: #aaa;
+    }
+    .downloads {
+      display: inline-block;
+      float: right;
+      width: 10%;
+      text-align: center;
+    }
+    .downloads > a {
+      margin-top: 1em;
+    }
+
+    .translation_table {
+      width: 100%;
+      border-bottom-width: 0!important;
+      margin-top: 2em;
+    }
+    .translation_table thead td {
+      padding: 0.5em;
+      background-color: white;
+    }
+    .translation_table tbody td {
+      padding: 0;
+      position: relative;
+      background-color: white;
+    }
+    .transcribe_form tbody, .transcribe_form thead {
+      background-color: white;
+    }
+
+    .transcribe_form textarea,
+    .transcribe_form .overlay {
+      width: 100%;
+      height: 100%;
+      min-height: 3em;
+      padding: 0.5em;
+      font-size: 1.3em;
+      line-height: 1.5em;
+      margin: 0!important;
+      background-color: transparent;
+      border-width: 0;
+      resize: none;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .transcribe_form .overlay {display: none;}
+    .transcribe_form.editing .overlay {display: block;}
+
+    .transcribe_form textarea:disabled {
+      cursor: text;
+    }
+    .translation_table textarea:disabled {
+      cursor: pointer;
+    }
+    .transcribe_form .time-code {
+      width: 90%;
+      height: 1em;
+      display: inline-block;
+    }
+    .transcribe_form .section-number {
+      position: absolute;
+      top: 7px;
+      right: 2px;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border-width: 0;
+      background-color: #aaa;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+    }
+    .transcribe_form .section-number:placeholder-shown {
+      background-color: #eee;
+    }
+    .transcribe_form .speaker {
+      position: absolute;
+      top: 44px;
+      right: 0px;
+      width: 40px;
+      height: 20px;
+      font-size: 0.8em;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0.3;
+    }
+    .transcribe_form .speaker.set {
+      opacity: 1;
+    }
+
+    .editing .now-playing .meta-data-cell{
+      position: relative;
+      z-index: 2;
+    }
+    .editing .now-playing .meta-data-cell:before,
+    .editing .now-playing .meta-data-cell:after{
+      content: '`';
+      position: absolute;
+      top: -1em;
+      left: -1.5em;
+      display: block;
+    }
+    .editing .now-playing .meta-data-cell:after{
+      content: 'Esc';
+      top: unset;
+      bottom: -0.5em;
+    }
+
+
+    .transcribe_form .overlay {
+      position: absolute;
+      background-color: transparent;
+      pointer-events: none;
+      color: rgba(255,255,0,0.0);
+    }
+    .transcribe_form .overlay .error,
+    .transcribe_form .overlay .word {
+      pointer-events: none;
+      display: inline-block;
+      position: relative;
+    }
+    .transcribe_form .overlay .error { background-color: rgba(255, 0, 0, 0.2);}
+    .transcribe_form .overlay .word  { background-color: rgba(0, 255, 0, 0.0);}
+
+    .translation_table tr.now-playing td {
+      background-color: #cef;
+    }
+
+
+    .translation_table tfoot .blank_row {
+      display: none;
+    }
+
+    .translation_table tr > td:nth-child(1) {
+      width: 10%;
+    }
+    .translation_table td {
+      width: auto;
+    }
+
+    .pop_open + * { display: none;}
+    .pop_open:checked + * { display: block; margin: 2em 0;}
+
+  </style>
+
+
+  <script src="https://unpkg.com/wavesurfer.js@4.2.0/dist/wavesurfer.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.min.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js"></script>
+  <script charset="utf-8"> // wavesurfer stuff
+    var wavesurfer;
+
+    function time_string_to_seconds(time_string){
+      // takes str("1:23") and returns int(83)
+      if(matches = time_string.match(/(\d+):(\d+)/))
+      {
+        return matches[1]*60 + matches[2]*1;
+      }
+      return false;
+    }
+
+    function seconds_to_time_string(seconds){
+      // takes int(83) and returns str("1:23")
+      return parseInt(time/60) + ':' + parseInt(time%60).toString().padStart(2, '0');
+    }
+
+    function set_now_playing(row){
+      if(row.hasClass('now-playing')){
+        return;
+      }
+      $('.now-playing').removeClass('now-playing');
+      row.addClass('now-playing');
+      [start_seconds, end_seconds] = get_start_end_seconds(row);
+
+      region = false;
+      for(i in wavesurfer.regions.list){
+        region = wavesurfer.regions.list[i];
+      }
+      if(region && region.start == start_seconds && region.end == end_seconds){
+        // don't recreate region
+      }else{
+        wavesurfer.clearRegions();
+        wavesurfer.addRegion({
+          start: start_seconds,
+          end: end_seconds,
+          color: "rgba(200, 230, 255, 0.4)",
+          drag: false,
+          resize: false,
+          loop: false,
+        });
+      }
+    }
+
+    function get_start_end_seconds(row){
+      region_buffer = 0.1 // a fraction of a second buffer to prevent end of one region from spilling into the next
+      start_seconds = time_string_to_seconds(row.find('.time-code').val());
+      next_time_code = false;
+      row.nextAll().find('.time-code').each(function(){
+        if($(this).val()){
+          next_time_code = $(this).val();
+          return false;
+        }
+      });
+      end_seconds = next_time_code ? time_string_to_seconds(next_time_code) - region_buffer : wavesurfer.getDuration();
+      return [start_seconds, end_seconds];
+    }
+
+
+    $(function(){
+      // audio visualisation
+      wavesurfer = WaveSurfer.create({
+          container: '#waveform',
+          progressColor: '#aaa',
+          cursorColor: '#d18f00',
+          cursorWidth: '3px',
+          waveColor: '#3f801e',
+          loopSelection: true,
+          normalize: false,
+          responsive: true,
+          barRadius: 0,
+          barHeight: 1.3,
+          barWidth: 0,
+          plugins: [
+            WaveSurfer.cursor.create({}),
+            WaveSurfer.regions.create({})
+          ],
+      });
+      wavesurfer.load('{{ clip.data.url }}');
+      var button = document.querySelector('[data-action="play"]');
+      button.addEventListener('click', wavesurfer.playPause.bind(wavesurfer));
+
+      button.addEventListener('mousedown', function(){ // return focus to previously focussed element if button clicked
+        var return_focus_to = document.activeElement
+        window.setTimeout(function(){return_focus_to.focus()}, 10);
+      })
+
+      wavesurfer.on('pause', function () {
+        button.innerHTML = '<i class="material-icons">play_arrow</i>';
+      });
+      wavesurfer.on('play', function () {
+        button.innerHTML = '<i class="material-icons">pause</i>';
+      });
+      wavesurfer.on('ready', function () {
+        $('#waveform').removeClass('loading');
+      });
+      window.setInterval(function(){
+        time = wavesurfer.getCurrentTime();
+        $('#playback-time').html(seconds_to_time_string(time));
+
+       $($('tbody tr').get().reverse()).each(function(){
+        time_code = $(this).find('.time-code').val();
+        if(!time_code){
+          return;
+        }
+        if(time_string_to_seconds(time_code) <= time){
+          set_now_playing($(this));
+          return false;
+        }
+       })
+
+      }, 100);
+
+      // playback for viewing not editing
+      $('.translation_table').on('mouseup', 'textarea:disabled', function(){
+        $row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds($row);
+        if(start_seconds !== false){
+          wavesurfer.play(start_seconds, end_seconds);
+        }
+      });
+
+      // playback for editing
+      $('.translation_table').on('focus', 'textarea', function(){
+        $row = $(this).parents('tr').eq(0);
+        [start_seconds, end_seconds] = get_start_end_seconds($row);
+        if(start_seconds !== false){
+          current_time = wavesurfer.getCurrentTime();
+          if(wavesurfer.isPlaying() && current_time >= start_seconds && current_time <= end_seconds){
+            // don't jump the time around if we're already playing the section in focus
+          }else{
+            wavesurfer.setCurrentTime(start_seconds);
+          }
+        }
+        wavesurfer.setPlayEnd(end_seconds);
+      });
+
+    })
+  </script>
+  <script charset="utf-8"> // text management stuff
+    var alt_characters = {
+      'a': 'āăáàắ',
+      'e': 'əē',
+      'i': 'ī',
+      'o': 'ð',
+      'u': 'ū',
+      'c': 'č',
+      'd': 'ḍʣ',
+      'h': 'ḥ',
+      'r': 'ṛ',
+      's': 'ṣšʦθ',
+      't': 'ṭʦ',
+      "'": "ʾʿ",
+    };
+
+    function compile_raw_text(textarea_idx){
+      transcript_bits = $('.transcribe_form tbody tr').map(function(idx){
+        metadata = [];
+        section_number = parseInt($(this).find('.section-number').val());
+        if(section_number){
+          metadata.push(section_number)
+        }
+        timecode = $(this).find('.time-code').val()
+        if(timecode){
+          metadata.push(timecode)
+        }
+        speaker = $(this).find('.speaker').text().replace('👤', '')
+        if(speaker){
+          metadata.push(speaker)
+        }
+
+        textareas = $(this).find('textarea');
+        return "("+ metadata.join(" ") +")" + textareas.eq(textarea_idx).val();
+      }).get()
+      return transcript_bits.join('');
+    }
+
+    function compile_raw_texts(){
+      $('[name="transcript"]').val(compile_raw_text(1));
+      $('[name="translation"]').val(compile_raw_text(2));
+    }
+
+    $.fn.focusEnd = function(){
+      $(this)[0].selectionStart = $(this).val().length;
+      return $(this).focus();
+    }
+
+    $(function(){
+      $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
+
+      // update section speaker
+      $('body').on('click', '.speaker.editable', function(){
+        initials = prompt("Please type the speaker's initials");
+
+        speakers_string = $('[name=speakers]').val();
+        speaker_list = speakers_string.split(',').reduce(function(result, item, index, array) {
+          [a, b] = item.split("=");
+          result[a.trim()] = b.trim();
+          return result;
+        }, {});
+
+        if(initials && initials.toUpperCase() in speaker_list === false)
+        {
+          name = prompt("'"+initials+"' not found in current speaker list. Enter their full name to add them to the list.");
+          if(name){
+            $('[name=speakers]').val(speakers_string+ ", "+initials+"="+name);
+          }else{
+            return false
+          }
+        }
+
+        $(this).text('👤' + initials);
+        $(this).toggleClass('set', initials != '');
+      })
+
+      // expand textareas to fit contents
+      $('body').on('keyup', 'textarea', function(){
+        elem = $(this)[0]
+        if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
+      })
+      window.setTimeout(function(){$('textarea').trigger('keyup')}, 10);
+      $('textarea').eq(1).focusEnd();
+
+      // form compilation and saving
+      $('.transcribe_form').on('submit', compile_raw_texts)
+      $('.compile').on('click', compile_raw_texts);
+
+
+      // Valid regex set by Nena format standards: https://github.com/CambridgeSemiticsLab/nena_corpus/blob/8dfcf53/standards/NFD_regexes.json
+      valid_chars_regexps = {
+          "alphabet": "(b|B|c|C|č|Č|c̭|C̭|č̣|Č̣|č̭|Č̭|d|D|ḍ|Ḍ|f|F|g|G|ġ|Ġ|h|H|ḥ|Ḥ|j|J|k|K|k̭|K̭|l|L|ḷ|Ḷ|m|M|ṃ|Ṃ|n|N|p|P|p̣|P̣|p̭|P̭|q|Q|r|R|ṛ|Ṛ|s|S|š|Š|ṣ|Ṣ|t|T|ṭ|Ṭ|ṱ|Ṱ|v|V|w|W|x|X|y|Y|z|Z|ž|Ž|ẓ|Ẓ|ð|Ð|ð̣|Ð̣|ɟ|ʾ|ʿ|θ|Θ|a|A|à|À|á|Á|ā|Ā|ă|Ă|ā̀|Ā̀|ā́|Ā́|ằ|Ằ|ắ|Ắ|e|E|è|È|é|É|ē|Ē|ḕ|Ḕ|ḗ|Ḗ|i|I|ì|Ì|í|Í|ī|Ī|ī̀|Ī̀|ī́|Ī́|o|O|ò|Ò|ó|Ó|ō|Ō|ṑ|Ṑ|ṓ|Ṓ|u|U|ù|Ù|ú|Ú|ū|Ū|ŭ|Ŭ|ū̀|Ū̀|ū́|Ū́|ŭ̀|Ŭ̀|ŭ́|Ŭ́|ə|Ə|ə̀|Ə̀|ə́|Ə́|ɛ|Ɛ|ɛ̀|Ɛ̀|ɛ́|Ɛ́|ɛ̄|Ɛ̄)(?![̀-ͯ])",
+          "punctuation": "⁺|\"|\\ |\\-|=|ˈ|,|\\.\\.\\.|:|—|;|\\.|\\?|!|\"| "
+      };
+      alphabet = valid_chars_regexps['alphabet'].normalize('NFD');
+      punctuation = valid_chars_regexps['punctuation'].normalize('NFD');
+      valid_chars_regexp = new RegExp("(("+alphabet+")|("+punctuation+"))+", "g");
+
+      // keep overlays up to date with their textareas
+      $('form.editing').on('change keyup', 'textarea', function(e){
+        if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
+          // alt+arrow just cycles the last character so we don't need to re-validate
+          return true;
+        }
+
+        let val = $(this).val().normalize('NFD');
+        // these delimiters are composed of valid characters but unlikely to appear in the actual texts
+        // thus they can be injected into the content without breaking validation then replaced with spans later
+        start_word  = '!!START-WORD!!'
+        start_error = '!!START-ERROR!!'
+        end_word    = '!!END-WORD!!'
+        end_error   = '!!END-ERROR!!'
+        // each word will be wrapped in a span tag to let us mimic the wrapping behaviour of the textarea
+        val = val.replace(/([\s-…]+)/g, end_word+'$1'+start_word);
+        // each run of valid characters closes the previos error context and opens a new on at its end
+        // we originally planned to (more logically) search for runs of invalid chars and wrap them
+        // but regex matching for not(this|that) is non-trivial for multi-code-point terms
+        // ([^abc] only works in the negative because the terms "a", "b", "c" are single-code-points)
+        val = val.replace(valid_chars_regexp, end_error+'$&'+start_error);
+        val = val.replace(/\n/g, '<br>');
+        //val = val.replace(/ /g, '&nbsp;'); // was used to prevent multi-space shortening in html, maybe not needed
+        val = start_word + start_error + val + end_error + end_word;
+        val = val.split(start_word).join('<span class="word">');
+        val = val.split(start_error).join('<span class="error">');
+        val = val.split(end_word).join('</span>');
+        val = val.split(end_error).join('</span>');
+        $(this).siblings('.overlay').html(val);
+      })
+
+      // keyboard shortcuts for non-keyboard characters (eg. ā ă á à e ə ē ī ð ū č ḍ ṭ ṣ š ḥ ʦ ʣ θ ṛ ʾ ʿ)
+      function simulate_typing_string(input, string, replace_last_n_chars = 0){
+        start = input.selectionStart - replace_last_n_chars;
+        $(input).val($(input).val().slice(0, start) + string + $(input).val().slice(input.selectionEnd));
+        input.selectionStart = start + string.length;
+        input.selectionEnd = start + string.length;
+      }
+
+      // keyboard management for textareas
+      $('body').on('keydown', 'textarea', function(e){
+        chosen_key   = e.key;
+        last_char    = $(this).val().charAt(this.selectionStart-1);
+        //console.log(last_char);
+        $current_row = $(this).parents('tr').eq(0);
+
+        if($current_row.find('.time-code').val()){
+          set_now_playing($current_row);
+        }
+
+        if(chosen_key == '`'){
+          [start_seconds, end_seconds] = get_start_end_seconds($current_row);
+          wavesurfer.play(start_seconds, end_seconds);
+          return false;
+        }
+
+        if(chosen_key == 'Escape'){
+          playback_stopped = !wavesurfer.isPlaying()
+          wavesurfer.pause();
+          if(!$current_row.next().length){
+            $current_row.after($blank_row.clone());
+          }
+          $next_time_code = $current_row.next().find('.time-code').eq(0);
+          if(!$next_time_code.val() || playback_stopped){
+            $next_time_code.val(seconds_to_time_string(wavesurfer.getCurrentTime()));
+            $next_time_code.focus();
+          }
+          return false;
+        }
+
+        if(chosen_key == 'Enter' && last_char == '\n'){
+          let val = $(this).val();
+          cusor_position = this.selectionStart;
+          first_text = val.slice(0, cusor_position - 1).trim();
+          second_text = val.slice(cusor_position).trim();
+          $(this).val(first_text);
+          $(this).css('height', '1px').trigger('keyup');
+          shuntTextDown(second_text, $(this))
+
+          function shuntTextDown(text, $textarea){
+            let $current_row = $textarea.parents('tr').eq(0);
+            let $next_row = $current_row.next();
+            let textarea_idx = $current_row.find('textarea').index($textarea)
+            if($next_row.length){ // if we're not at the last row shunt it's value down if needed
+              var $target_row = $next_row
+              $next_textarea = $next_row.find('textarea').eq(textarea_idx);
+              next_text = $next_textarea.val().trim();
+              if(next_text.length){
+                shuntTextDown(next_text, $next_textarea)
+              }
+            }else{ // create a new row after the current one
+              var $target_row = $blank_row.clone();
+              $current_row.after($target_row);
+            }
+            let $new_textarea = $target_row.find('textarea').eq(textarea_idx)
+
+            $new_textarea.focus();
+            $new_textarea.val(text);
+            $new_textarea[0].selectionEnd = 0;
+            $new_textarea[0].selectionStart = 0;
+            $new_textarea.trigger('keyup');
+          }
+          return false;
+        }
+
+        if(chosen_key == 'Backspace' && last_char == '' && $current_row.prev().length){
+          // merge textarea contents back into previous textareas
+          shuntTextUp($(this))
+          function shuntTextUp($textarea){
+            console.log($textarea)
+            let $current_row = $textarea.parents('tr').eq(0);
+            let $prev_row = $current_row.prev();
+            let textarea_idx = $current_row.find('textarea').index($textarea)
+
+            $prev_textarea = $prev_row.find('textarea').eq(textarea_idx);
+            prev_text = $prev_textarea.val().trim();
+
+            $prev_textarea.val((prev_text + '\n' + $textarea.val()).trim());
+            $textarea.val('')
+            if($textarea.is(':focus')){
+              $prev_textarea.focus();
+              cursor_pos = prev_text.length;
+              if(prev_text.length){cursor_pos += 1;} // add an extra step to the cursor to account for joining newline
+              $prev_textarea[0].selectionStart = cursor_pos;
+              $prev_textarea[0].selectionEnd = cursor_pos;
+            }
+            $prev_textarea.trigger('keyup');
+            if($current_row.next().length){
+              shuntTextUp($current_row.next().find('textarea').eq(textarea_idx))
+            }
+          }
+
+          //$current_row.remove();
+          return false;
+        }
+
+        if($(this).hasClass('time-code')){
+          if(chosen_key == 'ArrowUp'){
+            $current_row.prev().find('.time-code').select();
+          }else if(chosen_key == 'ArrowDown'){
+            $current_row.next().find('.time-code').select();
+          }
+        }
+
+        if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
+          // alt+arrow just cycles the last character
+          for(i in alt_characters){
+            if(i == last_char || alt_characters[i].indexOf(last_char) >= 0){
+              chosen_key = i;
+              break;
+            }
+          }
+        }
+
+        if(e.altKey && chosen_key in alt_characters) {
+          alts = chosen_key + alt_characters[chosen_key]
+          idx = alts.indexOf(last_char);
+          replace_length = idx < 0 ? 0 : 1;
+          simulate_typing_string(this, alts[(idx+1)%alts.length], replace_length);
+          e.preventDefault();
+          return false;
+        }
+
+        if(e.ctrlKey && chosen_key == 's') {
+          $(this).parents('form').submit();
+          return false;
+        }
+      })
+
+    });
+  </script>
+
+
+{% endblock %}

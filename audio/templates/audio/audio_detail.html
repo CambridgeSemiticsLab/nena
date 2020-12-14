@@ -12,26 +12,17 @@
     {% if clip.transcript %}
       <table class="translation_table">
       <tr>
-        {% if text_chunks %}
         <td class="heading" ></td>
-        {% endif %}
         <td><h2>Transcript</h2></td>
         <td><h2>Translation</h2></td>
       </tr>
-      {% if text_chunks %}
-        {% for heading, transcript_chunk, translation_chunk in text_chunks %}
-        <tr>
-          <td class="heading {% if '@' in heading %}jump_to_time{% endif %}">{{heading|safe}}</p></td>
-          <td><p class="aramaic">{{transcript_chunk|safe}}</p></td>
-          <td><p>{{translation_chunk|safe}}</p></td>
-        </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td><p class="aramaic">{{ clip.transcript|safe|linebreaksbr }}</p></td>
-          <td><p>{{ clip.translation|safe|linebreaksbr }}</p></td>
-        </tr>
-      {% endif %}
+      {% for heading, transcript_chunk, translation_chunk in text_chunks %}
+      <tr>
+        <td class="heading {% if '@' in heading %}jump_to_time{% endif %}">{{heading|safe}}</td>
+        <td><p class="aramaic">{{transcript_chunk|safe|linebreaksbr}}</p></td>
+        <td><p>{{translation_chunk|safe|linebreaksbr}}</p></td>
+      </tr>
+      {% endfor %}
       </table>
     {% else %}
       <p>
@@ -47,8 +38,9 @@
     {% if user.is_staff %}
       <div style="background-color: #fec9; padding: 6px;">
         Staff-only buttons: <br>
-        <a class="button" href="{% url 'audio:audio-edit' object.pk %}">Edit audio and transcription</a>
-        <a class="button" href="{% url 'audio:audio-delete' object.pk %}">Delete audio and transcription</a>
+        <a class="button" href="{% url 'audio:audio-edit' object.pk %}">Change audio file or title</a>
+        <a class="button" href="{% url 'audio:audio-transcribe' object.pk %}">Edit transcript or translation</a>
+        <a class="button" href="{% url 'audio:audio-delete' object.pk %}">Delete audio, transcript and translation</a>
       </div>
     {% endif %}
   </div>

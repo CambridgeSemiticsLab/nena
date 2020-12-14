@@ -12,18 +12,12 @@
 {% block page_content %}
     {% block content_column_2 %}
         <div class='campl-column6'>
-            <form class="audio_form" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+            <form class="audio_form df_form" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
                 {{ form.media }}
                 {% for field in form %}
-                <p>
-                  {# todo - maybe add annotations back in once they're better spec'd #}
-                  {% if field.html_name == 'annotations' %}
-                    <div style="display: none;">
-                      {{ field.errors }}
-                      {{ field.label_tag }}
-                      {{ field }}
-                    </div>
-                  {% elif field.html_name == 'transcript' %}
+                  {% if field.html_name == 'transcript' %}
                     {{ field.errors }}
                     {{ field.label_tag }}
                     <p style="font-style: italic; font-size: 0.7em; line-height: 1.2em">
@@ -35,15 +29,23 @@
                       (2@0:14) Second paragraph.
                     </p>
                     {{ field|add_class:"aramaic" }}
-                  {% else %}
-                    {{ field.errors }}
-                    {{ field.label_tag }}
-                    {{ field }}
                   {% endif %}
-                </p>
+                  {% if field.errors %}
+                    <tr><td colspan=2>{{ field.errors }}</td></tr>
+                  {% endif %}
+                  <tr>
+                    <td>{{ field.label_tag }}</td>
+                    <td>{{ field }}</td>
+                  </tr>
                 {% endfor %}
-                <input class="button" type="submit" value="Save" />
+                <tr><td></td><td><input class="button" type="submit" value="Save" /></td></tr>
+            </table>
             </form>
         </div>
+    <style>
+      #id_description {width: 100%;}
+      .audio_form table {margin: 1em 1em 3em; border-bottom-width: 0;}
+      .audio_form td {padding: 0.5em 1em; background-color: transparent;}
+    </style>
     {% endblock %}
 {% endblock %}

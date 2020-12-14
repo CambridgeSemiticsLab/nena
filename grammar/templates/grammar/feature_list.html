@@ -152,7 +152,8 @@
         {% elif dialects %}
           {% for dialectfeature in dialectfeatures %}
             <div class="example dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.id feature.fullheading %}">
-                {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialectfeature.dialect_id df=dialectfeature feature_heading=feature.fullheading%}
+              <span class="hidden-delimiter">,</span>
+              {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialectfeature.dialect_id df=dialectfeature feature_heading=feature.fullheading%}
             </div>
           {% empty %}
             {% if feature.fullheading %}
@@ -271,6 +272,13 @@
     z-index: 2;
     overflow: hidden;
     white-space: pre;
+  }
+
+  .hidden-delimiter {
+    display: inline-block;
+    opacity: 0;
+    width: 1px;
+    overflow: hidden;
   }
   </style>
 
