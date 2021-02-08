@@ -73,6 +73,7 @@ celerybeat-schedule
 
 # Environments
 .env
+.env.safe*
 .venv
 env/
 venv/
@@ -87,5 +88,8 @@ database
 
 # static files
 media/
+/media-snapshot
 /static/
 staticfiles/
+
+/secrets
