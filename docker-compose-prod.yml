@@ -16,7 +16,7 @@ services:
     environment:
       - DJANGO_READ_DOT_ENV_FILE=True
       - DJANGO_SETTINGS_MODULE=common.settings.production
-    command: ["sh", "-c", "/usr/local/bin/gunicorn --bind=0.0.0.0:80 common.mythic --reload"]
+    command: ["sh", "-c", "/usr/local/bin/gunicorn --bind=0.0.0.0:80 common.wsgi --reload"]
   db:
     image: mariadb:10.1
     expose:
