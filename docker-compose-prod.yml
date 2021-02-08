@@ -4,9 +4,9 @@ services:
     build:
       context: .
     expose:
-      - 8000
+      - 80
     ports:
-      - 80:8000
+      - 80:80
     links:
       - db:db
     volumes:
@@ -15,7 +15,8 @@ services:
       - db
     environment:
       - DJANGO_READ_DOT_ENV_FILE=True
-    command: ["sh", "-c", "/usr/local/bin/gunicorn --bind=0.0.0.0:8000 common.mythic --reload"]
+      - DJANGO_SETTINGS_MODULE=common.settings.production
+    command: ["sh", "-c", "/usr/local/bin/gunicorn --bind=0.0.0.0:80 common.mythic --reload"]
   db:
     image: mariadb:10.1
     expose:
