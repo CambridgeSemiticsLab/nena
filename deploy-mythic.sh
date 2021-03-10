@@ -1,6 +1,4 @@
 #!/bin/bash
-# Get rid of old docker images (does not take down running containers)
-docker system prune ${@:1:1}
 
 git fetch
 
@@ -17,8 +15,7 @@ then
 else
     git checkout .env.example
     git pull
-    docker-compose -f docker-compose-prod.yml up -d --build --remove-orphans
-    docker exec -t app_nena_1 python /usr/src/app/manage.py migrate
-    docker exec -t app_nena_1 python /usr/src/app/manage.py collectstatic --no-input
+    python manage.py migrate
+    python manage.py collectstatic --no-input
     ./set-updated-date.sh
 fi
