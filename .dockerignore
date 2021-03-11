@@ -1,0 +1,10 @@
+/secrets/*
+!README.txt
+db.sqlite3
+.env
+*.env
+.git
+/database
+/media
+/static
+/logs

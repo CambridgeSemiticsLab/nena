@@ -116,46 +116,6 @@ class DialectDetailView(DetailView):
         })
         return context
 
-class DialectListJSONView(ListView):
-
-    name = 'Dialects'
-    model = Dialect
-
-    def get_context_data(self, **kwargs):
-        context = super(DialectListJSONView, self).get_context_data(**kwargs)
-        return context
-
-    def render_to_response(self, context):
-        data = {'type': 'FeatureCollection', 'features': []}
-        for d in context['object_list']:
-            if d.latitude and d.longitude:
-                data['features'].append({
-                    "id": d.pk,
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [d.longitude, d.latitude]},
-                        "properties": {
-                            "name": d.name,
-                            "community": d.community,
-                            "url": d.get_absolute_url(),
-                        }
-                    })
-        return JsonResponse(data, safe=False)
-
-class DialectDetailJSONView(DetailView):
-    name = 'Dialects'
-    model = Dialect
-
-    def get_context_data(self, **kwargs):
-        context = super(DialectDetailJSONView, self).get_context_data(**kwargs)
-        return context
-
-    def render_to_response(self, context):
-        for d in [context['dialect']]:
-            data = {"id": d.pk, "type": "Feature", "geometry": {"type": "Point", "coordinates": [d.longitude, d.latitude]}, "properties": {"name": d.name, "community": d.community, "url": d.get_absolute_url(), 'focus': True}}
-            return JsonResponse(data, safe=False)
-
 class DialectCreateView(CreateView):
     model = Dialect
     fields = ['name', 'code', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']

@@ -1,12 +1,10 @@
 version: '3'
 services:
-  nena:
+  app:
     build:
       context: .
-    expose:
-      - 8000
     ports:
-      - 8000:8000
+      - 8000:80
     links:
       - db:db
     volumes:
@@ -14,11 +12,14 @@ services:
     depends_on:
       - db
     environment:
-      - DJANGO_READ_DOT_ENV_FILE=True
+      - DJANGO_DB_HOST=db
+      - DJANGO_DB_PORT=3306
+      - DJANGO_DB_DEFAULT_USER=root
+      - DJANGO_DB_DEFAULT_PASSWORD=
+      - GS_PROJECT_ID=
+    command: /usr/local/bin/gunicorn --bind=0.0.0.0:80 common.wsgi --reload
   db:
     image: mariadb:10.1
-    expose:
-      - 3306
     volumes:
       - ./database:/docker-entrypoint-initdb.d  # Place init .sql file(s) here.
       - mariadb_data:/var/lib/mysql

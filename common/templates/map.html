@@ -1,6 +1,7 @@
 {#  optional parameters taken by this template:                                                       #}
 {#  - `map_data_json` is a json string containing a plottable set of data consumed by `L.geoJSON()`   #}
 {#  - `map_center` is a two value list (longitude, latitude)                                          #}
+{% load static %}
 
 {% if not hide_toggles %}
 <input type="checkbox" id="toggle-names">
@@ -16,7 +17,7 @@
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
-<script src="/static/js/borders.js"></script>
+<script src="{% static 'js/borders.js' %}"></script>
 <script>
 
     var normalmap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.{ext}', {

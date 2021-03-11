@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from legacy.admin import legacyadmin
 from django.views.generic import TemplateView, RedirectView
 from django.conf import settings
 from django.contrib.auth import views as auth_views
@@ -33,27 +32,13 @@ urlpatterns = [
     url(r'^accounts/non-raven$', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
 #    url(r'^accounts/logout$', auth_views., {'next_page': '/'}, name='logout'),
     url(r'^admin/', admin.site.urls),
-    url(r'^legacy/', legacyadmin.urls),
     url(r'^dialects/', include(('dialects.urls'), namespace='dialects')),
     url(r'^dialectmaps/', include(('dialectmaps.urls'), namespace='dialectmaps')),
     url(r'^grammar/', include(('grammar.urls'), namespace='grammar')),
-
-    url(r'^api/', include('api.urls', namespace='api')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/v1/', include(('dialects.api'), namespace='api-v1')),
-    url(r'^api/v1/dialects/', include(('dialects.api'), namespace='api-dialects')),
-    url(r'^api/v1/dialectmaps/', include(('dialectmaps.api'), namespace='api-dialectmaps')),
-    url(r'^api/v1/grammar/', include(('grammar.api'), namespace='api-grammar')),
-
     url(r'^audio/', include(('audio.urls'), namespace='audio')),
     url(r'^gallery/', include(('gallery.urls'), namespace='gallery')),
 ]
 
-if not settings.USE_AWS_S3:
-    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-if settings.USE_SILK and settings.DEBUG:
-    urlpatterns = [
-        url(r'^silk/', include('silk.urls', namespace='silk')),
-    ] + urlpatterns
+if not settings.GS_PROJECT_ID:  # if we're not using Google Storages to serve files, serve them locally
+    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
+                              + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

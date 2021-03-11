@@ -1,3 +1,4 @@
+{% load static %}
 <div id="map" style='min-height: 500px'></div>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
@@ -10,8 +11,8 @@
             popupAnchor:  [0,0]
         }
     });
-    var jewishIcon    = new dialectIcon({iconUrl:'/static/images/smalldot.png', shadowUrl: '/static/images/smalldotshadow.png'}),
-        christianIcon = new dialectIcon({iconUrl:'/static/images/smallsquare.png', shadowUrl: '/static/images/smallsquareshadow.png'});
+    var jewishIcon    = new dialectIcon({iconUrl:'{% static "images/smalldot.png" %}', shadowUrl: '{% static "images/smalldotshadow.png" %}'}),
+        christianIcon = new dialectIcon({iconUrl:'{% static "images/smallsquare.png" %}', shadowUrl: '{% static "images/smallsquareshadow.png" %}'});
 
     var refcities = [
         { "name": "Van", "lat": 34.1613074, "long": 51.0460015 },

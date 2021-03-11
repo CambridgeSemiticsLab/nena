@@ -16,7 +16,6 @@ import environ
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
 WEBROOT_DIR = environ.Path(__file__) - 4
-APPS_DIR = BASE_DIR
 
 env = environ.Env()
 
@@ -29,9 +28,8 @@ if READ_DOT_ENV_FILE:
 
 
 DEBUG    = env.bool('DJANGO_DEBUG', False)
-USE_SILK = False
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
-USE_AWS_S3 = env.bool('DJANGO_USE_AWS_S3', False)
 
 ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', default='').split(',')
 
@@ -43,7 +41,6 @@ DJANGO_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
 )
 
@@ -52,19 +49,12 @@ THIRD_PARTY_APPS = (
     'imagekit',
     'ucamprojectlight',
     'ucamwebauth',
-    'ckeditor',
-    'rest_framework',
-    'django_filters',
+    'storages',
     'widget_tweaks',
 )
 
-if USE_AWS_S3:
-    THIRD_PARTY_APPS = THIRD_PARTY_APPS + ('storages',)
-
 LOCAL_APPS = (
     'common',
-    'legacy',
-    'api',
     'dialects',
     'grammar',
     'dialectmaps',
@@ -111,6 +101,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'common.wsgi.application'
 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('DJANGO_DB_DEFAULT_NAME'),
+        'USER': env('DJANGO_DB_DEFAULT_USER'),
+        'PASSWORD': env('DJANGO_DB_DEFAULT_PASSWORD'),
+        'HOST': env('DJANGO_DB_HOST', default='localhost'),
+        'PORT': env('DJANGO_DB_PORT', default='3306'),
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB;',
+            'sql_mode': 'STRICT_TRANS_TABLES',
+        },
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -134,44 +140,34 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = 'en-gb'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = str(BASE_DIR('static'))
-#STATICFILES_DIRS = (
-#    str(APPS_DIR.path('static')),
-#)
+GS_PROJECT_ID = env('GS_PROJECT_ID', default=None) # Set in .env if we're using Google Storage for site assets
+if GS_PROJECT_ID: # Files are stored and served from a bucket in Google Cloud Storage
+    DEFAULT_FILE_STORAGE = 'common.storage_backends.GoogleCloudMediaStorage'
+    STATICFILES_STORAGE = 'common.storage_backends.GoogleCloudStaticStorage'
+    GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+    GS_STATIC_BUCKET_NAME = GS_BUCKET_NAME
+    GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
+    STATIC_URL = 'https://storage.googleapis.com/{}/'.format(GS_STATIC_BUCKET_NAME)
+    MEDIA_URL = 'https://storage.googleapis.com/{}/'.format(GS_MEDIA_BUCKET_NAME)
+else: # Files are stored and served locally
+    STATIC_ROOT = str(BASE_DIR.path('static'))
+    STATIC_URL = '/static/'
+    MEDIA_ROOT = str(BASE_DIR.path('media'))
+    MEDIA_URL = '/media/'
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-MEDIA_URL = '/media/'
-MEDIA_ROOT = str(APPS_DIR('media'))
 
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAdminUser',
-    ),
-#    'DEFAULT_FILTER_BACKENDS': (
-#        'django_filters.rest_framework.DjangoFilterBackend',
-#        'rest_framework.filters.OrderingFilter',
-#    ),
-}
 
 LAST_UPDATED_DATE = env('DJANGO_LAST_UPDATED_DATE', default='')
 GOOGLE_ANALYTICS_REFERENCE = env('DJANGO_GOOGLE_ANALYTICS_REFERENCE', default=None)

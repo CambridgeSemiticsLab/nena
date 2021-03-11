@@ -1,27 +1,27 @@
-FROM python:3.5-slim
+FROM python:3.8-slim
 
 WORKDIR /usr/src/app
 
 # Install additional Debian packages
 RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
-        vim python3 python3-pip python3-dev default-libmysqlclient-dev \
-        openssl libssl-dev libjpeg-dev zlib1g-dev
+        python3 python3-pip default-libmysqlclient-dev \
+        libjpeg-dev zlib1g-dev wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy MWS webapp
-COPY . /usr/src/app
+# download the cloudsql proxy
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
+    -q --show-progress -O /usr/src/cloud_sql_proxy
+# make cloudsql proxy executable
+RUN chmod +x /usr/src/cloud_sql_proxy
+
+COPY requirements requirements
 
 # Update pip and install Python dependencies.
-RUN pip install --upgrade -r requirements/local.txt
+RUN pip install --upgrade -r requirements/production.txt --no-cache-dir
 
-# Add volumes to allow overriding container contents with local directories for
-# development.
-VOLUME ["/usr/src/app"]
+COPY . /usr/src/app
 
-# Environment variables to override Django settings module and default database
-# configuration. Note: at least DJANGO_DB_PASSWORD should be set.
-ENV DJANGO_SETTINGS_MODULE=common.settings.local \
-    DJANGO_DB_HOST=db \
-    DJANGO_READ_DOT_ENV_FILE=True
+RUN date +'%d %b %Y' > /usr/src/build-date.txt
 
-EXPOSE 8000
-CMD ["sh", "-c", "/usr/local/bin/gunicorn --bind=0.0.0.0:8000 common.wsgi --reload"]
+EXPOSE 80
+CMD ["/usr/src/app/run.sh"]

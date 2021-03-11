@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load latestupdate %}
 
 {% block head_title %}
 NENA
@@ -47,10 +48,12 @@ developed by fixbork
 </div-->
 {% endblock %}
 {% block footer2 %}
-<div>
-{% if LAST_UPDATED_DATE %}
-<b>Last updated</b><br />{{LAST_UPDATED_DATE}}
+<div style="text-align: right;">
+{% date_updated as date_updated %}
+{% if date_updated %}
+<b>Last updated</b><br>{{date_updated}}
 {% endif %}
+
 </div>
 {% endblock %}
 {% block global_footer %}{% endblock %}

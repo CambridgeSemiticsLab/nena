@@ -1,40 +1,6 @@
 from .base import *
 
-SECRET_KEY = env('DJANGO_SECRET_KEY')
-
 DEBUG = env.bool('DJANGO_DEBUG', default=False)
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DJANGO_DB_DEFAULT_NAME'),
-        'USER': env('DJANGO_DB_DEFAULT_USER'),
-        'PASSWORD': env('DJANGO_DB_DEFAULT_PASSWORD'),
-        'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': 'SET default_storage_engine=INNODB;',
-            'sql_mode': 'STRICT_TRANS_TABLES',
-        },
-    },
-    # 'legacy': {
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': env('DJANGO_DB_LEGACY_NAME'),
-        # 'USER': env('DJANGO_DB_LEGACY_USER'),
-        # 'PASSWORD': env('DJANGO_DB_LEGACY_PASSWORD'),
-        # 'HOST': env('DJANGO_DB_HOST', default='localhost'),
-        # 'PORT': '3306',
-        # 'OPTIONS': {
-            # 'sql_mode': 'STRICT_TRANS_TABLES',
-            # 'init_command': 'SET '
-                # 'storage_engine=INNODB,'
-                # 'character_set_connection=utf8,'
-                # 'collation_connection=utf8_bin'
-        # },
-    # },
-}
-
-DATABASE_ROUTERS = ['legacy.router.LegacyRouter']
 
 UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
@@ -63,12 +29,3 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 -----END CERTIFICATE-----
 """}
 
-
-if USE_AWS_S3:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_ACCESS_KEY_ID = env('DJANGO_AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = env('DJANGO_AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = env('DJANGO_AWS_STORAGE_BUCKET_NAME')
-    #AWS_S3_ENDPOINT_URL = env('DJANGO_AWS_S3_ENDPOINT_URL')
-    AWS_DEFAULT_ACL = env('DJANGO_AWS_DEFAULT_ACL', default='private')
-    AWS_S3_REGION_NAME = env('DJANGO_AWS_S3_REGION_NAME', default='eu-west-2')
