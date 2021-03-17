@@ -338,7 +338,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
                 raw_rows.append('')
                 continue
 
-            dialect_idx = 1 if base_dialect_id else 0
+            dialect_idx = -1 if base_dialect_id else 0
             entries     = dialectfeatures[dialect_idx].get('entries', [])
             raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
 
