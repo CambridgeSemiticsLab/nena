@@ -37,6 +37,7 @@ urlpatterns = [
     url(r'^grammar/', include(('grammar.urls'), namespace='grammar')),
     url(r'^audio/', include(('audio.urls'), namespace='audio')),
     url(r'^gallery/', include(('gallery.urls'), namespace='gallery')),
+    url('django-github-push-deploy/', include('django_github_push_deploy.urls')),
 ]
 
 if not settings.GS_PROJECT_ID:  # if we're not using Google Storages to serve files, serve them locally

@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 # Install additional Debian packages
 RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
         python3 python3-pip default-libmysqlclient-dev \
-        libjpeg-dev zlib1g-dev wget \
+        libjpeg-dev zlib1g-dev wget git \
     && rm -rf /var/lib/apt/lists/*
 
 # download the cloudsql proxy

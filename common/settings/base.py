@@ -51,6 +51,7 @@ THIRD_PARTY_APPS = (
     'ucamwebauth',
     'storages',
     'widget_tweaks',
+    'django_github_push_deploy',
 )
 
 LOCAL_APPS = (
@@ -168,6 +169,9 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
+# django_github_push_deploy settings
+GITHUB_DEPLOY_KEY  = env('GITHUB_DEPLOY_KEY', default='')
+DEPLOY_COMMAND     = env('DEPLOY_COMMAND', default='')
 
 LAST_UPDATED_DATE = env('DJANGO_LAST_UPDATED_DATE', default='')
 GOOGLE_ANALYTICS_REFERENCE = env('DJANGO_GOOGLE_ANALYTICS_REFERENCE', default=None)
