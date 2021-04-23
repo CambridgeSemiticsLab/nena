@@ -291,6 +291,7 @@
 
 
   {% if user.is_staff %}
+  {% if user.is_superuser %}{# the only menu option at this time is just for superusers, so hide whole thing from everyone else #}
   <div class='campl-column12'>
   <div class="campl-content-container">
       <div style="background-color: #fec9; padding: 6px;">
@@ -299,5 +300,6 @@
       </div>
   </div>
   </div>
+  {% endif %}
   {% endif %}
 {% endblock %}
