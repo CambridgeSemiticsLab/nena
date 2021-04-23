@@ -31,6 +31,7 @@
     <form class="transcribe_form {{form|yesno:'editing,'}}" action="" method="post">
     {% csrf_token %}
 
+      {% if form %}
       <h2 style="margin-top:0.5em;">Metadata</h2>
       {% for inline_field in inline_fields %}
       <div class="inline_field">
@@ -47,6 +48,37 @@
         .inline_field input {height: initial; display: inline-block; width: 70%}
         .inline_field .help_text{display: block; margin-left: 15%; padding-left: 6px; padding-top:0; width: 70%; font-size: 80%; opacity: 0.8; font-style:italic;}
       </style>
+      {% else %}
+      <style>
+        #metadata_table {
+          margin-top: 1em;
+          border-bottom: 0px solid transparent;
+          background-color: transparent;
+        }
+        #metadata_table tbody {
+          background-color: transparent;
+        }
+        #metadata_table th, #metadata_table td{
+          padding: 0.3em;
+          text-align: left;
+          background-color: transparent!important;
+        }
+      </style>
+      <table id="metadata_table"style="width: 100%;">
+        <tr>
+          <th>Transcribed by</th>
+          <th>Source</th>
+          <th>Speakers</th>
+          <th>Place</th>
+        </tr>
+        <tr>
+          <td>{{clip.transcriber|default_if_none:"-"}}</td>
+          <td>{{clip.source|default_if_none:"-"}}</td>
+          <td>{{clip.speakers|default_if_none:"-"}}</td>
+          <td>{{clip.place|default_if_none:"-"}}</td>
+        </tr>
+      </table>
+      {% endif %}
 
       <table class="translation_table">
       <thead>
