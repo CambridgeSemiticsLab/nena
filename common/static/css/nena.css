@@ -559,11 +559,16 @@ a.plain {
         border-bottom: 1px solid var(--dull);
 }
 #grammar_tree .pop_open {
-        display:none
+        display: none;
         }
+#grammar_tree .pop_open + ul {
+            transition: max-height 1s;
+            transition-timing-function: ease-out;
+            }
 #grammar_tree .pop_open:checked + ul {
-            max-height:50000px;
+            max-height:250000px;
             transition: max-height 5s;
+            transition-timing-function: ease-in;
             }
 /* li contents */
 #grammar_tree li > label {
