@@ -90,7 +90,7 @@
       </thead>
       <tbody>
         {% for metadata, transcript_chunk, translation_chunk in text_chunks %}
-        <tr>
+        <tr id="{{forloop.counter}}">
           <td class="meta-data-cell">
             <textarea {{form|yesno:',disabled'}} class="time-code">{{metadata.timestamp|default_if_none:''}}</textarea>
             <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" placeholder="&sect;">
@@ -375,6 +375,9 @@
       background-color: #cef;
     }
 
+    .translation_table tr:target td {
+      background-color: #fec;
+    }
 
     .translation_table tfoot .blank_row {
       display: none;
@@ -455,7 +458,7 @@
     }
 
 
-    $(function(){
+    function initWavesurfer(){
       // audio visualisation
       wavesurfer = WaveSurfer.create({
           container: '#waveform',
@@ -533,7 +536,7 @@
         wavesurfer.setPlayEnd(end_seconds);
       });
 
-    })
+    }
   </script>
   <script charset="utf-8"> // text management stuff
     var alt_characters = {
@@ -586,6 +589,23 @@
     $(function(){
       $blank_row = $($('.blank_row').eq(0)[0].outerHTML);
 
+      initWavesurfer();
+
+      // highlight chosen row if there's a section hash in the url
+      hash = window.location.hash;
+      if(hash){
+        window.setTimeout(function(){
+            $target_row = $(hash);
+            $target_row.addClass('url-hash-target');
+            var scrollto = $target_row.offset().top - $('.sticky-top-bar').height() - 50;
+            $('html, body').animate({scrollTop:scrollto}, 0);
+            // set_now_playing($target_row); // this seems to break browser's scroll-to-target
+          }, 20);
+      }else{
+        $('textarea').eq(1).focusEnd();
+      }
+
+
       // update section speaker
       $('body').on('click', '.speaker.editable', function(){
         initials = prompt("Please type the speaker's initials");
@@ -617,7 +637,6 @@
         if (elem.clientHeight < elem.scrollHeight) elem.style.height=elem.scrollHeight+"px";
       })
       window.setTimeout(function(){$('textarea').trigger('keyup')}, 10);
-      $('textarea').eq(1).focusEnd();
 
       // form compilation and saving
       $('.transcribe_form').on('submit', compile_raw_texts)
