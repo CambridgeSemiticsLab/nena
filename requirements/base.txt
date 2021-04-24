@@ -11,4 +11,4 @@ django-ucamprojectlight==1.1
 django-ucamwebauth==1.5.0
 Pillow==8.1.1
 django-widget-tweaks==1.4.8
-git+https://github.com/jamespstrachan/django-github-push-deploy.git@8d09ecb31e5ac6a17bb68135439b50508354564e
+git+https://github.com/jamespstrachan/django-github-push-deploy.git@43da910e17101152626c642849e2ac2e8cb98379
