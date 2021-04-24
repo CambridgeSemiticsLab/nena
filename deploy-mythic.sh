@@ -21,5 +21,5 @@ else
     python manage.py collectstatic --no-input
     deactivate
     ./set-updated-date.sh
-    service apache2 restart
+    apache2ctl graceful
 fi
