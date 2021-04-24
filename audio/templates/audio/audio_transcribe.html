@@ -652,11 +652,22 @@
       punctuation = valid_chars_regexps['punctuation'].normalize('NFD');
       valid_chars_regexp = new RegExp("(("+alphabet+")|("+punctuation+"))+", "g");
 
+      // a dict of invalid characters which are always automatically replaced by their valid equivalent
+      autocorrect_dict = {
+        '+': '⁺',
+        '|': 'ˈ',
+      }
+
       // keep overlays up to date with their textareas
       $('form.editing').on('change keyup', 'textarea', function(e){
+        chosen_key = e.key;
         if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
           // alt+arrow just cycles the last character so we don't need to re-validate
           return true;
+        }
+
+        for(bad_char in autocorrect_dict){
+          $(this).val($(this).val().split(bad_char).join(autocorrect_dict[bad_char]));
         }
 
         let val = $(this).val().normalize('NFD');
@@ -814,6 +825,13 @@
           e.preventDefault();
           return false;
         }
+
+        //// no longer do this on keydown, replace whole box on keyup to account for pasted errors consistently
+        //if(chosen_key in autocorrect_dict) {
+        //  simulate_typing_string(this, autocorrect_dict[chosen_key]);
+        //  e.preventDefault();
+        //  return false;
+        //}
 
         if(e.ctrlKey && chosen_key == 's') {
           $(this).parents('form').submit();
