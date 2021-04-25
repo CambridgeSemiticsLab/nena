@@ -140,12 +140,14 @@
       <div>
         {% if form %}
         <a class="button compile">Compile the raw texts from the above sections</a>
+        <a class="button save-raw" style="background-color: red;">Save raw text below without compiling from above</a>
         <br>
         {% endif %}
         <label for="id_transcript">Transcription:</label>
-        <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript}}</textarea>
+        <textarea name="transcript" cols="40" rows="10" id="id_transcript" {{form|yesno:',disabled'}}>{{clip.transcript|default_if_none:""}}</textarea>
         <label for="id_translation">Translation:</label>
-        <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation}}</textarea>
+        <textarea name="translation" cols="40" rows="10" id="id_translation" {{form|yesno:',disabled'}}>{{clip.translation|default_if_none:""}}</textarea>
+
       </div>
     </form>
 
@@ -285,12 +287,12 @@
       font-size: 1.3em;
       line-height: 1.5em;
       margin: 0!important;
-      background-color: transparent;
       border-width: 0;
       resize: none;
       overflow-wrap: break-word;
       white-space: pre-wrap;
     }
+    .translation_table textarea, .translation_table .overlay {background-color: transparent;}
     .transcribe_form .overlay {display: none;}
     .transcribe_form.editing .overlay {display: block;}
 
@@ -639,8 +641,20 @@
       window.setTimeout(function(){$('textarea').trigger('keyup')}, 10);
 
       // form compilation and saving
-      $('.transcribe_form').on('submit', compile_raw_texts)
       $('.compile').on('click', compile_raw_texts);
+      $('.transcribe_form').on('submit', function(){
+          if(!$(this).hasClass('no-compile')){
+            compile_raw_texts();
+          }
+        })
+      $('.save-raw').on('click', function(){
+          let answer = confirm("Do you want to force save based on the raw text below? "+
+                               "Any edits made using the editor above will not be saved. \n\n "+
+                               "Only click 'OK' if you know what you're doing!")
+          if(answer){
+            $('.transcribe_form').addClass('no-compile').trigger('submit');
+          }
+        });
 
 
       // Valid regex set by Nena format standards: https://github.com/CambridgeSemiticsLab/nena_corpus/blob/8dfcf53/standards/NFD_regexes.json
