@@ -123,6 +123,7 @@
         <div class='folder'></div>
         <input type="checkbox" class="pop_open" id="pop_open_{{forloop.counter}}"
           {%if feature_list|length < 100%}checked{%endif%}
+          {%if bulk_edit%}checked{%endif%}
           {%if info.level < 2 %}checked{%endif%}
           >
         <ul>
@@ -147,7 +148,7 @@
 
         {% if bulk_edit %}
           {% if forloop.first %}
-          <textarea class="df_edit_bulk utf8-text" name="bulk_edit" rows="{{feature_list|length|add:'-1'}}">{{raw_text}}</textarea>
+          <textarea class="df_edit_bulk utf8-text" name="bulk_edit" rows="{{feature_list|length|add:'-1'}}">{{raw_text|safe}}</textarea>
           {% endif %}
         {% elif dialects %}
           {% for dialectfeature in dialectfeatures %}
@@ -262,16 +263,23 @@
   <style>
   .df_edit_bulk {
     position:absolute;
-    top: 1.5em;
+    top: 2.1em;
     right:0;
     width: 50%;
     height: initial;
     background-color: #fec;
-    line-height: 201%;
-    font-size: 1.5em;
+    line-height: 39px;
+    font-size: 1em;
     z-index: 2;
     overflow: hidden;
     white-space: pre;
+  }
+
+  #grammar_tree.bulk_edit li {
+    max-height: none!important;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--dull);
+    padding: 0 2px;
   }
 
   .hidden-delimiter {

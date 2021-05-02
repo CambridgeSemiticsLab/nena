@@ -223,7 +223,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
 
     # annotated lists are an efficient way of getting a big chunk of a treebeard tree
     # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
-    max_depth    = chosen_root.depth + 1 if is_bulk_edit else None
+    max_depth    = None
     feature_list = Feature.get_annotated_list(parent=chosen_root, max_depth=max_depth)
 
     # process bulk save if that's what's happening
@@ -282,7 +282,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
 
 
     examples_dict = {}
-    if is_bulk_edit:  # Only provide entries at one level for bulk edit (can't bulk edit in subfolders)
+    if is_bulk_edit:
         entries = entries.filter(feature__feature__depth=max_depth)
     elif len(dialects) == 1:
         examples = DialectFeatureExample.objects.filter(feature__dialect__in=dialect_ids) \
@@ -342,10 +342,11 @@ def features_of_dialect(request, dialect_id_string, section=None):
             entries     = dialectfeatures[dialect_idx].get('entries', [])
             raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
 
-        raw_text = '\n'.join(raw_rows)
+        # join using html newline entity to prevent textarea ignoring first newline char
+        # see: https://stackoverflow.com/a/49604548
+        raw_text = '&#13;'.join(raw_rows)
         context.update({
-            'raw_text':     raw_text,
-            'example_text': 'kaθu  P "he writes" ~ kaθ <span style="color:red">M</span>',
+            'raw_text': raw_text,
         })
     if chosen_root:
         context['total_features'] = DialectFeature.objects.filter(dialect__in=dialect_ids).count()
