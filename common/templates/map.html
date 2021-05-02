@@ -44,7 +44,7 @@
 
     var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
     var map     = L.map('map',{layers: [cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
-    var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
+    //var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
 
     map.addControl(new L.Control.Fullscreen());
 
