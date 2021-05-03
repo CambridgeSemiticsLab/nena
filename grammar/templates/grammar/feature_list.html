@@ -263,13 +263,14 @@
   <style>
   .df_edit_bulk {
     position:absolute;
-    top: 2.1em;
+    top: 2.2em;
+    padding: 0.3em;
     right:0;
     width: 50%;
     height: initial;
-    background-color: #fec;
-    line-height: 39px;
+    background-color: #feca;
     font-size: 1em;
+    line-height: 2.5em;
     z-index: 2;
     overflow: hidden;
     white-space: pre;
@@ -279,7 +280,16 @@
     max-height: none!important;
     white-space: nowrap;
     border-bottom: 1px solid var(--dull);
+    margin-bottom: -1px;
+    background-color: transparent;
     padding: 0 2px;
+  }
+
+  #grammar_tree li > label {
+    font-size: 1em;
+    line-height: 2.5em;
+    padding: 0em 0 0em 48px;
+    margin: 0;
   }
 
   .hidden-delimiter {
