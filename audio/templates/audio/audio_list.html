@@ -15,6 +15,8 @@
             <thead>
                 <tr>
                     <th>Title</th>
+                    <th>Source</th>
+                    <th>Text&nbsp;ID</th>
                     <th>Dialect</th>
                     <th>Transcript</th>
                     <th>Translation</th>
@@ -23,6 +25,8 @@
         {% for clip in clips %}
             <tr>
                 <td><a href="{% url 'audio:audio-detail' clip.id %}">{{ clip.title }}</a></td>
+                <td>{{ clip.source|default_if_none:"" }}</td>
+                <td>{{ clip.text_id|default_if_none:"" }}</td>
                 <td><a href="{% url 'dialects:dialect-detail' clip.dialect__id %}">{{ clip.dialect__name }}</a></td>
                 <td style="text-align: center;">{{ clip.transcript|yesno:"✔," }}</td>
                 <td style="text-align: center;">{{ clip.translation|yesno:"✔," }}</td>

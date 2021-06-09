@@ -462,6 +462,7 @@ def problems(request):
         ('no_past_base',     '^ *No, general past base only *$'),
         ('no_stative',       '^ *No: General stative participle only *$'),
         ('no_loanwords',     '^ *No, restricted to loanwords *$'),
+        ('loanwords',        'loan'),
         ('not_present',      '^ *XXX *$'),
         ('blank',            '^ *$'),
         ('unsure',           '^\?*$'),

@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
+from django.db.models import F
 
 from audio.models import Audio
 from dialects.models import Dialect, DialectFeatureEntry
@@ -22,9 +23,9 @@ class AudioListView(ListView):
     context_object_name = 'clips'
 
     def get_queryset(self):
-        return Audio.objects.all().values('id', 'title', 'transcript', 'translation',
+        return Audio.objects.all().values('id', 'title', 'source', 'text_id', 'transcript', 'translation',
                                           'dialect__id', 'dialect__name') \
-                                  .order_by('dialect__name', 'title')
+                                  .order_by('dialect__name', F('text_id').asc(nulls_last=True), 'title')
 
 
 def chunk_translation_text(audio):
