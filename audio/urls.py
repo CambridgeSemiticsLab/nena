@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^new$', audio.views.AudioCreateView.as_view(), name='audio-create'),
     url(r'^(?P<pk>[0-9]+)/edit$', audio.views.AudioUpdateView.as_view(), name='audio-edit'),
     url(r'^(?P<pk>[0-9]+)/transcribe$', audio.views.AudioTranscribeView.as_view(), name='audio-transcribe'),
+    url('nena-compile', audio.views.nena_compile_all, name='nena-compile-all'),
     url(r'^(?P<pk>[0-9]+)/delete$', audio.views.AudioDeleteView.as_view(), name='audio-delete'),
 ]
 

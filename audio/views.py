@@ -2,7 +2,7 @@ import re
 from itertools import zip_longest
 
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from django.db.models import F
+from django.contrib import messages
 
 from audio.models import Audio
 from dialects.models import Dialect, DialectFeatureEntry
@@ -135,6 +136,18 @@ class AudioTranscribeView(AudioUpdateView):
             'inline_fields': (context['form'][f] for f in ('transcriber', 'source', 'text_id', 'speakers', 'place'))
             })
         return context
+
+
+@login_required
+def nena_compile_all(request):
+    audios = Audio.objects.filter(transcript__isnull=False)
+    num_transcripts = audios.count()
+    audios = audios.filter(dialect__code__isnull=False)
+    num_complete = audios.count()
+    for audio in audios:
+        audio.nena_compile()
+    messages.add_message(request, messages.INFO, "{} of {} corpus entries compiled to .nena format".format(num_complete, num_transcripts))
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @method_decorator(login_required, name='dispatch')
