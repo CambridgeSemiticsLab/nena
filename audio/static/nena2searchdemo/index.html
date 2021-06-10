@@ -1,0 +1,172 @@
+
+<html> 
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title></title>
+		<link rel="stylesheet" href="layered.css"/>
+		<script defer src="jquery.js"></script>
+		<script defer src="configdata.js"></script>
+		<script defer src="layered.js"/></script>
+		<script defer src="corpusdata.js"></script>
+	</head>
+	<body>
+    <div class="page">
+      <div class="leftcol">
+        <div class="progress" id="progress">
+          Javascript has not yet kicked in.<br>
+          Downloading corpus ...<br>
+        </div>
+        <details>
+          <summary id="title"></summary>
+          <div id="description"></div>
+          <details><summary><i>guide</i></summary>
+            <div>
+              <p>This is a <i>layered</i> search interface.</p>
+              <p>You can search the corpus by specifying search patterns
+              for one or more <i>layers</i> of the corpus. 
+              The result set are the pieces of the corpus that satisfy all patterns.</p>
+              <p>The patterns you specify must be valid <i>regular expressions</i>
+              according to the JavaScript language. Here is a 
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet" target="_blank">cheatsheet</a>.</p>
+              <p>Here is more
+              <a href="https://annotation.github.io/text-fabric/tf/about/layeredsearch.html" target="_blank">background</a>
+              on layered search.</p>
+            </div>
+          </details>
+        </details>
+        <div id="jobs">
+          <input
+            type="file" name="imjname" id="imjname"
+            accept="application/json"
+            class="import"
+          >
+          <button
+            type="button" class="medium active" id="importj"
+            title="import job from file"
+          >↑</button>
+          <button
+            type="button" class="medium active" id="deletej"
+            title="delete current job"
+          >-</button>
+          <select class="selinp" id="jchange"></select>
+          <button
+            type="button" class="medium active" id="newj"
+            title="fresh new job"
+          >+</button>
+          <button
+            type="button" class="medium active" id="renamej"
+            title="rename current job"
+          >→</button>
+          <button
+            type="button" class="medium active" id="dupj"
+            title="duplicate current job"
+          >++</button>
+          <button
+            type="button" class="medium active" id="exportj"
+            title="export job to file"
+          >↓</button>
+        </div>
+        <form>
+        <div id="query">
+          <table id="querytable">
+            <tbody id="querybody">
+            </tbody>
+          </table>
+        </div>
+        <div id="results">
+          <div id="execute">
+            <button
+                type="submit" accesskey="g" title="Enter or Ctr-Opt-G go search"
+                class="dirty" id="go"
+            >go search</button>
+            <button
+                type="button" class="medium active" id="exportr"
+                title="export all results to tab-separated file"
+            >↓</button>
+          </div>
+          <div id="resultoverview" class="cols">
+            <div id="stats">
+              <table>
+                <colgroup>
+                  <col align="left">
+                  <col align="right">
+                </colgroup>
+                <thead id="statshead">
+                  <tr><th>level</th><th>total</th><th>results</th></tr>
+                </thead>
+                <tbody id="statsbody">
+                </tbody>
+              </table>
+            </div>
+            <div id="settings">
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+      <div class="midcol">
+        <div id="setterw">
+          <div>focus:</div>
+          <input
+            accesskey="m" title="Ctr-Opt-M manual input"
+            type="number"
+            name="setter" id="setter"
+            min="1" max="1" step="1"
+            value="1"
+          >
+        </div>
+        <div class="upnav">
+          <button
+              type="button" accesskey="p" title="Ctr-Opt-P previous one"
+              class="small" id="minp"
+          >↑</button>
+          <button
+              type="button" accesskey="b" title="Ctr-Opt-B backward screen"
+              class="small" id="min2p"
+          >↑↑</button>
+          <button
+              type="button" accesskey="s" title="Ctr-Opt-S start of results"
+              class="small" id="mina"
+          >┳</button>
+        </div>
+        <div class="downnav">
+          <button
+              type="button" accesskey="n" title="Ctr-Opt-N next one"
+              class="small" id="maxp"
+          >↓</button>
+          <button
+              type="button" accesskey="f" title="Ctr-Opt-F forward screen"
+              class="small" id="max2p"
+          >↓↓</button>
+          <button
+              type="button" accesskey="e" title="Ctr-Opt-E end of results"
+              class="small" id="maxa"
+          >┻</button>
+        </div>
+        <div id="totalw">
+          total: <span id="total">0</span>
+        </div>
+        <div id="sliderw" class="swrapper">
+          <input
+            type="range"
+            name="slider" id="slider"
+            min="1" max="1" step="1"
+            value="1"
+          >
+        </div>
+      </div>
+      <div class="rightcol">
+        <table id="resultstable">
+          <thead id="resultshead">
+            <th>n</th>
+            <th>in</th>
+            <th>result</th>
+          </thead>
+          <tbody id="resultsbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

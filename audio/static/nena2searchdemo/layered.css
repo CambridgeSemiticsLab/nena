@@ -1,0 +1,492 @@
+/* GENERIC STUFF */
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body, td, th {
+  font-family: sans-serif;
+}
+
+table {
+  border-collapse: separate ! important;
+  border-spacing: 0;
+}
+
+input {
+  border-radius: 3px;
+}
+
+button {
+  font-size: medium;
+}
+
+/* PAGE DIVISION INTO COLUMNS */
+
+div.page {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	align-items: flex-start;
+	width: 99vw;
+	height: 99vh;
+}
+
+div.leftcol {
+	flex: 0 0 35rem;;
+	border-right: 1pt solid var(--fog-rim);
+	padding-left: 4px;
+	padding-right: 8px;
+	height: 99vh;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+div.midcol {
+	flex: 0 0 7rem;
+	padding-left: 8px;
+	padding-right: 8px;
+	height: 99vh;
+  overflow: visible;
+	-webkit-overflow-scrolling: touch;
+}
+div.rightcol {
+	flex: 1 1 auto;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+	align-items: stretch;
+	border-left: 1pt solid var(--fog-rim);
+	padding-left: 8px;
+	padding-right: 4px;
+	height: 99vh;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* LEFT COLUMN */
+
+/* short messages during initialization */
+
+#progress {
+  font-family: monospace;
+  font-size: x-large;
+  background-color: var(--initializing);
+}
+
+#title {
+  font-weight: bold;
+  font-size: large;
+  text-align: center;
+}
+
+/* main division of right column */
+
+#query, #results, #jobs {
+  border: 0.15rem solid var(--panel-border);
+  border-radius: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.2rem;
+  margin: 1rem 0.2rem;
+}
+
+/* secondary division of parts of right column */
+
+.cols {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+/* left column jobs section */
+
+/* input type="file" control is hidden */
+#imjname {
+  display: none;
+}
+
+/* buttons and inputs for job control, im/export */
+
+#jobs {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+
+#jobaction {
+  border-radius: 0.5rem;
+  background-color: var(--ctlinp-back);
+  margin-left: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+button.medium {
+  border-radius: 0.5rem;
+  color: var(--inactive-fore);
+  background-color: var(--inactive-back);
+  font-size: medium;
+  font-weight: medium;
+  margin: 0.1rem;
+  padding: 0.4rem;
+  border: solid 0.1rem var(--button-back);
+}
+.cntinp {
+  font-family: monospace;
+  color: var(--ctlinp-fore);
+  background-color: var(--ctlinp-back);
+  font-size: large;
+  width: 7rem;
+}
+.selinp {
+  width: 18rem;
+  font-family: monospace;
+  color: var(--ctlinp-fore);
+  background-color: var(--ctlinp-back);
+  font-size: large;
+}
+
+/* left column query section */
+
+#querytable {
+  width: 100%;
+}
+#querybody td {
+  border-style: solid;
+  border-color: var(--white);
+  border-width: 2px;
+}
+#querybody tr.qtype > td {
+  border-color: var(--query-border);
+  background-color: var(--query-back);
+}
+#querybody tr.qtypelast > td {
+}
+
+/* expand buttons in the query table for levels (node types) */
+.expand {
+  border-radius: 0.2rem;
+  padding: 0.2rem;
+  border-width: 0;
+  color: var(--txtbtn-off-fore);
+  background-color: var(--txtbtn-off-back);
+}
+.expand.on {
+  color: var(--txtbtn-off-fore);
+  background-color: var(--txtbtn-off-back);
+}
+.expand.no {
+  background-color: var(--query-back);
+}
+/* entries in the query table for levels (node types) */
+.unit {
+  border-radius: 0.2rem;
+  padding: 0.2rem;
+  border-width: 0;
+  color: var(--txtbtn-off-fore);
+  background-color: var(--txtbtn-off-back);
+}
+.unit.on {
+  color: var(--txtbtn-on-fore);
+  font-weight: bold;
+  background-color: var(--txtbtn-on-back);
+}
+.lvcell {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+/* the name of a level (node type) */
+.lv {
+  background-color: var(--level-back);
+  border-radius: 0.3rem;
+  font-weight: bold;
+}
+/* the name of a layer */
+.lyr {
+  background-color: var(--layer-back);
+  border-radius: 0.1rem;
+  padding: 0.2rem 0rem;
+  margin: 0.2rem 0rem;
+}
+/* the entry of a regex (search pattern) */
+.pattern {
+  font-size: large;
+  color: var(--cntinp-fore);
+  background-color: var(--cntinp-back);
+  margin-top: 0.1rem;
+  margin-bottom: 0.1rem;
+}
+/* malformed regexes receive error formatting */
+.error {
+  color: var(--error-fore);
+  background-color: var(--error-back);
+}
+.pattern.error {
+  color: var(--cntinp-fore);
+  background-color: var(--error-back);
+}
+.flags {
+  width: 1.4rem;
+  border-radius: 0.1rem;
+  margin: 0.05rem;
+  padding: 0.15rem;
+  border-width: 0;
+  color: var(--txtbtn-off-fore);
+  background-color: var(--txtbtn-off-back);
+  text-decoration: line-through;
+}
+.flags.on {
+  color: var(--txtbtn-on-fore);
+  font-weight: bold;
+  background-color: var(--txtbtn-on-back);
+  text-decoration: none;
+}
+.visible, .exec {
+  border-radius: 0.2rem;
+  padding: 0.2rem;
+  border-width: 0;
+  color: var(--txtbtn-off-fore);
+  background-color: var(--white);
+}
+.visible.on, .exec.on {
+  color: var(--txtbtn-on-fore);
+  font-weight: bold;
+}
+
+.dirty {
+  border: 0.2rem solid var(--dirty-border);
+}
+
+/* left column results section */
+
+/* big search execution button and progress indicator */
+#execute {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: space-between;
+}
+#go {
+  flex: 1 1 100%;
+  border-radius: 0.5rem;
+  color: var(--button-back);
+  background-color: var(--button-fore);
+  border: 0.2rem solid var(--button-back);
+  font-size: x-large;
+}
+#go.dirty {
+  color: var(--button-fore);
+  background-color: var(--button-back);
+  border: 0.2rem solid var(--button-back);
+}
+#go.waiting {
+  background-color: var(--executing);
+  border: 0.2rem solid var(--button-back);
+}
+
+#stats, #settings {
+  padding: 0.5rem;
+}
+
+.stat {
+  padding-left: 1rem;
+  text-align: right;
+}
+.statlabel {
+  font-weight: bold;
+}
+
+.stattotal {
+  font-family: monospace;
+  text-align: right;
+}
+.statresult {
+  font-family: monospace;
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* MID COLUMN */
+
+/* a vertical slider to set the focus position in the results table */
+.swrapper {
+  display: inline-block;
+  width: 3rem;
+  height: 60vh;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+#slider {
+  height: 3rem;
+  width: 60vh;
+  margin-top: 1rem;
+  transform-origin: 1rem 3rem;
+  transform: rotate(90deg);
+}
+
+/* control to set focus position manually */
+#setterw {
+  margin-top: 1rem;
+}
+#setter {
+  color: var(--ctlinp-fore);
+  background-color: var(--ctlinp-back);
+}
+#setter,#total {
+  width: 5rem;
+  font-size: large;
+}
+/* total number of results, displayed at the bottom of the slider */
+#total {
+  text-align: left;
+  color: var(--ctlinp-fore);
+  background-color: var(--white);
+  font-weight: bold;
+}
+/* navigation buttons */
+.upnav, .downnav {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  height: 1rem;
+}
+button.small {
+  border-radius: 0.4rem;
+  color: var(--inactive-fore);
+  background-color: var(--inactive-back);
+  font-size: small;
+  font-weight: bold;
+  margin: 0.05rem;
+  padding: 0.05rem;
+  border-width: 0;
+}
+button.small.active, button.medium.active {
+  color: var(--button-fore);
+  background-color: var(--button-back);
+}
+
+/* RIGHT COLUMN */
+
+#resultsbody,#resultshead {
+  background-color: var(--white);
+}
+#resultsbody.waiting,#resultshead.waiting {
+  background-color: var(--waiting);
+}
+#resultsbody td {
+  border-style: solid;
+  border-color: var(--result-border);
+  border-width: 2px 1px;
+}
+#resultsbody th {
+  color: var(--plain-fore);
+  font-weight: normal;
+}
+#resultsbody tr.focus > th {
+  color: var(--focus-fore);
+  font-weight: bold;
+  background-color: var(--focus-back);
+}
+#resultsbody tr.pfocus > th {
+  color: var(--pfocus-fore);
+  font-weight: bold;
+  background-color: var(--pfocus-back);
+}
+#resultsbody tr.focus > td {
+  border-bottom-color: var(--focus-back);
+  border-top-color: var(--focus-back);
+}
+#resultsbody tr.pfocus > td {
+  border-bottom-color: var(--pfocus-back);
+  border-top-color: var(--pfocus-back);
+}
+
+/* highlighted background (for the lowest level) */
+.hl {
+  background-color: var(--hl0-back);
+}
+/* highlighted border (for higher levels) */
+.hlh {
+  border: 0.2rem solid var(--hl-border);
+  color: var(--hl-fore);
+  background-color: var(--hl-back);
+}
+/* normal border when not highlighted (for higher levels) */
+.o {
+  border: 2px solid var(--unhl-border);
+  color: var(--unhl-fore);
+  background-color: var(--unhl-back);
+}
+.hlh, .o {
+  display: inline-flex;
+  font-family: monospace;
+	flex-flow: row wrap;
+  border-radius: 0.2rem;
+  padding: 0.2rem;
+  margin: 0.2rem;
+}
+/* when multiple layers must be displayed for a node: vertical stacking */
+.m {
+  display: inline-flex;
+	flex-flow: column nowrap;
+}
+/* when a node has child nodes */
+.h {
+  border-radius: 0.1rem;
+  border: 2px solid var(--unhl-border);
+  padding: 0.1rem;
+  margin: 0.3rem;
+}
+/* formatting the node itself */
+.n {
+  font-style: italic;
+  font-weight: bold;
+  color: var(--node-fore);
+  background-color: var(--node-back);
+}
+
+/* COLORS */
+
+:root {
+  --white:            hsla(  0,   0%, 100%, 1    );
+  --black:            hsla(  0,   0%,   0%, 1    );
+  --initializing:     hsla( 50, 100%,  50%, 1    );
+  --dirty-border:     hsla( 50, 100%,  50%, 1    );
+  --executing:        hsla( 20, 100%,  50%, 1    );
+  --waiting:          hsla( 20,  50%,  90%, 1    );
+	--inactive-fore:    hsla(  0,   0%,  80%, 1    );
+	--inactive-back:    hsla(  0,   0%,  60%, 1    );
+	--button-fore:      hsla(  0,   0%, 100%, 1    );
+	--button-back:      hsla(  0,   0%,  20%, 1    );
+	--ctlinp-fore:      hsla(  0,   0%,  10%, 1    );
+	--ctlinp-back:      hsla(  0,   0%,  90%, 1    );
+	--cntinp-fore:      hsla(240, 100%,  20%, 1    );
+	--cntinp-back:      hsla(240, 100%,  97%, 1    );
+	--error-fore:       hsla(  0, 100%,  20%, 1    );
+	--error-back:       hsla(  0, 100%,  95%, 1    );
+	--txtbtn-on-fore:   hsla(  0,   0%,   0%, 1    );
+	--txtbtn-on-back:   hsla(  0,   0%,  99%, 1    );
+	--txtbtn-off-fore:  hsla(  0,   0%,  50%, 1    );
+	--txtbtn-off-back:  hsla(  0,   0%,  98%, 1    );
+	--query-back:       hsla(  0,   0%,  90%, 1    );
+	--query-border:     hsla(  0,   0%,  90%, 1    );
+	--level-back:       hsla(  0,   0%,  90%, 1    );
+	--layer-back:       hsla(  0,   0%,  95%, 1    );
+  --hl0-back:         hsla( 58, 100%,  47%, 1    ); 
+  --hl-border:        hsla( 45, 100%,  50%, 1    ); 
+  --hl-fore:          hsla( 45,   0%,   0%, 1    ); 
+  --hl-back:          hsla( 45, 100%,  97%, 1    ); 
+  --unhl-border:      hsla(  0,   0%,  70%, 1    ); 
+  --unhl-fore:        hsla(  0,   0%,  30%, 1    ); 
+  --unhl-back:        hsla(  0,   0%,  95%, 1    ); 
+  --result-border:    hsla(  0,   0%,  70%, 1    ); 
+  --focus-fore:       hsla(240, 100%, 100%, 1    ); 
+  --focus-back:       hsla(240, 100%,  60%, 1    ); 
+  --pfocus-fore:      hsla(240, 100%,   0%, 1    ); 
+  --pfocus-back:      hsla(240, 100%,  90%, 1    ); 
+  --panel-border:     hsla(  0,   0%,  80%, 1    ); 
+  --node-fore:        hsla(240,  70%,  20%, 1    ); 
+  --node-back:        hsla(240,  50%,  95%, 1    ); 
+}
