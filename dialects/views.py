@@ -431,6 +431,16 @@ def dialect_feature_edit(request, dialect_id, feature_heading):
     return render(request, 'dialects/dialectfeature_edit.html', context)
 
 
+def build_dialects_json(request):
+    dialects = Dialect.objects.filter(code__isnull=False).values('name', 'code', 'location')
+
+    return JsonResponse([{'code': d['code'],
+                          'name': d['name'],
+                          'location': dict(Dialect.LOCATIONS).get(d['location'],''),
+                          'source': 'Fieldwork by Geoffrey Khan',
+                         } for d in dialects], safe=False, json_dumps_params={'indent': 2, 'ensure_ascii': False})
+
+
 def problems(request):
     """ a staff-only page detailing data issues that we think we can fix automatically, and some we can't
     """

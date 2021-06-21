@@ -41,7 +41,7 @@ class Audio(models.Model):
         }
 
         metadata_string = "\n".join(f"{key}:: {val}" for key,val in metadata.items() if val)
-        filename = "{}.nena".format(self.title)
+        filename = "{}. {} - {}.nena".format(self.id, self.dialect.name, self.title)
         self.nena_file.delete()
         self.nena_file.save(filename, ContentFile(metadata_string + "\n\n" + self.transcript))
 
