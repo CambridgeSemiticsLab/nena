@@ -1,8 +1,9 @@
 import re
+import json
 from itertools import zip_longest
 
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.urls import reverse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -13,6 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from django.db.models import F
 from django.contrib import messages
+from django.conf import settings
 
 from audio.models import Audio
 from dialects.models import Dialect, DialectFeatureEntry
@@ -140,14 +142,38 @@ class AudioTranscribeView(AudioUpdateView):
 
 @login_required
 def nena_compile_all(request):
-    audios = Audio.objects.filter(transcript__isnull=False)
-    num_transcripts = audios.count()
-    audios = audios.filter(dialect__code__isnull=False)
-    num_complete = audios.count()
-    for audio in audios:
-        audio.nena_compile()
-    messages.add_message(request, messages.INFO, "{} of {} corpus entries compiled to .nena format".format(num_complete, num_transcripts))
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    output = ''
+
+    if request.method == "POST":
+        audios = Audio.objects.filter(transcript__isnull=False)
+        num_transcripts = audios.count()
+        audios = audios.filter(dialect__code__isnull=False)
+        num_complete = audios.count()
+        for audio in audios:
+            audio.nena_compile()
+            pass
+        output += "{} of {} corpus entries compiled to .nena format \n".format(num_complete, num_transcripts)
+
+        # from https://stackoverflow.com/questions/1218933/can-i-redirect-the-stdout-into-some-sort-of-string-buffer
+        from io import StringIO
+        import sys
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+
+        import sys
+        sys.path.append(str(settings.BASE_DIR.path('nena-pipeline')))
+        from pipeline.corpus_pipeline import CorpusPipeline
+        cp = CorpusPipeline(str(settings.BASE_DIR.path('nena-pipeline/config.json')))
+        try:
+            cp.build_corpus(str(settings.BASE_DIR.path('media/nenafiles')), str(settings.BASE_DIR.path('media/nenapipelinefiles')))
+        except Exception:
+            print(json.dumps(cp.errors, indent=2))
+
+        sys.stdout = old_stdout
+        output += mystdout.getvalue()
+
+    context = {'output': output}
+    return render(request, 'audio/compile.html', context)
 
 
 @method_decorator(login_required, name='dispatch')

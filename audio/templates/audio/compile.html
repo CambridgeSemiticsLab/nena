@@ -1,0 +1,23 @@
+{% extends 'nena.html' %}
+{% load static %}
+
+{% block subtitle %}
+    Compile Nena Corpus for Search
+{% endblock %}
+
+{% block page_content %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+
+    {% if output%}
+      <pre>{{output}}</pre>
+    {% endif %}
+    <form action="{% url 'audio:nena-compile-all' %}" method="post">
+      {% csrf_token %}
+      <input class="button" type="submit" value="Compile all .nena files">
+    </form>
+  </div>
+  </div>
+
+
+{% endblock %}
