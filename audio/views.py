@@ -141,9 +141,8 @@ class AudioTranscribeView(AudioUpdateView):
 
 
 @login_required
-def nena_compile_all(request):
+def search(request):
     output = ''
-
     if request.method == "POST":
         audios = Audio.objects.filter(transcript__isnull=False)
         num_transcripts = audios.count()
@@ -165,7 +164,7 @@ def nena_compile_all(request):
         from pipeline.corpus_pipeline import CorpusPipeline
         cp = CorpusPipeline(str(settings.BASE_DIR.path('nena-pipeline/config.json')))
         try:
-            cp.build_corpus(str(settings.BASE_DIR.path('media/nenafiles')), str(settings.BASE_DIR.path('media/nenapipelinefiles')))
+            cp.build_corpus(settings.MEDIA_ROOT + '/nenafiles', settings.MEDIA_ROOT + '/nenapipelinefiles')
         except Exception:
             print(json.dumps(cp.errors, indent=2))
 
@@ -173,7 +172,7 @@ def nena_compile_all(request):
         output += mystdout.getvalue()
 
     context = {'output': output}
-    return render(request, 'audio/compile.html', context)
+    return render(request, 'audio/search.html', context)
 
 
 @method_decorator(login_required, name='dispatch')

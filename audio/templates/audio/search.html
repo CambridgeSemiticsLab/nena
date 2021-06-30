@@ -1,0 +1,45 @@
+{% extends 'nena.html' %}
+{% load static %}
+
+{% block subtitle %}
+    Nena Corpus Search
+{% endblock %}
+
+{% block page_content %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+
+    <p>
+      The NENA corpus search tool is an implementation of
+      <a href="https://annotation.github.io/text-fabric/tf/" target="_BLANK">TextFabric search</a> applied to our corpus texts.
+      The tool itself runs within the browser and can be re-compiled as the text corpus grows.
+      <br>
+      <br>
+      <a href="{% get_media_prefix %}nenapipelinefiles/search_tool/index.html" target="_BLANK">Use the search tool &raquo;</a>
+    </p>
+    {% if output%}
+      <br>
+      <br>
+      <br>
+      <br>
+      <b>Debug output of the compilation process</b>
+      <pre>{{output}}</pre>
+    {% endif %}
+    </div>
+  </div>
+
+  {% if user.is_staff %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only buttons: <br>
+        <form action="{% url 'audio:search' %}" method="post">
+          {% csrf_token %}
+          <input class="button" type="submit" value="Recompile search index from current corpus">
+        </form>
+      </div>
+  </div>
+  </div>
+  {% endif %}
+
+{% endblock %}

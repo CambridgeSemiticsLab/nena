@@ -12,6 +12,7 @@
                     {% if user.is_staff %}
                     <li style="float:right;"><a href="{% url 'dialects:problems' %}">Problems</a></li>
                     <li style="float:right;"><a href="{% url 'admin:auth_user_changelist' %}" target="_BLANK">Users</a></li>
+                    <li style="float:right;"><a href="{% url 'audio:search' %}">Search</a></li>
                     {% endif %}
                 </ul>
             </div>
