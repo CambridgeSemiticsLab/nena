@@ -1,6 +1,8 @@
 import re
 import json
 from itertools import zip_longest
+from io import StringIO
+import sys
 
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, Http404, JsonResponse
@@ -143,6 +145,8 @@ class AudioTranscribeView(AudioUpdateView):
 @login_required
 def search(request):
     output = ''
+    text_issues = []
+
     if request.method == "POST":
         audios = Audio.objects.filter(transcript__isnull=False)
         num_transcripts = audios.count()
@@ -154,24 +158,42 @@ def search(request):
         output += "{} of {} corpus entries compiled to .nena format \n".format(num_complete, num_transcripts)
 
         # from https://stackoverflow.com/questions/1218933/can-i-redirect-the-stdout-into-some-sort-of-string-buffer
-        from io import StringIO
-        import sys
         old_stdout = sys.stdout
         sys.stdout = mystdout = StringIO()
 
-        import sys
         sys.path.append(str(settings.BASE_DIR.path('nena-pipeline')))
         from pipeline.corpus_pipeline import CorpusPipeline
         cp = CorpusPipeline(str(settings.BASE_DIR.path('nena-pipeline/config.json')))
         try:
             cp.build_corpus(settings.MEDIA_ROOT + '/nenafiles', settings.MEDIA_ROOT + '/nenapipelinefiles')
+
+            """ The CorpusPipeline returns a dict of errors keyed by pipeline stage name
+                Each key returns a list of strings, one per error, eg:
+            {
+              "nena_parser": [
+                "corpus_id 15: Illegal character '<' @ index 107",
+                ...
+                "corpus_id 210: unexpected PUNCT_END (',') at index 1295",
+              ],
+              "tf_builder": []
+            }
+            """
+
+            output += json.dumps(cp.errors, indent=2)
+            import re
+            for error_string in cp.errors.get('nena_parser', []):
+                matches = re.match(r"^corpus_id (\d+): (.+)$", error_string)
+                text_issues.append(matches.groups())
         except Exception:
             print(json.dumps(cp.errors, indent=2))
 
         sys.stdout = old_stdout
         output += mystdout.getvalue()
 
-    context = {'output': output}
+    context = {
+        'output': output,
+        'text_issues': text_issues,
+        }
     return render(request, 'audio/search.html', context)
 
 

@@ -21,8 +21,19 @@
       <br>
       <br>
       <br>
-      <br>
       <b>Debug output of the compilation process</b>
+      <br>
+
+      <p>
+      {% for issue in text_issues %}
+        Text id {{issue.0}}:
+        <a href="{% url 'audio:audio-transcribe' issue.0 %}" target="_BLANK">{{issue.1}}</a>
+        - this text has not been included in the search index
+        <br>
+      {% empty %}
+        No validation issues were found in the corpus transcription texts.
+      {% endfor %}
+      </p>
       <pre>{{output}}</pre>
     {% endif %}
     </div>
