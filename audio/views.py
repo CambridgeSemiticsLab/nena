@@ -1,8 +1,11 @@
 import re
+import json
 from itertools import zip_longest
+from io import StringIO
+import sys
 
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.urls import reverse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -11,6 +14,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
+from django.db.models import F
+from django.contrib import messages
+from django.conf import settings
 
 from audio.models import Audio
 from dialects.models import Dialect, DialectFeatureEntry
@@ -22,9 +28,9 @@ class AudioListView(ListView):
     context_object_name = 'clips'
 
     def get_queryset(self):
-        return Audio.objects.all().values('id', 'title', 'transcript', 'translation',
+        return Audio.objects.all().values('id', 'title', 'source', 'text_id', 'transcript', 'translation',
                                           'dialect__id', 'dialect__name') \
-                                  .order_by('dialect__name', 'title')
+                                  .order_by('dialect__name', F('text_id').asc(nulls_last=True), 'title')
 
 
 def chunk_translation_text(audio):
@@ -134,6 +140,61 @@ class AudioTranscribeView(AudioUpdateView):
             'inline_fields': (context['form'][f] for f in ('transcriber', 'source', 'text_id', 'speakers', 'place'))
             })
         return context
+
+
+@login_required
+def search(request):
+    output = ''
+    text_issues = []
+
+    if request.method == "POST":
+        audios = Audio.objects.filter(transcript__isnull=False)
+        num_transcripts = audios.count()
+        audios = audios.filter(dialect__code__isnull=False)
+        num_complete = audios.count()
+        for audio in audios:
+            audio.nena_compile()
+            pass
+        output += "{} of {} corpus entries compiled to .nena format \n".format(num_complete, num_transcripts)
+
+        # from https://stackoverflow.com/questions/1218933/can-i-redirect-the-stdout-into-some-sort-of-string-buffer
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+
+        sys.path.append(str(settings.BASE_DIR.path('nena-pipeline')))
+        from pipeline.corpus_pipeline import CorpusPipeline
+        cp = CorpusPipeline(str(settings.BASE_DIR.path('nena-pipeline/config.json')))
+        try:
+            cp.build_corpus(settings.MEDIA_ROOT + '/nenafiles', settings.MEDIA_ROOT + '/nenapipelinefiles')
+
+            """ The CorpusPipeline returns a dict of errors keyed by pipeline stage name
+                Each key returns a list of strings, one per error, eg:
+            {
+              "nena_parser": [
+                "corpus_id 15: Illegal character '<' @ index 107",
+                ...
+                "corpus_id 210: unexpected PUNCT_END (',') at index 1295",
+              ],
+              "tf_builder": []
+            }
+            """
+
+            output += json.dumps(cp.errors, indent=2)
+            import re
+            for error_string in cp.errors.get('nena_parser', []):
+                matches = re.match(r"^corpus_id (\d+): (.+)$", error_string)
+                text_issues.append(matches.groups())
+        except Exception:
+            print(json.dumps(cp.errors, indent=2))
+
+        sys.stdout = old_stdout
+        output += mystdout.getvalue()
+
+    context = {
+        'output': output,
+        'text_issues': text_issues,
+        }
+    return render(request, 'audio/search.html', context)
 
 
 @method_decorator(login_required, name='dispatch')

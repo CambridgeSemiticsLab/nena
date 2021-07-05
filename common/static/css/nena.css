@@ -108,6 +108,15 @@ body .campl-wrap.fullwidth {
     white-space: nowrap;
 }
 
+
+#content .alert {
+  background-color: #cef;
+  padding: 1em 2em;
+}
+#content .alert-warning {
+  background-color: #fce;
+}
+
 /* aramaic text is displayed using Charis for it extensive character set */
 @font-face {
   font-family: CharisSILW;

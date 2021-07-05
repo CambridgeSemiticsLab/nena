@@ -17,6 +17,10 @@ else
     git pull
     source venv/bin/activate
     pip install -r requirements/production.txt
+
+    git -C nena-pipeline pull
+    pip install -r nena-pipeline/requirements.txt
+
     python manage.py migrate
     python manage.py collectstatic --no-input
     deactivate
