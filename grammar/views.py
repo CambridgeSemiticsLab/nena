@@ -50,11 +50,26 @@ def dialects_with_feature(request, pk):
     ''' Faster way to list all dialects with corresponding entries for a given feature '''
     ''' todo - replace FeatureDetailView and FeatureParadigmView with this or similar '''
     feature = Feature.objects.get(pk=pk)
+    is_absent = request.GET.get('is_absent', 'False')=='true'
     prefetch_entries = Prefetch('entries', DialectFeatureEntry.objects.order_by('-frequency'))
-    queryset = DialectFeature.objects.filter(feature_id=feature.id) \
+    queryset = DialectFeature.objects.filter(feature_id=feature.id, is_absent=is_absent) \
                              .select_related('dialect') \
                              .prefetch_related(prefetch_entries) \
                              .order_by('dialect__name')
+    unfiltered_count = queryset.count()
+
+    if request.method == "POST" and request.GET.get('mark_without'):
+        dialect_ids = list(int(x) for x in request.POST.getlist('checked_dialect_id'))
+        if DialectFeature.objects.filter(dialect_id__in=dialect_ids, feature=feature).count():
+            msg = 'Error: at least one of the submitted dialects already has an entry for this feature'
+            messages.add_message(request, messages.INFO, msg)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        for dialect in Dialect.objects.filter(id__in=dialect_ids):
+            df = DialectFeature(dialect=dialect, feature=feature, is_absent=True)
+            df.save()
+        msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
+        messages.add_message(request, messages.INFO, msg)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
     search_term = request.POST.get('find', '')
     replacement = request.POST.get('replace', '')
@@ -87,9 +102,27 @@ def dialects_with_feature(request, pk):
     if request.GET.get('entry'):
         queryset = queryset.filter(entries__entry=request.GET.get('entry'))
 
+    unknown_dialect_ids = Dialect.objects.exclude(features__feature=feature).values_list('id', flat=True)
+    is_unknown = request.GET.get('is_unknown', 'False')=='true'
+    if is_unknown:
+        queryset = (DialectFeature(dialect=dialect, feature=feature)
+                    for dialect in Dialect.objects.filter(id__in=unknown_dialect_ids))
+
+    num_dialects = Dialect.objects.count()
+    num_unknown  = len(unknown_dialect_ids)
+    num_with     = unfiltered_count
+    num_without  = num_dialects - num_unknown - unfiltered_count
+    if is_absent:
+        num_with, num_without = num_without, num_with
+
     context = {
-        'feature': feature,
+        'with_without_unknown': 'unknown' if is_unknown else 'without' if is_absent else 'with',
+        'feature':          feature,
         'dialect_features': queryset,
+        'num_dialects':     num_dialects,
+        'num_with':         num_with,
+        'num_without':      num_without,
+        'num_unknown':      num_unknown,
         'communities':      Dialect.COMMUNITIES,
         'chosen_community': request.GET.get('community'),
         'locations':        Dialect.LOCATIONS,

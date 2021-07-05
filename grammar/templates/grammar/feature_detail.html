@@ -2,6 +2,9 @@
 
 {% block subtitle %}
     {% if search_term %}Replace {{dialect_features|length}} "{{search_term}}" entries for {% endif %}
+    {% if with_without_unknown == 'with' %} Dialects with{% endif %}
+    {% if with_without_unknown == 'without' %} Dialects without{% endif %}
+    {% if with_without_unknown == 'unknown' %} Dialects with no record for{% endif %}
     {{ feature.fullheading }}&nbsp;{{ feature.name|safe }}
     {% if entry_filter %}matching "<span class="aramaic">{{entry_filter|safe}}</span>"{% endif %}
     {% if chosen_location_name %}in {{chosen_location_name}}{% endif %}
@@ -12,8 +15,17 @@
 {% block page_content %}
   <div class="campl-column12 clearfix" id="feature_detail">
   <div class="campl-content-container">
+
+    <p>
+      Of the {{num_dialects}} dialects
+      <a href="{% url 'grammar:feature-detail' feature.id %}">{{num_with}} {{num_with|pluralize:'has,have'}} this feature</a>,
+      <a href="{% url 'grammar:feature-detail' feature.id %}?is_absent=true">{{num_without}} {{num_without|pluralize:"doesn't,don't"}}</a>
+      and
+      <a href="{% url 'grammar:feature-detail' feature.id %}?is_unknown=true">{{num_unknown}} {{num_unknown|pluralize:'has,have'}} no current record</a>.
+    </p>
+
     {% include 'dialects/_dialect_filter.html' %}
-    <form action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="post">
+    <form id="table_form" action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="post">
     {% csrf_token %}
     <input class="button fr" type="submit" value="See map of this feature">
     <a id="add_to_group" class="button fr">
@@ -24,7 +36,7 @@
       {% with dialect=dialect_feature.dialect entries=dialect_feature.entries %}
         <tr>
           <td style="width: 5em;">
-            <input type="checkbox" class="chex row_select">
+            <input type="checkbox" class="chex row_select" name="checked_dialect_id" value="{{dialect.id}}">
             <input type="hidden" name="dialect_id" value="{{dialect.id}}">
             <input type="hidden" name="group_number" value="0">
             <span class="map_group"></span>
@@ -51,14 +63,20 @@
           </td>
           <td>{{ dialect.get_community_display }}</td>
           <td>{{ dialect.get_location_display }}</td>
+          {% if dialect_feature.id %}
           <td>
             <a href="{% url 'dialects:dialect-feature' dialect.id dialect_feature.id %}">details</a>
             {% if user.is_staff %}
-            <a href="{% url 'dialects:dialect-feature-edit' dialect.id dialect_feature.id %}">edit</a>
+            <a href="{% url 'dialects:dialect-feature-edit' dialect.id feature.fullheading %}">edit</a>
             {% endif %}
           </td>
+          {% endif %}
         </tr>
       {% endwith %}
+      {% empty %}
+      <tr>
+      <td style="padding: 4em 10em;">No results found</td>
+      </tr>
       {% endfor %}
     </table>
     </form>
@@ -71,6 +89,7 @@
   <div class="campl-content-container">
       <div style="background-color: #fec9; padding: 6px;">
         Staff-only: <br>
+        {% if with_without_unknown == 'with' %}
         <form action="" method="POST">
           {% csrf_token %}
           In above entries find
@@ -84,6 +103,10 @@
             <input type="submit" class="button" value="Apply">
           {% endif %}
         </form>
+        {% endif %}
+        {% if with_without_unknown == 'unknown' %}
+          <button class="button" id="mark_without">Mark as does not have this feature</button>
+        {% endif %}
       </div>
   </div>
   </div>
@@ -103,6 +126,10 @@ $(function(){
       $(this).siblings('.map_group').html(group_number).css('display', 'inline-block')
       $(this).prop('checked', false )
     })
+  });
+
+  $('#mark_without').on('click', function(){
+    $('#table_form').attr('action', '?mark_without=true').submit()
   })
 })
 </script>
