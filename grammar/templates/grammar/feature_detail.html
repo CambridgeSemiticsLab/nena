@@ -47,7 +47,10 @@
           <td>{{ dialect.get_community_display }}</td>
           <td>{{ dialect.get_location_display }}</td>
           <td>
-            <a href="{% url 'dialects:dialect-feature' dialect.id dialect_feature.id %}">details &raquo;</a>
+            <a href="{% url 'dialects:dialect-feature' dialect.id dialect_feature.id %}">details</a>
+            {% if user.is_staff %}
+            <a href="{% url 'dialects:dialect-feature-edit' dialect.id dialect_feature.id %}">edit</a>
+            {% endif %}
           </td>
         </tr>
       {% endwith %}
