@@ -4,7 +4,8 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse, HttpResponse
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.db.models import Prefetch, Count, F
 from django.urls import reverse_lazy
 from django.shortcuts import render
@@ -55,6 +56,27 @@ def dialects_with_feature(request, pk):
                              .prefetch_related(prefetch_entries) \
                              .order_by('dialect__name')
 
+    search_term = request.POST.get('find', '')
+    replacement = request.POST.get('replace', '')
+    if request.method == "POST":
+        df_ids = queryset.values_list('id', flat=True)
+        matching_entries = DialectFeatureEntry.objects.filter(entry=search_term, feature_id__in=df_ids)
+
+        if not matching_entries.count():
+            msg = 'No entries match "{}"'.format(search_term)
+            messages.add_message(request, messages.INFO, msg)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+        if request.POST.get('confirm'):
+            for entry in matching_entries:
+                entry.entry = replacement
+                entry.save()
+            msg = 'Updated {} entries from "{}" to "{}"'.format(matching_entries.count(), search_term, replacement)
+            messages.add_message(request, messages.INFO, msg)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+        queryset = queryset.filter(entries__entry=request.POST['find'])
+
     # todo: combine this filtering logic with similar in dialects.DialectListView
     if request.GET.get('community'):
         queryset = queryset.filter(dialect__community=request.GET.get('community'))
@@ -73,6 +95,8 @@ def dialects_with_feature(request, pk):
         'locations':        Dialect.LOCATIONS,
         'chosen_location':  request.GET.get('location'),
         'entry_filter':     request.GET.get('entry', None),
+        'search_term':      search_term,
+        'replacement':      replacement,
     }
 
     if request.GET.get('community'):

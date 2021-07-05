@@ -1,10 +1,12 @@
 {% extends 'nena.html' %}
 
 {% block subtitle %}
+    {% if search_term %}Replace {{dialect_features|length}} "{{search_term}}" entries for {% endif %}
     {{ feature.fullheading }}&nbsp;{{ feature.name|safe }}
     {% if entry_filter %}matching "<span class="aramaic">{{entry_filter|safe}}</span>"{% endif %}
     {% if chosen_location_name %}in {{chosen_location_name}}{% endif %}
     {% if chosen_community_name %}in {{chosen_community_name}} communities{% endif %}
+    {% if search_term %}?{% endif %}
 {% endblock %}
 
 {% block page_content %}
@@ -38,6 +40,9 @@
           {% for entry in dialect_feature.entries.all %}
             <div>
               {{ entry.entry }}
+              {% if entry.entry == search_term %}
+                <span style="color:red;">&rarr; {{replacement}}</span>
+              {% endif %}
               <a class="filter" title="filter entries like this" href="{% url 'grammar:feature-detail' feature.id %}?entry={{ entry.entry }}">
                 <svg viewBox="0 0 80 90" focusable=false><path d="m 0,0 30,45 0,30 10,15 0,-45 30,-45 Z"></path></svg>
               </a>
@@ -61,6 +66,28 @@
   </div>
   </div>
 
+ {% if user.is_staff %}
+  <div class='campl-column12'>
+  <div class="campl-content-container">
+      <div style="background-color: #fec9; padding: 6px;">
+        Staff-only: <br>
+        <form action="" method="POST">
+          {% csrf_token %}
+          In above entries find
+          <input name="find" value="{{search_term}}" {{search_term|yesno:"readonly,"}}>
+          and replace with
+          <input name="replace" value="{{replacement}}" {{search_term|yesno:"readonly,"}}>
+          {% if search_term %}
+            <input type="submit" class="button" name="confirm" value="Confirm">
+            (this can't be undone)
+          {% else %}
+            <input type="submit" class="button" value="Apply">
+          {% endif %}
+        </form>
+      </div>
+  </div>
+  </div>
+  {% endif %}
 
 <style>
 .dialect_filter_form {margin-bottom: -2.6em;}
