@@ -70,6 +70,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend'
 )
 
+# Allows non-current members of university who are still Raven account holders to login
+UCAMWEBAUTH_NOT_CURRENT=True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
