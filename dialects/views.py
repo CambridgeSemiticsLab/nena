@@ -329,7 +329,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
             if entry['frequency'] not in ('P', None):
                 encoded_entry += ' {}'.format(entry['frequency'])
             if entry['comment']:
-                encoded_entry += ' "{}"'.format(entry['comment'])
+                encoded_entry += ' "{}"'.format(entry['comment'].replace('\r', '').replace('\n', '; '))
             return encoded_entry
 
         raw_rows = []
