@@ -98,7 +98,7 @@
             <span class="speaker {{metadata.speaker|yesno:'set,'}} {{form|yesno:"editable,"}}">👤{{metadata.speaker|default_if_none:''}}</span>
             {% endif %}
           </td>
-          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
+          <td><div class="overlay aramaic">{%if not form%}{{transcript_chunk|safe}}{%endif%}</div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
         </tr>
         {% endfor %}
@@ -293,7 +293,8 @@
       white-space: pre-wrap;
     }
     .translation_table textarea, .translation_table .overlay {background-color: transparent;}
-    .transcribe_form .overlay {display: none;}
+    .transcribe_form .overlay + textarea {display: none;}
+    .transcribe_form.editing textarea {display: block;}
     .transcribe_form.editing .overlay {display: block;}
 
     .transcribe_form textarea:disabled {
@@ -360,6 +361,8 @@
 
     .transcribe_form .overlay {
       position: absolute;
+    }
+    .transcribe_form.editing .overlay {
       background-color: transparent;
       pointer-events: none;
       color: rgba(255,255,0,0.0);
