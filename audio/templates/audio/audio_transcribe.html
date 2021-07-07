@@ -671,22 +671,41 @@
       valid_chars_regexp = new RegExp("(("+alphabet+")|("+punctuation+"))+", "g");
 
       // a dict of invalid characters which are always automatically replaced by their valid equivalent
+      // https://github.com/CambridgeSemiticsLab/nena_corpus/blob/master/sources/msdoc2html/convert.py#L27
       autocorrect_dict = {
-        '+': '⁺',
-        '|': 'ˈ',
+        // stylistic substitutions
+        '\|': '\u02c8', // pipe to superscript line
+        '\+': '\u207A', // plus to superscript plus (esp. Christian Urmi)
+
+        // standardizing substutions
+        '\u2011': '\u002d',  // non-breaking hyphen to normal hyphen-minus
+        '\u01dd': '\u0259',  // 'ǝ' "turned e" to 'ə' schwa
+        '\uf1ea': '\u003d',  // SIL deprecated double hyphen to '=' equals sign
+        '\u2026': '...',  // '…' horizontal ellipsis to three dots
+        'J\u0335': '\u0248',  // 'J' + short combining stroke to 'Ɉ' J with stroke
+        'J\u0336': '\u0248',  // J' + long combining stroke to 'Ɉ' J with stroke
+        '<y>': '\u02b8',  // superscript small letter y
+
+        // corrections of errors
+        '\u002d\u032d': '\u032d\u002d',  // Switch positions of Hyphen and Circumflex accent below
       }
 
       // keep overlays up to date with their textareas
       $('form.editing').on('change keyup', 'textarea', function(e){
         chosen_key = e.key;
+
+
         if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
           // alt+arrow just cycles the last character so we don't need to re-validate
           return true;
         }
 
+        cursor_position = this.selectionStart;
         for(bad_char in autocorrect_dict){
           $(this).val($(this).val().split(bad_char).join(autocorrect_dict[bad_char]));
         }
+        this.selectionStart = cursor_position;
+        this.selectionEnd   = cursor_position;
 
         let val = $(this).val().normalize('NFD');
         // these delimiters are composed of valid characters but unlikely to appear in the actual texts
