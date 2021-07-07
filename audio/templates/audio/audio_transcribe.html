@@ -69,13 +69,17 @@
           <th>Transcribed by</th>
           <th>Source</th>
           <th>Speakers</th>
+          {% if clip.place %}
           <th>Place</th>
+          {% endif %}
         </tr>
         <tr>
           <td>{{clip.transcriber|default_if_none:"-"}}</td>
           <td>{{clip.source|default_if_none:"-"}}</td>
           <td>{{clip.speakers|default_if_none:"-"}}</td>
+          {% if clip.place %}
           <td>{{clip.place|default_if_none:"-"}}</td>
+          {% endif %}
         </tr>
       </table>
       {% endif %}
