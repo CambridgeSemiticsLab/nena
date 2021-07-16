@@ -78,18 +78,14 @@ class AudioDetailView(DetailView):
     context_object_name = 'clip'
     template_name = 'audio/audio_transcribe.html'
 
+    def present_text(self, chunks):
+        superscript_languages = lambda text : re.sub(r"\<(\w+):(.+?)\>", r"<sup>\1</sup>\2<sup>\1</sup>", text)
+        return ((x,superscript_languages(y),z) for x,y,z in chunks)
+
     def get_context_data(self, **kwargs):
         context = super(AudioDetailView, self).get_context_data(**kwargs)
-
-        # todo - try to find matching words within text
-        # words = set(re.findall('\w+', clip.transcript))
-        # words = [w for w in words if not w.isdigit()]
-
-        # dfs = DialectFeatureEntry.objects.filter(feature__dialect_id=clip.dialect_id) \
-                                         # .filter(entry__in=words) \
-                                         # .values_list('entry', 'feature__dialect_id')
         text_chunks = chunk_translation_text(context['clip'])
-        context.update({'text_chunks': text_chunks})
+        context.update({'text_chunks': self.present_text(text_chunks)})
         return context
 
 

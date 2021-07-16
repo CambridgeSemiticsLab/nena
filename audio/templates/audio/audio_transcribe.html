@@ -20,9 +20,6 @@
         <a class="button dull" href="{{ clip.data.url }}" target="blank" title="download audio file">
           <i class="material-icons">cloud_download</i> mp3
         </a>
-        <a class="button dull" href="{% static 'audio/corpus_export_template.docx' %}" target="blank" title="download transcription document">
-          <i class="material-icons">cloud_download</i> docx
-        </a>
       </div>
 
       <div id="playback-time">0:00</div>
@@ -69,13 +66,17 @@
           <th>Transcribed by</th>
           <th>Source</th>
           <th>Speakers</th>
+          {% if clip.place %}
           <th>Place</th>
+          {% endif %}
         </tr>
         <tr>
           <td>{{clip.transcriber|default_if_none:"-"}}</td>
           <td>{{clip.source|default_if_none:"-"}}</td>
           <td>{{clip.speakers|default_if_none:"-"}}</td>
+          {% if clip.place %}
           <td>{{clip.place|default_if_none:"-"}}</td>
+          {% endif %}
         </tr>
       </table>
       {% endif %}
@@ -98,7 +99,7 @@
             <span class="speaker {{metadata.speaker|yesno:'set,'}} {{form|yesno:"editable,"}}">👤{{metadata.speaker|default_if_none:''}}</span>
             {% endif %}
           </td>
-          <td><div class="overlay aramaic"></div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
+          <td><div class="overlay aramaic">{%if not form%}{{transcript_chunk|safe}}{%endif%}</div><textarea {{form|yesno:',disabled'}} class="aramaic" spellcheck="false">{{transcript_chunk|safe}}</textarea></td>
           <td><textarea {{form|yesno:',disabled'}}>{{translation_chunk|safe}}</textarea></td>
         </tr>
         {% endfor %}
@@ -293,7 +294,8 @@
       white-space: pre-wrap;
     }
     .translation_table textarea, .translation_table .overlay {background-color: transparent;}
-    .transcribe_form .overlay {display: none;}
+    .transcribe_form .overlay + textarea {display: none;}
+    .transcribe_form.editing textarea {display: block;}
     .transcribe_form.editing .overlay {display: block;}
 
     .transcribe_form textarea:disabled {
@@ -360,6 +362,8 @@
 
     .transcribe_form .overlay {
       position: absolute;
+    }
+    .transcribe_form.editing .overlay {
       background-color: transparent;
       pointer-events: none;
       color: rgba(255,255,0,0.0);
@@ -667,22 +671,41 @@
       valid_chars_regexp = new RegExp("(("+alphabet+")|("+punctuation+"))+", "g");
 
       // a dict of invalid characters which are always automatically replaced by their valid equivalent
+      // https://github.com/CambridgeSemiticsLab/nena_corpus/blob/master/sources/msdoc2html/convert.py#L27
       autocorrect_dict = {
-        '+': '⁺',
-        '|': 'ˈ',
+        // stylistic substitutions
+        '\|': '\u02c8', // pipe to superscript line
+        '\+': '\u207A', // plus to superscript plus (esp. Christian Urmi)
+
+        // standardizing substutions
+        '\u2011': '\u002d',  // non-breaking hyphen to normal hyphen-minus
+        '\u01dd': '\u0259',  // 'ǝ' "turned e" to 'ə' schwa
+        '\uf1ea': '\u003d',  // SIL deprecated double hyphen to '=' equals sign
+        '\u2026': '...',  // '…' horizontal ellipsis to three dots
+        'J\u0335': '\u0248',  // 'J' + short combining stroke to 'Ɉ' J with stroke
+        'J\u0336': '\u0248',  // J' + long combining stroke to 'Ɉ' J with stroke
+        '<y>': '\u02b8',  // superscript small letter y
+
+        // corrections of errors
+        '\u002d\u032d': '\u032d\u002d',  // Switch positions of Hyphen and Circumflex accent below
       }
 
       // keep overlays up to date with their textareas
       $('form.editing').on('change keyup', 'textarea', function(e){
         chosen_key = e.key;
+
+
         if(e.altKey && (chosen_key == 'ArrowUp' || chosen_key == 'ArrowDown')){
           // alt+arrow just cycles the last character so we don't need to re-validate
           return true;
         }
 
+        cursor_position = this.selectionStart;
         for(bad_char in autocorrect_dict){
           $(this).val($(this).val().split(bad_char).join(autocorrect_dict[bad_char]));
         }
+        this.selectionStart = cursor_position;
+        this.selectionEnd   = cursor_position;
 
         let val = $(this).val().normalize('NFD');
         // these delimiters are composed of valid characters but unlikely to appear in the actual texts
