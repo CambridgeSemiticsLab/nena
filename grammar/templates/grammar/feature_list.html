@@ -309,17 +309,17 @@
 
 
   {% if user.is_staff %}
-  {% if user.is_superuser %}{# the only menu option at this time is just for superusers, so hide whole thing from everyone else #}
   <div class='campl-column12'>
   <div class="campl-content-container">
       <div style="background-color: #fec9; padding: 6px;">
         Staff-only buttons: <br>
+        {% if user.is_superuser %}
         <a class="button" href="{% url 'admin:grammar_feature_changelist' %}" target="_BLANK">Edit grammar feature tree</a>
+        {% endif %}
         <a class="button" href="{% url 'grammar:coverage-check' 'grammar' %}" target="_BLANK">Download Grammar Coverage CSV</a>
         <a class="button" href="{% url 'grammar:coverage-check' 'dialects' %}" target="_BLANK">Download Dialects Coverage CSV</a>
       </div>
   </div>
   </div>
-  {% endif %}
   {% endif %}
 {% endblock %}
