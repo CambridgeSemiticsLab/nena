@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.db.models import Prefetch, Count, F
+from django.db.models import Prefetch, Count, F, Q
 from django.urls import reverse_lazy
 from django.shortcuts import render
 
@@ -232,3 +232,50 @@ class FeatureParadigmView(DetailView):
                         dialects[e.feature.dialect.pk] = {'name': e.feature.dialect.name, 'mappable': mappable, 'entries': entries }
         context['dialects'] = dialects
         return context
+
+
+@login_required
+def coverage_check(request, type="grammar"):
+    ''' returns a csv summary of which grammar features have what level of completeness '''
+    import csv
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="{}_coverage.csv"'.format(type)
+
+    if type == "grammar":
+        headings = {
+            'id'          : 'Feature ID',
+            'fullheading' : 'Section Number',
+            'name'        : 'Section Name',
+            'num_dialects': 'Dialects Populated',
+        }
+        results = Feature.objects.filter() \
+                         .annotate(num_dialects=Count('dialectfeature', distinct=True)) \
+                         .values_list(*headings.keys())
+    elif type == "dialects":
+        headings = {
+            'id'          : 'Dialect ID',
+            'name'        : 'Name',
+            'location'    : 'Location',
+            'longitude'   : 'Longitude',
+            'latitude'    : 'Latitude',
+            'num_features': 'Num Features',
+        }
+        query = Dialect.objects.filter() \
+                       .annotate(num_features=Count('features', distinct=True)) \
+
+        sections = {}
+        for i in range(1, 18):
+            sections['section_{}'.format(i)] = 'Section {}.0'.format(i)
+            arg = {'section_{}'.format(i): Count('features', distinct=True, filter=Q(features__feature__fullheading__startswith="{}.".format(i)))}
+            query = query.annotate(**arg)
+
+        headings.update(sections)
+
+        results = query.order_by('name').values_list(*headings.keys())
+
+    writer = csv.writer(response)
+    writer.writerow(headings.values())
+    for row in results:
+        writer.writerow(row)
+
+    return response
