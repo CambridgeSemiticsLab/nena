@@ -39,11 +39,11 @@
     {% endfor %}
     </div>
     <div class="controls">
+      <input class="button" type="submit" value="Save" style="float: right;"/>
       {% if df.id %}
         <a class="button dull cancel" href="{% url 'dialects:dialect-feature' dialect.id df.id %}">Cancel</a>
         <input class="button" type="submit" value="Delete" name="delete" onclick="return confirm('Are you sure you want to permanently remove this entry?')"/>
       {% endif %}
-      <input class="button" type="submit" value="Save"/>
     </div>
     </form>
   </div>

@@ -152,7 +152,7 @@
           {% endif %}
         {% elif dialects %}
           {% for dialectfeature in dialectfeatures %}
-            <div class="example dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.id feature.fullheading %}">
+            <div class="example dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.dialect_id feature.fullheading %}">
               <span class="hidden-delimiter">,</span>
               {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialectfeature.dialect_id df=dialectfeature feature_heading=feature.fullheading%}
             </div>
