@@ -31,7 +31,7 @@
     <a id="add_to_group" class="button fr">
         Add to map group
     </a>
-    <table class="campl-table campl-table-condensed campl-table-striped">
+    <table class="checkable-rows campl-table campl-table-condensed campl-table-striped">
       {% for dialect_feature in dialect_features %}
       {% with dialect=dialect_feature.dialect entries=dialect_feature.entries %}
         <tr>
@@ -130,6 +130,32 @@ $(function(){
 
   $('#mark_without').on('click', function(){
     $('#table_form').attr('action', '?mark_without=true').submit()
+  })
+
+  // makes checkbox in header row control state of all in table
+  $('.checkable-rows th input[type=checkbox]').click(function () {
+    $(this).parents('form').find('td input[type=checkbox]').prop('checked', $(this).prop('checked')).trigger('checkable-rows:group-select');
+  });
+
+  // range selection for checkboxes within a form
+  $('.checkable-rows tbody').on('click', 'input[type=checkbox]', function(e){
+    $checkboxes   = $(this).parents('form').find('input[type=checkbox]')
+    $old_checkbox = $checkboxes.filter('.last_checkbox_clicked').removeClass('last_checkbox_clicked')
+    $new_checkbox = $(this).addClass('last_checkbox_clicked')
+    if( e.shiftKey )
+    {
+      $checkboxes.each(function(){
+        index     = $checkboxes.index($(this))
+        old_index = $checkboxes.index($old_checkbox)
+        new_index = $checkboxes.index($new_checkbox)
+        if( index <= Math.max(old_index, new_index) && index >= Math.min(old_index, new_index))
+        {
+          $(this).prop('checked', $new_checkbox.prop('checked'))
+          $old_checkbox.prop('checked', $new_checkbox.prop('checked'))
+          $(this).trigger('checkable-rows:group-select')
+        }
+      })
+    }
   })
 })
 </script>
