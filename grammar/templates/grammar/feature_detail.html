@@ -51,13 +51,14 @@
 
           {% for entry in dialect_feature.entries.all %}
             <div>
-              {{ entry.entry }}
+              <span class="entry">{{ entry.entry }}</span>
               {% if entry.entry == search_term %}
                 <span style="color:red;">&rarr; {{replacement}}</span>
               {% endif %}
               <a class="filter" title="filter entries like this" href="{% url 'grammar:feature-detail' feature.id %}?entry={{ entry.entry }}">
                 <svg viewBox="0 0 80 90" focusable=false><path d="m 0,0 30,45 0,30 10,15 0,-45 30,-45 Z"></path></svg>
               </a>
+              <a class="check_similar" title="Check all like this">✔</a>
             </div>
           {% endfor %}
           </td>
@@ -115,6 +116,29 @@
 <style>
 .dialect_filter_form {margin-bottom: -2.6em;}
 .map_group { width: 1.5em; height: 1.5em; background:white; border: 2px solid black; border-radius:50%; text-align:center; font-weight: bold; display:none;}
+
+.check_similar {
+  display: inline-block;
+  position: relative;
+  width: 1.3em; height: 1.3em;
+  left: 1em;
+  background-color: white;
+  border: 1px #aaa;
+  border-radius: 0.2em;
+  margin-left: 1em;
+  visibility: hidden;
+  cursor: pointer;
+  padding: 0.1em;
+}
+.check_similar:hover {
+  text-decoration: none;
+  background-color: var(--link);
+}
+*:hover > .filter,
+*:hover > .check_similar {
+  visibility: visible;
+}
+
 </style>
 
 <script>
@@ -131,6 +155,16 @@ $(function(){
   $('#mark_without').on('click', function(){
     $('#table_form').attr('action', '?mark_without=true').submit()
   })
+
+  $('.check_similar').on('click', function(){
+    entry_text = $(this).prevAll('.entry').text();
+    is_checked = $(this).parents('tr').find('.row_select').prop('checked');
+    $('#table_form .entry').each(function(){
+      if($(this).text() == entry_text){
+        $(this).parents('tr').find('.row_select').prop('checked', !is_checked);
+      }
+    })
+  });
 
   // makes checkbox in header row control state of all in table
   $('.checkable-rows th input[type=checkbox]').click(function () {
