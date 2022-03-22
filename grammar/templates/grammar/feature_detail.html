@@ -63,14 +63,14 @@
           </td>
           <td>{{ dialect.get_community_display }}</td>
           <td>{{ dialect.get_location_display }}</td>
-          {% if dialect_feature.id %}
           <td>
+            {% if dialect_feature.id %}
             <a href="{% url 'dialects:dialect-feature' dialect.id dialect_feature.id %}">details</a>
+            {% endif %}
             {% if user.is_staff %}
-            <a href="{% url 'dialects:dialect-feature-edit' dialect.id feature.fullheading %}">edit</a>
+            <a href="{% url 'dialects:dialect-feature-edit' dialect.id feature.fullheading %}">{{dialect_feature.id|yesno:"edit,add"}}</a>
             {% endif %}
           </td>
-          {% endif %}
         </tr>
       {% endwith %}
       {% empty %}
