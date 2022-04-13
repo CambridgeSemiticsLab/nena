@@ -102,13 +102,15 @@ def dialects_with_feature(request, pk):
     if request.GET.get('entry'):
         queryset = queryset.filter(entries__entry=request.GET.get('entry'))
 
-    unknown_dialect_ids = Dialect.objects.exclude(features__feature=feature).values_list('id', flat=True)
+    all_dialects_qs = Dialect.objects.filter(group_id=request.session['dialect_group_id'])
+
+    unknown_dialect_ids = all_dialects_qs.exclude(features__feature=feature).values_list('id', flat=True)
     is_unknown = request.GET.get('is_unknown', 'False')=='true'
     if is_unknown:
         queryset = (DialectFeature(dialect=dialect, feature=feature)
-                    for dialect in Dialect.objects.filter(id__in=unknown_dialect_ids))
+                    for dialect in all_dialects_qs.filter(id__in=unknown_dialect_ids))
 
-    num_dialects = Dialect.objects.count()
+    num_dialects = all_dialects_qs.count()
     num_unknown  = len(unknown_dialect_ids)
     num_with     = unfiltered_count
     num_without  = num_dialects - num_unknown - unfiltered_count
@@ -260,8 +262,8 @@ def coverage_check(request, type="grammar"):
             'latitude'    : 'Latitude',
             'num_features': 'Num Features',
         }
-        query = Dialect.objects.filter() \
-                       .annotate(num_features=Count('features', distinct=True)) \
+        query = Dialect.objects.filter(group_id=request.session['dialect_group_id']) \
+                               .annotate(num_features=Count('features', distinct=True)) \
 
         sections = {}
         for i in range(1, 18):

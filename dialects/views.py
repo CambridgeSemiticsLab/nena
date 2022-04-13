@@ -74,7 +74,7 @@ class DialectListView(ListView):
     # paginate_by = 20
 
     def get_queryset(self):
-        queryset = Dialect.objects.all()
+        queryset = Dialect.objects.filter(group_id=self.request.session['dialect_group_id'])
         if self.request.GET.get('community'):
             queryset = queryset.filter(community=self.request.GET.get('community'))
 
@@ -100,6 +100,7 @@ class DialectDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         dialects = Dialect.objects.filter(longitude__isnull=False, latitude__isnull=False) \
+                                  .filter(group_id=self.request.session['dialect_group_id']) \
                                   .values('id', 'name', 'community', 'longitude', 'latitude')
         map_data = [dialect_to_map_point(d, (d['id']==self.object.id)) for d in dialects]
 
@@ -122,7 +123,8 @@ class DialectCreateView(CreateView):
     fields = ['name', 'code', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']
 
     def get_context_data(self, **kwargs):
-        dialects = Dialect.objects.values_list('id', 'name')
+        dialects = Dialect.objects.filter(group_id=self.request.session['dialect_group_id']) \
+                                  .values_list('id', 'name')
         context = super(DialectCreateView, self).get_context_data(**kwargs)
         context.update({'dialects': dialects})
         return context
@@ -314,7 +316,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
         'breadcrumb_bits': make_breadcrumb_bits(chosen_root),
         'feature_list': feature_list,
         'num_features': num_features,
-        'all_dialects': Dialect.objects.all() \
+        'all_dialects': Dialect.objects.filter(group_id=request.session['dialect_group_id']) \
                                        .filter(features__feature__path__startswith=base_path) \
                                        .exclude(id__in=dialect_ids) \
                                        .annotate(feature_count=Count('features'))
