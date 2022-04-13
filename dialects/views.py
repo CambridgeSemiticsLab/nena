@@ -25,6 +25,7 @@ from dialects.forms import DialectFeatureForm
 
 def homepage(request):
     dialects = Dialect.objects.filter(longitude__isnull=False, latitude__isnull=False) \
+                              .filter(group_id=request.session['dialect_group_id']) \
                               .values('id', 'name', 'community', 'longitude', 'latitude')
 
     map_data = [dialect_to_map_point(d) for d in dialects]
@@ -378,6 +379,7 @@ def dialect_feature_pane(request, dialect_id, feature_heading):
         'feature_heading': feature_heading,
     }
     if df_dict:
+
         df_dict['entries'] = DialectFeatureEntry.objects.filter(feature_id=df_dict['id']) \
                                                         .values('entry', 'comment')
         context.update({

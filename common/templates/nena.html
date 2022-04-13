@@ -3,7 +3,7 @@
 {% load latestupdate %}
 
 {% block head_title %}
-NENA
+{{request.session.dialect_group_site_title}}
 {% endblock %}
 {% block all_breadcrumbs %}
     {# block.super #}
@@ -17,13 +17,25 @@ NENA
     </div>
 {% endblock %}
 {% block additional_head %}
-<link rel="stylesheet" href="{% static 'css/nena.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/nena.css' %}" />
+  {% if request.session.dialect_group_id == 2 %}
+  <style>
+    :root {
+        --bg: #f7f4ed;
+        --bg9: #f7f4ed;
+        --header: #802e1e;
+        --header0: #902e1e;
+        --link: #d18f00;
+        --dull: #aaa;
+    }
+  </style>
+  {% endif %}
 {% endblock %}
 {% block site_name %}
-    <a href="{% url 'index' %}">The North-Eastern Neo-Aramaic Database Project</a>
+    <a href="{% url 'index' %}">{{request.session.dialect_group_site_title}}</a>
 {% endblock %}
 {% block subtitle %}
-    The North Eastern Neo-Aramaic Database Project
+    {{request.session.dialect_group_site_title}}
 {% endblock %}
 {% block tabs %}{% endblock %}
 {% block search_bar %}{% endblock %}
@@ -57,4 +69,3 @@ developed by fixbork
 </div>
 {% endblock %}
 {% block global_footer %}{% endblock %}
-

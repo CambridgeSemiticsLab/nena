@@ -3,12 +3,27 @@ from django.urls import reverse
 
 from grammar.models import Feature
 
+
+class DialectGroup(models.Model):
+    name       = models.CharField(max_length=80)
+    subdomain  = models.CharField(max_length=16, null=True, blank=True)
+    site_title = models.CharField(max_length=50)
+    lead_text  = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Dialect(models.Model):
     CHRISTIAN = 'C'
     JEWISH = 'J'
+    KURDISH = 'K'
+    GORANI = 'G'
     COMMUNITIES = (
         (CHRISTIAN ,'Christian'),
         (JEWISH, 'Jewish'),
+        (KURDISH, 'Kurdish'),
+        (GORANI, 'Gorani'),
     )
     AM = 'AM'
     IR = 'IR'
@@ -38,6 +53,7 @@ class Dialect(models.Model):
     )
     name = models.CharField(max_length=40)
     code = models.CharField(max_length=40, blank=True, null=True)
+    group = models.ForeignKey(DialectGroup, related_name="dialects", on_delete=models.PROTECT, null=True, blank=True)
     community = models.CharField(max_length=1, choices=COMMUNITIES,
                 default='', blank=False, null=False)
     country = models.CharField(max_length=2, choices=COUNTRIES,

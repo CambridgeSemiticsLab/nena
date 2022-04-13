@@ -28,9 +28,10 @@ class AudioListView(ListView):
     context_object_name = 'clips'
 
     def get_queryset(self):
-        return Audio.objects.all().values('id', 'title', 'source', 'text_id', 'transcript', 'translation',
+        return Audio.objects.filter(dialect__group_id=self.request.session['dialect_group_id']) \
+                            .values('id', 'title', 'source', 'text_id', 'transcript', 'translation',
                                           'dialect__id', 'dialect__name') \
-                                  .order_by('dialect__name', F('text_id').asc(nulls_last=True), 'title')
+                            .order_by('dialect__name', F('text_id').asc(nulls_last=True), 'title')
 
 
 def chunk_translation_text(audio):
@@ -105,6 +106,11 @@ class DialectAudioView(AudioListView):
 class AudioCreateView(CreateView):
     model = Audio
     fields = ('title', 'dialect', 'description', 'data')
+
+    def get_form(self):
+        form = super(AudioCreateView, self).get_form()
+        form.fields['dialect'].queryset = Dialect.objects.filter(group_id=self.request.session.get('dialect_group_id'))
+        return form
 
     def get_success_url(self):
         return reverse('audio:audio-detail', args=(self.object.pk,))
@@ -198,4 +204,3 @@ class AudioDeleteView(DeleteView):
     model = Audio
     fields = '__all__'
     success_url = reverse_lazy('audio:audio-list')
-
