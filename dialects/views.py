@@ -120,7 +120,7 @@ class DialectDetailView(DetailView):
 
 class DialectCreateView(CreateView):
     model = Dialect
-    fields = ['name', 'code', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']
+    fields = ['name', 'code', 'group', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']
 
     def get_context_data(self, **kwargs):
         dialects = Dialect.objects.filter(group_id=self.request.session['dialect_group_id']) \
@@ -153,8 +153,7 @@ class DialectCreateView(CreateView):
 
 class DialectUpdateView(UpdateView):
     model = Dialect
-    fields = ['name', 'code', 'community', 'country', 'location', 'latitude', 'longitude', 'source', 'information', 'remarks']
-#    template_name_suffix = '_update_form'
+    fields = DialectCreateView.fields
 
 class DialectDeleteView(DeleteView):
     model = Dialect
