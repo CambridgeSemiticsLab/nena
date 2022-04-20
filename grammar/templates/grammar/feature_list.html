@@ -151,18 +151,25 @@
           <textarea class="df_edit_bulk utf8-text" name="bulk_edit" rows="{{feature_list|length|add:'-1'}}">{{raw_text|safe}}</textarea>
           {% endif %}
         {% elif dialects %}
-          {% for dialectfeature in dialectfeatures %}
-            <div class="example dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.dialect_id feature.fullheading %}">
-              <span class="hidden-delimiter">,</span>
-              {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialectfeature.dialect_id df=dialectfeature feature_heading=feature.fullheading%}
-            </div>
-          {% empty %}
-            {% if feature.fullheading %}
-            <div class="example no_dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialects.0.id feature.fullheading %}">
-              {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialects.0.id feature_heading=feature.fullheading%}
-            </div>
+          {% for dialect in dialects %}
+            {% if dialect.id in dialectfeatures.keys %}
+              {% for dialect_id, dialectfeature in dialectfeatures.items %}
+                {% if dialect.id == dialectfeature.dialect_id %}
+                  <div class="example dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialectfeature.dialect_id feature.fullheading %}">
+                    <span class="hidden-delimiter">,</span>
+                    {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialectfeature.dialect_id df=dialectfeature feature_heading=feature.fullheading%}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              {% if feature.fullheading %}
+              <div class="example no_dialectfeature" data-src="{% url 'dialects:dialect-feature-pane' dialect.id feature.fullheading %}">
+                {% include 'dialects/_dialectfeature_pane.html' with dialect_id=dialect.id feature_heading=feature.fullheading%}
+              </div>
+              {% endif %}
             {% endif %}
           {% endfor %}
+
           {% if dialectfeatures|length == 1 %}
             <div class="example">
               {% for example in dialectfeatures.0.examples %}

@@ -301,11 +301,10 @@ def features_of_dialect(request, dialect_id_string, section=None):
             'entries': entries_dict.get(x['id'], []),
             'examples': examples_dict.get(x['id'], []),
         })
-        dialectfeatures_dict.setdefault(x['feature_id'], []).append(x)
+        dialectfeatures_dict.setdefault(x['feature_id'], {}).update({x['dialect_id']: x})
 
     for i, feature in enumerate(feature_list):
         feature_list[i] = (feature[0], feature[1], dialectfeatures_dict.get(feature[0].id, []))
-
 
     context = {
         'dialect_ids':  dialect_ids,
