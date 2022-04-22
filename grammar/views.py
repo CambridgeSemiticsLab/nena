@@ -52,7 +52,8 @@ def dialects_with_feature(request, pk):
     feature = Feature.objects.get(pk=pk)
     is_absent = request.GET.get('is_absent', 'False')=='true'
     prefetch_entries = Prefetch('entries', DialectFeatureEntry.objects.order_by('-frequency'))
-    queryset = DialectFeature.objects.filter(feature_id=feature.id, is_absent=is_absent) \
+    queryset = DialectFeature.objects.filter(feature_id=feature.id, is_absent=is_absent,
+                                             dialect__group=request.session['dialect_group_id']) \
                              .select_related('dialect') \
                              .prefetch_related(prefetch_entries) \
                              .order_by('dialect__name')
@@ -147,16 +148,20 @@ def dialects_with_feature(request, pk):
 def map_of_feature(request, pk):
     '''  '''
     from dialectmaps.views import entry_to_map_point
-    entries = DialectFeatureEntry.objects.filter(feature__feature_id=pk) \
-                                         .filter(feature__dialect__longitude__isnull=False,
-                                                 feature__dialect__latitude__isnull=False) \
-                                         .values('id', 'entry', 'feature_id',
-                                                 dialect_id=F('feature__dialect__id'),
-                                                 dialect=F('feature__dialect__name'),
-                                                 community=F('feature__dialect__community'),
-                                                 longitude=F('feature__dialect__longitude'),
-                                                 latitude=F('feature__dialect__latitude'),
-                                                 group=F('entry'))
+    entries = DialectFeatureEntry.objects \
+        .filter(
+            feature__feature_id=pk,
+            feature__dialect__group=request.session['dialect_group_id'],
+            feature__dialect__longitude__isnull=False,
+            feature__dialect__latitude__isnull=False) \
+        .values(
+            'id', 'entry', 'feature_id',
+            dialect_id=F('feature__dialect__id'),
+            dialect=F('feature__dialect__name'),
+            community=F('feature__dialect__community'),
+            longitude=F('feature__dialect__longitude'),
+            latitude=F('feature__dialect__latitude'),
+            group=F('entry'))
 
     group_map = None
     if request.POST:
