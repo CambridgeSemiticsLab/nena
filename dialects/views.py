@@ -339,8 +339,8 @@ def features_of_dialect(request, dialect_id_string, section=None):
                 raw_rows.append('')
                 continue
 
-            dialect_idx = -1 if base_dialect_id else 0
-            entries     = dialectfeatures[dialect_idx].get('entries', [])
+            dialect_id = base_dialect_id or dialect_ids[0]
+            entries    = dialectfeatures.get(dialect_id, {}).get('entries', [])
             raw_rows.append(' ~ '.join([encode_entry(x) for x in entries]))
 
         # join using html newline entity to prevent textarea ignoring first newline char
