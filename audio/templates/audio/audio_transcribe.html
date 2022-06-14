@@ -94,7 +94,7 @@
         <tr id="{{forloop.counter}}">
           <td class="meta-data-cell">
             <textarea {{form|yesno:',disabled'}} class="time-code">{{metadata.timestamp|default_if_none:''}}</textarea>
-            <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" placeholder="&sect;">
+            <input class="section-number" value="{{metadata.section_number|default_if_none:''}}" {{form|yesno:',disabled'}} placeholder="&sect;">
             {% if form or metadata.speaker %}
             <span class="speaker {{metadata.speaker|yesno:'set,'}} {{form|yesno:"editable,"}}">👤{{metadata.speaker|default_if_none:''}}</span>
             {% endif %}
@@ -294,8 +294,8 @@
       white-space: pre-wrap;
     }
     .translation_table textarea, .translation_table .overlay {background-color: transparent;}
-    .transcribe_form .overlay + textarea {display: none;}
-    .transcribe_form.editing textarea {display: block;}
+    .transcribe_form .overlay + textarea {visibility: hidden;}
+    .transcribe_form.editing textarea {visibility: visible;}
     .transcribe_form.editing .overlay {display: block;}
 
     .transcribe_form textarea:disabled {
