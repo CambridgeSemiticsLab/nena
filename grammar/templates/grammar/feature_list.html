@@ -1,5 +1,6 @@
 {% extends 'nena.html' %}
 {% load static %}
+{% load humanize %}
 {% load nbsp %}
 
 {% block page_wrapper_class %}{% if dialects|length > 2 %}fullwidth{% endif %}{% endblock %}
@@ -41,11 +42,11 @@
     {% if dialects|length == 1 %}
     <span style="float: left;">
       {% if section %}
-      This section has {{num_features}} of the
+      This section has {{num_features|intcomma}} of the
       <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
       detailed for the dialect
       {% else %}
-      This dialect has {{num_features}} features
+      This dialect has {{num_features|intcomma}} features
       {% endif %}
     </span>
     {% endif %}

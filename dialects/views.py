@@ -74,7 +74,8 @@ class DialectListView(ListView):
     # paginate_by = 20
 
     def get_queryset(self):
-        queryset = Dialect.objects.filter(group_id=self.request.session['dialect_group_id'])
+        queryset = Dialect.objects.filter(group_id=self.request.session['dialect_group_id']) \
+                                  .annotate(num_features=Count('features'))
         if self.request.GET.get('community'):
             queryset = queryset.filter(community=self.request.GET.get('community'))
 
