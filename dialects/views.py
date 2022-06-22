@@ -4,7 +4,7 @@ from collections import OrderedDict
 from itertools import zip_longest
 
 from django.shortcuts import render
-from django.http import JsonResponse, Http404, HttpResponseRedirect
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
@@ -209,6 +209,77 @@ def setup_comparison(request, dialect_id_string):
         return HttpResponseRedirect(reverse(view_name, args=args))
 
 
+def populate_feature_list(section_root, dialect_ids, is_bulk_edit=False, max_depth=0):
+    """ returns a list of all features within the given root, complete with dialectfeatures for the
+        requested dialect_ids
+        [
+            ( feature, treebeard_info, [{df: _, entries: [], examples: []}, {df: _, entries: [], examples: []}, ...] ),
+            ( feature, treebeard_info, [{df: _, entries: [], examples: []}, {df: _, entries: [], examples: []}, ...] ),
+            ...,
+        ]
+    """
+    # annotated lists are an efficient way of getting a big chunk of a treebeard tree
+    # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
+    feature_list = Feature.get_annotated_list(parent=section_root)
+
+    base_path = section_root.path if section_root else ''
+    preserved = Case(*[When(dialect_id=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
+    dialectfeatures = DialectFeature.objects.filter(dialect__in=dialect_ids) \
+                                            .filter(feature__path__startswith=base_path) \
+                                            .values('id', 'dialect_id', 'feature_id', 'feature__path', 'feature__fullheading',
+                                                    'is_absent', 'introduction', 'comment', 'category') \
+                                            .order_by('feature__path', preserved)
+
+    entries = DialectFeatureEntry.objects.filter(feature__dialect__in=dialect_ids) \
+                                           .filter(feature__feature__path__startswith=base_path) \
+                                           .values('feature__id', 'id', 'entry', 'frequency', 'comment') \
+                                           .order_by('feature__feature__path', '-frequency')
+
+    entries_dict = {}
+    for x in entries:
+        entries_dict.setdefault(x['feature__id'], []).append(x)
+
+    examples_dict = {}
+    if is_bulk_edit:
+        entries = entries.filter(feature__feature__depth=max_depth)
+    elif len(dialect_ids) == 1:
+        examples = DialectFeatureExample.objects.filter(feature__dialect__in=dialect_ids) \
+                                                .filter(feature__feature__path__startswith=base_path) \
+                                                .values('feature__id', 'id', 'example') \
+                                                .order_by('feature__feature__path')
+        for x in examples:
+            examples_dict.setdefault(x['feature__id'], []).append(x)
+
+
+    num_features = 0
+    dialectfeatures_dict = {}
+    for x in dialectfeatures:
+        num_features += 1
+        x.update({
+            'entries': entries_dict.get(x['id'], []),
+            'examples': examples_dict.get(x['id'], []),
+        })
+        dialectfeatures_dict.setdefault(x['feature_id'], {}).update({x['dialect_id']: x})
+
+    for i, feature in enumerate(feature_list):
+        info = feature[1]
+        info['has_children'] = len(feature_list) > i+1 and feature_list[i+1][1]['level'] != info['level']
+        feature_list[i] = (feature[0], info, dialectfeatures_dict.get(feature[0].id, []))
+
+    return feature_list
+
+
+def encode_entry(entry):
+    """ returns a string encoding the dialectfeatureentry in a single line for quick editing
+    """
+    encoded_entry = entry['entry']
+    if entry['frequency'] not in ('P', None):
+        encoded_entry += ' {}'.format(entry['frequency'])
+    if entry['comment']:
+        encoded_entry += ' "{}"'.format(entry['comment'].replace('\r', '').replace('\n', '; '))
+    return encoded_entry
+
+
 @login_required
 def features_of_dialect(request, dialect_id_string, section=None):
     '''The grammar features of a chosen dialect, in tree format '''
@@ -222,11 +293,8 @@ def features_of_dialect(request, dialect_id_string, section=None):
     preserved    = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
     dialects     = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved)
     chosen_root  = get_section_root(section)
+    base_path    = chosen_root.path if chosen_root else ''
 
-    # annotated lists are an efficient way of getting a big chunk of a treebeard tree
-    # see: https://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.get_annotated_list
-    max_depth    = None
-    feature_list = Feature.get_annotated_list(parent=chosen_root, max_depth=max_depth)
 
     # process bulk save if that's what's happening
     # todo - separate this out into a different function, with own url and pass feature id list
@@ -234,6 +302,7 @@ def features_of_dialect(request, dialect_id_string, section=None):
     bulk_text   = request.POST.get('bulk_edit', None)
     entry_regex = r'^\s*(?P<entry>.+?)\s*(?P<frequency>\b[MPmp]\b){0,1}\s*(?P<comment>\".+\")?\s*$'
     if bulk_text is not None:
+        feature_list = Feature.get_annotated_list(parent=chosen_root)
         row_texts = bulk_text.split('\n')
         for row_text, feature in zip_longest(row_texts, feature_list[1:], fillvalue=''):  # skip first feature as it matches the top-level group
             dfes = []
@@ -262,51 +331,9 @@ def features_of_dialect(request, dialect_id_string, section=None):
 
         return HttpResponseRedirect(reverse('dialects:dialect-grammar-section', args=(dialects[0].id, section)))
 
+    feature_list = populate_feature_list(chosen_root, dialect_ids, is_bulk_edit=is_bulk_edit)
 
-    # ( feature, stuff, [{df: _, entries: [], examples: []}, {df: _, entries: [], examples: []}, ...] )
-
-    base_path = chosen_root.path if chosen_root else ''
-    preserved = Case(*[When(dialect_id=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
-    dialectfeatures = DialectFeature.objects.filter(dialect__in=dialect_ids) \
-                                            .filter(feature__path__startswith=base_path) \
-                                            .values('id', 'dialect_id', 'feature_id', 'feature__path', 'feature__fullheading',
-                                                    'is_absent', 'introduction', 'comment', 'category') \
-                                            .order_by('feature__path', preserved)
-
-    entries = DialectFeatureEntry.objects.filter(feature__dialect__in=dialect_ids) \
-                                           .filter(feature__feature__path__startswith=base_path) \
-                                           .values('feature__id', 'id', 'entry', 'frequency', 'comment') \
-                                           .order_by('feature__feature__path', '-frequency')
-
-    entries_dict = {}
-    for x in entries:
-        entries_dict.setdefault(x['feature__id'], []).append(x)
-
-
-    examples_dict = {}
-    if is_bulk_edit:
-        entries = entries.filter(feature__feature__depth=max_depth)
-    elif len(dialects) == 1:
-        examples = DialectFeatureExample.objects.filter(feature__dialect__in=dialect_ids) \
-                                                .filter(feature__feature__path__startswith=base_path) \
-                                                .values('feature__id', 'id', 'example') \
-                                                .order_by('feature__feature__path')
-        for x in examples:
-            examples_dict.setdefault(x['feature__id'], []).append(x)
-
-
-    num_features = 0
-    dialectfeatures_dict = {}
-    for x in dialectfeatures:
-        num_features += 1
-        x.update({
-            'entries': entries_dict.get(x['id'], []),
-            'examples': examples_dict.get(x['id'], []),
-        })
-        dialectfeatures_dict.setdefault(x['feature_id'], {}).update({x['dialect_id']: x})
-
-    for i, feature in enumerate(feature_list):
-        feature_list[i] = (feature[0], feature[1], dialectfeatures_dict.get(feature[0].id, []))
+    num_features = sum(len(x[2]) for x in feature_list)
 
     context = {
         'dialect_ids':  dialect_ids,
@@ -325,14 +352,6 @@ def features_of_dialect(request, dialect_id_string, section=None):
 
 
     if context['bulk_edit']:
-        def encode_entry(entry):
-            encoded_entry = entry['entry']
-            if entry['frequency'] not in ('P', None):
-                encoded_entry += ' {}'.format(entry['frequency'])
-            if entry['comment']:
-                encoded_entry += ' "{}"'.format(entry['comment'].replace('\r', '').replace('\n', '; '))
-            return encoded_entry
-
         raw_rows = []
         for feature, info, dialectfeatures in feature_list[1:]:
             if not dialectfeatures:
@@ -441,6 +460,43 @@ def build_dialects_json(request):
                           'location': dict(Dialect.LOCATIONS).get(d['location'],''),
                           'source': 'Fieldwork by Geoffrey Khan',
                          } for d in dialects], safe=False, json_dumps_params={'indent': 2, 'ensure_ascii': False})
+
+
+
+@login_required
+def download_feature_entries(request, section=''):
+    ''' returns a csv of dialectfeature entries for a chosen dialectfeature group across a set of dialects '''
+    import csv
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="features-in-{}.csv"'.format(section)
+
+    chosen_root = get_section_root(section)
+
+    if False: # gets list of dialect ids for dialects which have some entries in the chosen root
+        dialect_ids = Dialect.objects.filter(group_id=request.session['dialect_group_id']) \
+                                     .filter(features__feature__path__startswith=chosen_root.path) \
+                                     .values_list('id', flat=True)
+
+    dialect_ids = Dialect.objects.values_list('id', flat=True)
+
+    preserved    = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(dialect_ids)])
+    dialects     = Dialect.objects.filter(id__in=dialect_ids).order_by(preserved).values('id', 'name')
+
+    feature_list = populate_feature_list(chosen_root, dialect_ids)
+
+    writer = csv.writer(response)
+    writer.writerow(['', '', 'dialect id:'] + [dialect['id'] for dialect in dialects])
+    writer.writerow(['feature id', 'feature name', ''] + [dialect['name'] for dialect in dialects])
+
+    for feature, info, dialectfeatures in feature_list:
+        cells = []
+        if dialectfeatures:
+            for dialect in dialects:
+                entries = dialectfeatures.get(dialect['id'], {}).get('entries', [])
+                cells.append(' ~ '.join([encode_entry(x) for x in entries]))
+        writer.writerow([feature.fullheading, feature.name, ''] + cells)
+
+    return response
 
 
 def problems(request):

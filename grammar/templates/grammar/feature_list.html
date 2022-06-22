@@ -323,6 +323,12 @@
         {% if user.is_superuser %}
         <a class="button" href="{% url 'admin:grammar_feature_changelist' %}" target="_BLANK">Edit grammar feature tree</a>
         {% endif %}
+
+        {% if feature_list.0.0.fullheading %}
+        <br>
+        <a class="button" href="{% url 'dialects:download-feature-entries' feature_list.0.0.fullheading %}" target="_BLANK">Download all entries in {{feature_list.0.0.fullheading}} as CSV</a>
+        {% endif %}
+        <br>
         <a class="button" href="{% url 'grammar:coverage-check' 'grammar' %}" target="_BLANK">Download Grammar Coverage CSV</a>
         <a class="button" href="{% url 'grammar:coverage-check' 'dialects' %}" target="_BLANK">Download Dialects Coverage CSV</a>
       </div>
