@@ -485,7 +485,7 @@ def download_feature_entries(request, section=''):
 
     feature_list = populate_feature_list(chosen_root, dialect_ids)
 
-    writer = csv.writer(response)
+    writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(['', '', 'dialect id:'] + [dialect['id'] for dialect in dialects])
     writer.writerow(['feature id', 'feature name', ''] + [dialect['name'] for dialect in dialects])
 
