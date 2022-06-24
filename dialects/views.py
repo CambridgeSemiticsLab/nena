@@ -468,6 +468,7 @@ def build_dialects_json(request):
 def download_feature_entries(request, section=''):
     ''' returns a csv of dialectfeature entries for a chosen dialectfeature group across a set of dialects '''
     import csv
+    import codecs
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="features-in-{}.csv"'.format(section)
 
@@ -485,6 +486,7 @@ def download_feature_entries(request, section=''):
 
     feature_list = populate_feature_list(chosen_root, dialect_ids)
 
+    response.write(codecs.BOM_UTF8)
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(['', '', 'dialect id:'] + [dialect['id'] for dialect in dialects])
     writer.writerow(['feature id', 'feature name', ''] + [dialect['name'] for dialect in dialects])
