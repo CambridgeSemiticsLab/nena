@@ -107,6 +107,16 @@
         {% endif %}
         {% if with_without_unknown == 'unknown' %}
           <button class="button" id="mark_without">Mark as does not have this feature</button>
+
+          <select class="button" id="bulk_enter" style="height: initial; width: initial; font-family: monospace;">
+            <option>-- Bulk add entries for selected --</option>
+            <optgroup label="existing entries:">
+            {% for entry in unique_entries %}
+              <option value="{{entry}}">{{entry}}</option>
+            {% endfor %}
+            </optgroup>
+              <option value="NEW_ENTRY">(type new entry)</option>
+          </select>
         {% endif %}
       </div>
   </div>
@@ -154,6 +164,16 @@ $(function(){
 
   $('#mark_without').on('click', function(){
     $('#table_form').attr('action', '?mark_without=true').submit()
+  })
+
+  $('#bulk_enter').on('change', function(){
+    entry_text = $(this).val();
+    if(entry_text == 'NEW_ENTRY'){
+      entry_text = prompt("Type a new feature entry for the seleted dialects");
+    }
+    if(entry_text){
+      $('#table_form').attr('action', '?bulk_enter='+entry_text).submit();
+    }
   })
 
   $('.check_similar').on('click', function(){

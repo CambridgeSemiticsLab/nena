@@ -59,16 +59,27 @@ def dialects_with_feature(request, pk):
                              .order_by('dialect__name')
     unfiltered_count = queryset.count()
 
-    if request.method == "POST" and request.GET.get('mark_without'):
+    unique_entries = set(e.entry for df in queryset for e in df.entries.all())
+
+
+    if request.method == "POST" and (request.GET.get('mark_without') or request.GET.get('bulk_enter')):
         dialect_ids = list(int(x) for x in request.POST.getlist('checked_dialect_id'))
         if DialectFeature.objects.filter(dialect_id__in=dialect_ids, feature=feature).count():
             msg = 'Error: at least one of the submitted dialects already has an entry for this feature'
             messages.add_message(request, messages.INFO, msg)
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         for dialect in Dialect.objects.filter(id__in=dialect_ids):
-            df = DialectFeature(dialect=dialect, feature=feature, is_absent=True)
-            df.save()
-        msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
+            if request.GET.get('bulk_enter'):
+                df = DialectFeature(dialect=dialect, feature=feature)
+                df.save()
+                entry = request.GET.get('bulk_enter')
+                dfe = DialectFeatureEntry(feature=df, entry=entry)
+                dfe.save()
+                msg = '{} dialects given the entry {}'.format(len(dialect_ids), entry)
+            elif request.GET.get('mark_without'):
+                df = DialectFeature(dialect=dialect, feature=feature, is_absent=True)
+                df.save()
+                msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
         messages.add_message(request, messages.INFO, msg)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
@@ -122,6 +133,7 @@ def dialects_with_feature(request, pk):
         'with_without_unknown': 'unknown' if is_unknown else 'without' if is_absent else 'with',
         'feature':          feature,
         'dialect_features': queryset,
+        'unique_entries':   unique_entries,
         'num_dialects':     num_dialects,
         'num_with':         num_with,
         'num_without':      num_without,
