@@ -2,10 +2,46 @@
 {#  - `map_data_json` is a json string containing a plottable set of data consumed by `L.geoJSON()`   #}
 {#  - `map_center` is a two value list (longitude, latitude)                                          #}
 {% load static %}
+<style>
+.widscreen_map #map{
+  width: 100vw;
+  height:90vh;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  border-radius: 0;
+}
+.widscreen_map #map .icon_base:before,
+.widscreen_map #map .label:before {
+    top: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
+    line-height: 12px;
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+.widscreen_map #map .icon_C:before {
+  z-index: 1;
+  background: rgba(255,0,0,1);
+}
+.widscreen_map #map .icon_J:before {z-index: 2; background: rgba(0,0,255,1);}
+
+.widescreen_map #map .my-div-icon {width: 100px!important; height: auto!important; padding: 5px; background-color:#ffeeccaa;}
+
+#map .river {
+  stroke: cyan;
+  stroke-width: 5px;
+  fill: none;
+}
+</style>
 
 {% if not hide_toggles %}
 <input type="checkbox" id="toggle-names">
-<input type="checkbox" id="toggle-colors">
+<input type="checkbox" id="toggle-colors" checked>
 {% endif %}
 <div id="map">
   <div class="key">
@@ -13,8 +49,8 @@
     <span class="icon_base icon_J">Jewish</span>
   </div>
 </div>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
 <script src="{% static 'js/borders.js' %}"></script>
@@ -32,6 +68,12 @@
             ext: 'png' });
     var cities_and_terrain = new L.LayerGroup([normalmap, cities])
 
+    var cities_and_terrain =  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', {
+              attribution: '&copy; <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              minZoom: 6,
+              maxZoom: 11,
+              ext: 'png' });
+
     var printmap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
             minZoom: 6,
@@ -43,10 +85,13 @@
     };
 
     var center = [{{map_center.0|default:'37'}}, {{map_center.1|default:'45'}}];
-    var map     = L.map('map',{layers: [cities_and_terrain], center: center, zoom: 7, maxBoundsViscosity: 0.9});
-    //var borders = L.geoJSON(country_borders, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
+    var map     = L.map('map',{layers: [cities_and_terrain], center: center, zoom: 5, maxBoundsViscosity: 0.9});
+    var river_zab = L.geoJSON(river_zab_rough, {style: function(feature) { return { className: feature.properties.class }} }).addTo(map);
 
     map.addControl(new L.Control.Fullscreen());
+
+    var myIcon = L.divIcon({className: 'my-div-icon', html:"I am custom text on the map"});
+    L.marker([36.995, 44.896], {icon: myIcon}).addTo(map);
 
     // Process our map data points, grouping into layers by point.properties.group
     // if this doesn't exist stick them in a single layer called "points"
@@ -129,6 +174,7 @@
 
     markers = L.geoJSON(json_data, dataLayerOptions)
     map.setMaxBounds(markers.getBounds().pad(.2));
+    map.fitBounds(markers.getBounds());
 
     map.on('baselayerchange', function(e) {
       $('#map').toggleClass('print')

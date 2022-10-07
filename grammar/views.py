@@ -172,8 +172,9 @@ def map_of_feature(request, pk):
             groups_dict[key].append(id)
 
         url = reverse("grammar:feature-map", kwargs={'pk':pk})
-        querystring = "/".join(f"{k}:{','.join(ids)}" for k, ids in groups_dict.items())
-        return HttpResponseRedirect(url +"?groups="+querystring)
+        querystring = MAP_GROUP_DELIMITER.join(f"{k}{MAP_GROUP_EQUALS}{','.join(ids)}" for k, ids in groups_dict.items())
+        url = (url + "?groups=" + querystring) if groups_dict else url
+        return HttpResponseRedirect(url)
 
     from dialectmaps.views import entry_to_map_point
     entries = DialectFeatureEntry.objects \
@@ -236,12 +237,15 @@ def map_of_feature(request, pk):
     return render(request, 'dialectmaps/dialectmap_detail.html', context)
 
 
+MAP_GROUP_DELIMITER = "-/-"
+MAP_GROUP_EQUALS = ":"
+
 def decode_group_map(group_string):
     """ return a dict of id -> group key from the given string """
     group_map = {}
-    for group in group_string.split("/"):
+    for group in group_string.split(MAP_GROUP_DELIMITER):
         if group == "": continue
-        key, ids = group.split(":")
+        key, ids = group.split(MAP_GROUP_EQUALS)
         for id in ids.split(","):
             group_map[int(id)] = key
     return group_map
