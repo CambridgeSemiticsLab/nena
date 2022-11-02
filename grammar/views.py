@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -117,10 +118,18 @@ def dialects_with_feature(request, pk):
     if is_absent:
         num_with, num_without = num_without, num_with
 
+    frequency_summary = defaultdict(int)
+    for dialect_feature in queryset:
+        for entry in dialect_feature.entries.all():
+            frequency_summary[entry.entry] += 1
+    frequency_summary = sorted(frequency_summary.items(), key=lambda x: x[1], reverse=True)
+
+
     context = {
         'with_without_unknown': 'unknown' if is_unknown else 'without' if is_absent else 'with',
         'feature':          feature,
         'dialect_features': queryset,
+        'frequency_summary': frequency_summary,
         'num_dialects':     num_dialects,
         'num_with':         num_with,
         'num_without':      num_without,

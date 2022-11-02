@@ -24,6 +24,12 @@
       <a href="{% url 'grammar:feature-detail' feature.id %}?is_unknown=true">{{num_unknown}} {{num_unknown|pluralize:'has,have'}} no current record</a>.
     </p>
 
+    {% for entry, num in frequency_summary %}
+    <div class="counter_chip" data-entry_text="{{entry}}">
+      {{num}} &times; <span class="aramaic">{{entry}}</span>
+    </div>
+    {% endfor %}
+
     {% include 'dialects/_dialect_filter.html' %}
     <form id="table_form" action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="post">
     {% csrf_token %}
@@ -114,6 +120,14 @@
   {% endif %}
 
 <style>
+.counter_chip{
+  display: inline-block;
+  padding: 1em;
+  background-color: white;
+  border-radius: 3px;
+  margin: 0.5em;
+  cursor: pointer;
+}
 .dialect_filter_form {margin-bottom: -2.6em;}
 .map_group { width: 1.5em; height: 1.5em; background:white; border: 2px solid black; border-radius:50%; text-align:center; font-weight: bold; display:none;}
 
@@ -159,12 +173,21 @@ $(function(){
   $('.check_similar').on('click', function(){
     entry_text = $(this).prevAll('.entry').text();
     is_checked = $(this).parents('tr').find('.row_select').prop('checked');
+    check_all_matching(entry_text, is_checked)
+  });
+
+  $('.counter_chip').on('click', function(){
+    check_all_matching($(this).attr('data-entry_text'));
+  })
+
+  function check_all_matching(text, undo=false){
     $('#table_form .entry').each(function(){
-      if($(this).text() == entry_text){
-        $(this).parents('tr').find('.row_select').prop('checked', !is_checked);
+      if($(this).text() == text){
+        $(this).parents('tr').find('.row_select').prop('checked', !undo);
       }
     })
-  });
+  }
+
 
   // makes checkbox in header row control state of all in table
   $('.checkable-rows th input[type=checkbox]').click(function () {
