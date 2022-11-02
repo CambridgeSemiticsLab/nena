@@ -47,8 +47,7 @@ def features(request, section=None):
 
 @login_required
 def dialects_with_feature(request, pk):
-    ''' Faster way to list all dialects with corresponding entries for a given feature '''
-    ''' todo - replace FeatureDetailView and FeatureParadigmView with this or similar '''
+    ''' list all dialects with corresponding entries for a given feature '''
     feature = Feature.objects.get(pk=pk)
     is_absent = request.GET.get('is_absent', 'False')=='true'
     prefetch_entries = Prefetch('entries', DialectFeatureEntry.objects.order_by('-frequency'))
@@ -205,40 +204,6 @@ def map_of_feature(request, pk):
         context.update({'chosen_location_name': dict(Dialect.LOCATIONS)[request.GET.get('location')]})
 
     return render(request, 'dialectmaps/dialectmap_detail.html', context)
-
-
-class FeatureParadigmView(DetailView):
-    '''Details for group of features across all dialects that form a language paradigm'''
-
-    model = Feature
-    template_name = 'grammar/paradigm_detail.html'
-
-    def get_context_data(self, **kwargs):
-
-        context = super(FeatureParadigmView, self).get_context_data(**kwargs)
-        dialects = {}
-        gf = Feature.objects.filter(pk=self.kwargs['pk']).first() # the grammar feature
-        paradigm = [gf] + list(gf.get_children()) # list of all the paradigm features for the grammar feature
-        for df in DialectFeature.objects.filter(feature=self.kwargs['pk']).order_by('dialect'):
-            d = df.dialect
-            for p in paradigm:
-                features = DialectFeature.objects.filter(feature=p, dialect=d)
-                for f in features:
-                    mappable = True if (f.dialect.latitude and f.dialect.longitude) else False
-                    entries = {}
-                    for e in f.entries.all():
-                        if e.feature.dialect.pk not in dialects:
-                            dialects[e.feature.dialect.pk] = {}
-                        if e.frequency == 'P':
-                            entries['primary'] = e.entry
-                        elif e.frequency == 'M':
-                            if 'marginal' in entries:
-                                entries['marginal'].append(e.entry)
-                            else:
-                                entries['marginal'] = [e.entry]
-                        dialects[e.feature.dialect.pk] = {'name': e.feature.dialect.name, 'mappable': mappable, 'entries': entries }
-        context['dialects'] = dialects
-        return context
 
 
 @login_required
