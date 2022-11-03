@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.db.models import Prefetch, Count, F, Q
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.shortcuts import render
 
 from grammar.models import Feature
@@ -124,11 +124,17 @@ def dialects_with_feature(request, pk):
             frequency_summary[entry.entry] += 1
     frequency_summary = sorted(frequency_summary.items(), key=lambda x: x[1], reverse=True)
 
+    group_string = request.GET.get('groups', '')
+    group_map = decode_group_map(group_string)
+    dialect_features = []
+    for dialect_feature in queryset:
+        dialect_feature.group_key = group_map.get(dialect_feature.dialect_id, None)
+        dialect_features.append(dialect_feature)
 
     context = {
         'with_without_unknown': 'unknown' if is_unknown else 'without' if is_absent else 'with',
         'feature':          feature,
-        'dialect_features': queryset,
+        'dialect_features': dialect_features,
         'frequency_summary': frequency_summary,
         'num_dialects':     num_dialects,
         'num_with':         num_with,
@@ -155,6 +161,18 @@ def dialects_with_feature(request, pk):
 @login_required
 def map_of_feature(request, pk):
     '''  '''
+    if request.method == "POST":
+        group_keys = request.POST.getlist('group_key')
+        dialect_ids   = request.POST.getlist('dialect_id')
+        groups_dict = defaultdict(list)
+        for id, key in zip(dialect_ids, group_keys):
+            if key == '0': continue
+            groups_dict[key].append(id)
+
+        url = reverse("grammar:feature-map", kwargs={'pk':pk})
+        querystring = "/".join(f"{k}:{','.join(ids)}" for k, ids in groups_dict.items())
+        return HttpResponseRedirect(url +"?groups="+querystring)
+
     from dialectmaps.views import entry_to_map_point
     entries = DialectFeatureEntry.objects \
         .filter(
@@ -171,11 +189,11 @@ def map_of_feature(request, pk):
             latitude=F('feature__dialect__latitude'),
             group=F('entry'))
 
-    group_map = None
-    if request.POST:
-        group_numbers = request.POST.getlist('group_number')
-        dialect_ids   = request.POST.getlist('dialect_id')
-        group_map = {int(x):y for x, y in zip(dialect_ids, group_numbers) if y != '0'}
+
+    group_string = request.GET.get('groups', '')
+    group_map = decode_group_map(group_string)
+
+    if group_map:
         entries = entries.filter(feature__dialect__id__in=group_map.keys())
 
     # todo: combine this filtering logic with similar in dialects.DialectListView
@@ -204,6 +222,7 @@ def map_of_feature(request, pk):
         'locations':        Dialect.LOCATIONS,
         'chosen_location':  request.GET.get('location'),
         'entry_filter':     request.GET.get('entry'),
+        'group_string':     group_string,
     }
 
     if request.GET.get('community'):
@@ -213,6 +232,17 @@ def map_of_feature(request, pk):
         context.update({'chosen_location_name': dict(Dialect.LOCATIONS)[request.GET.get('location')]})
 
     return render(request, 'dialectmaps/dialectmap_detail.html', context)
+
+
+def decode_group_map(group_string):
+    """ return a dict of id -> group key from the given string """
+    group_map = {}
+    for group in group_string.split("/"):
+        if group == "": continue
+        key, ids = group.split(":")
+        for id in ids.split(","):
+            group_map[int(id)] = key
+    return group_map
 
 
 @login_required

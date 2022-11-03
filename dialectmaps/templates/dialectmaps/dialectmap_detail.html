@@ -10,7 +10,13 @@
 {% block page_content %}
   <div class="campl-column12">
   <div class="campl-content-container">
-      {% include 'dialects/_dialect_filter.html' %}
+      {% if group_string %}
+        <a class="button" style="margin-bottom: 0.5em;" href="{% url 'grammar:feature-detail' feature.id %}?groups={{group_string}}">
+          edit groups
+        </a>
+      {% else %}
+        {% include 'dialects/_dialect_filter.html' %}
+      {% endif %}
       {% include "map.html" %}
       <br>
       <br>

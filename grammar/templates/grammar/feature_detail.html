@@ -31,7 +31,7 @@
     {% endfor %}
 
     {% include 'dialects/_dialect_filter.html' %}
-    <form id="table_form" action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="post">
+    <form id="table_form" action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="POST">
     {% csrf_token %}
     <input class="button fr" type="submit" value="See map of this feature">
     <a id="add_to_group" class="button fr">
@@ -41,11 +41,15 @@
       {% for dialect_feature in dialect_features %}
       {% with dialect=dialect_feature.dialect entries=dialect_feature.entries %}
         <tr>
-          <td style="width: 5em;">
+          <td>
             <input type="checkbox" class="chex row_select" name="checked_dialect_id" value="{{dialect.id}}">
             <input type="hidden" name="dialect_id" value="{{dialect.id}}">
-            <input type="hidden" name="group_number" value="0">
-            <span class="map_group"></span>
+            <input type="hidden" name="group_key" value="{{dialect_feature.group_key|default_if_none:0}}">
+          </td>
+          <td>
+            <span class="map_group {{dialect_feature.group_key|yesno:"visible,"}}" title="map group">
+              {{dialect_feature.group_key}}
+            </span>
           </td>
           <td>
             <a href="{% url 'dialects:dialect-detail' dialect.id %}">{{ dialect.name }}</a>
@@ -129,7 +133,20 @@
   cursor: pointer;
 }
 .dialect_filter_form {margin-bottom: -2.6em;}
-.map_group { width: 1.5em; height: 1.5em; background:white; border: 2px solid black; border-radius:50%; text-align:center; font-weight: bold; display:none;}
+.map_group {
+  min-width: 1.5em;
+  padding: 0.4em;
+  background:white;
+  border: 1px solid #aaa;
+  border-radius:50%;
+  text-align:center;
+  font-size: 0.8em;
+  display: none;
+}
+.map_group.visible {
+  display: inline-block;
+}
+
 
 .check_similar {
   display: inline-block;
@@ -158,10 +175,11 @@
 <script>
 $(function(){
   $('#feature_detail').on('click', '#add_to_group', function(){
-    group_number = prompt('Which group number? ("0" to remove from group)');
+    group_key = prompt('Which group key? ("0" to remove from group)');
     $('.row_select:checked').each(function(){
-      $(this).siblings('[name="group_number"]').val(group_number)
-      $(this).siblings('.map_group').html(group_number).css('display', 'inline-block')
+      $row = $(this).parents('tr').eq(0);
+      $row.find('[name="group_key"]').val(group_key)
+      $row.find('.map_group').html(group_key).addClass('visible')
       $(this).prop('checked', false )
     })
   });
