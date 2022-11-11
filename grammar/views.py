@@ -1,5 +1,5 @@
 import json
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -126,6 +126,7 @@ def dialects_with_feature(request, pk):
 
     group_string = request.GET.get('groups', '')
     group_map = decode_group_map(group_string)
+    group_summary = dict(Counter(group_map.values()))
     dialect_features = []
     for dialect_feature in queryset:
         dialect_feature.group_key = group_map.get(dialect_feature.dialect_id, None)
@@ -136,6 +137,7 @@ def dialects_with_feature(request, pk):
         'feature':          feature,
         'dialect_features': dialect_features,
         'frequency_summary': frequency_summary,
+        'group_summary':    group_summary,
         'num_dialects':     num_dialects,
         'num_with':         num_with,
         'num_without':      num_without,
