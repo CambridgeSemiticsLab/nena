@@ -228,6 +228,10 @@ def features_of_dialect(request, dialect_id_string, section=None):
     max_depth    = None
     feature_list = Feature.get_annotated_list(parent=chosen_root, max_depth=max_depth)
 
+    # redirect editing of individual sections to the instance editing page
+    if len(feature_list) < 2 and is_bulk_edit:
+        return HttpResponseRedirect(reverse('dialects:dialect-feature-edit', args=(dialects[0].id, section)))
+
     # process bulk save if that's what's happening
     # todo - separate this out into a different function, with own url and pass feature id list
     #        through form so it doesn't rely on the above code
