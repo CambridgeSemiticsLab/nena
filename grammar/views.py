@@ -1,3 +1,4 @@
+import csv
 import json
 from collections import defaultdict, Counter
 
@@ -157,6 +158,17 @@ def dialects_with_feature(request, pk):
     if request.GET.get('location'):
         context.update({'chosen_location_name': dict(Dialect.LOCATIONS)[request.GET.get('location')]})
 
+    if request.GET.get("as_csv"):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="Dialects with {feature.fullheading} {feature.name}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(("Dialect", "Entry", "Frequency", "Community", "Location", "Country", "Latitude", "Longitude"))
+        for feature in dialect_features:
+            dialect = feature.dialect
+            for entry in feature.entries.all():
+                writer.writerow((dialect.name, entry.entry, entry.frequency, dialect.community, dialect.location, dialect.country, dialect.latitude, dialect.longitude))
+        return response
+
     return render(request, 'grammar/feature_detail.html', context)
 
 
@@ -254,7 +266,6 @@ def decode_group_map(group_string):
 @login_required
 def coverage_check(request, type="grammar"):
     ''' returns a csv summary of which grammar features have what level of completeness '''
-    import csv
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{}_coverage.csv"'.format(type)
 

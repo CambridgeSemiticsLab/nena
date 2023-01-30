@@ -25,6 +25,9 @@
     </p>
 
     {% include 'dialects/_dialect_filter.html' %}
+    <a href="?as_csv=1" class="button fr">
+        ➥ CSV
+    </a>
     <form id="table_form" action="{% url 'grammar:feature-map' feature.id %}?{{ request.GET.urlencode }}" method="POST">
     {% csrf_token %}
     <input class="button fr" type="submit" value="See map of this feature">
