@@ -109,8 +109,8 @@ def dialects_with_feature(request, pk):
     unknown_dialect_ids = all_dialects_qs.exclude(features__feature=feature).values_list('id', flat=True)
     is_unknown = request.GET.get('is_unknown', 'False')=='true'
     if is_unknown:
-        queryset = (DialectFeature(dialect=dialect, feature=feature)
-                    for dialect in all_dialects_qs.filter(id__in=unknown_dialect_ids))
+        queryset = list(DialectFeature(dialect=dialect, feature=feature)
+                        for dialect in all_dialects_qs.filter(id__in=unknown_dialect_ids))
 
     num_dialects = all_dialects_qs.count()
     num_unknown  = len(unknown_dialect_ids)
