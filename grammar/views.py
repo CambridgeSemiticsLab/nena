@@ -161,6 +161,8 @@ def dialects_with_feature(request, pk):
     if request.GET.get("as_csv"):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="Dialects with {feature.fullheading} {feature.name}.csv"'
+        import codecs
+        response.write(codecs.BOM_UTF8)
         writer = csv.writer(response)
         writer.writerow(("Dialect", "Entry", "Frequency", "Community", "Location", "Country", "Latitude", "Longitude"))
         for feature in dialect_features:
