@@ -1,4 +1,5 @@
 {% extends 'nena.html' %}
+{% load humanize %}
 
 {% block subtitle %}
     {{ view.name }}
@@ -14,6 +15,7 @@
                   <th>Name</th>
                   <th>Community</th>
                   <th>Location</th>
+                  <th>Documented Features</th>
               </tr>
           </thead>
       {% for dialect in object_list  %}
@@ -21,6 +23,9 @@
               <td><a href={% url 'dialects:dialect-detail' dialect.pk %}>{{ dialect.name }}</a></td>
               <td>{{ dialect.get_community_display }}</td>
               <td>{{ dialect.get_location_display }}</td>
+              <td style="text-align:right">
+                <a href="{% url 'dialects:dialect-grammar' dialect.id %}">{{ dialect.num_features|intcomma|default:'' }}</a>
+              </td>
           </tr>
       {% empty %}
           No dialects.

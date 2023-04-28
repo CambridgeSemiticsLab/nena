@@ -1,5 +1,6 @@
 {% extends 'nena.html' %}
 {% load static %}
+{% load humanize %}
 {% load nbsp %}
 
 {% block page_wrapper_class %}{% if dialects|length > 2 %}fullwidth{% endif %}{% endblock %}
@@ -41,11 +42,11 @@
     {% if dialects|length == 1 %}
     <span style="float: left;">
       {% if section %}
-      This section has {{num_features}} of the
+      This section has {{num_features|intcomma}} of the
       <a href="{% url 'dialects:dialect-grammar' dialect_ids|join:',' %}">{{total_features}} total features</a>
       detailed for the dialect
       {% else %}
-      This dialect has {{num_features}} features
+      This dialect has {{num_features|intcomma}} features
       {% endif %}
     </span>
     {% endif %}
@@ -134,7 +135,11 @@
       <li class="level_{{info.level}}">
 
         <label for="pop_open_{{forloop.counter|add:'1'}}">
-          {{feature|safe}}
+          {% if info.has_children %}
+            {{feature|safe}}
+          {% else %}
+            <a href="{% url 'grammar:feature-detail' feature.id %}">{{feature|safe}}</a>
+          {% endif %}
           {% if feature.fullheading %}
           <a class="section_link" href="{% spaceless %}
               {% if dialects %}
@@ -143,14 +148,28 @@
                 {% url 'grammar:feature-list-section' feature.fullheading %}
               {% endif %}
               {% endspaceless %}" title="show just this section">§</a>
+
+          {% endif %}
+
+          {% if info.has_children %}
+          <label class="section_menu_icon" for="section_{{forloop.counter}}">☰</label>
+          <input class="display_toggle_next_neighbour" type="checkbox" id="section_{{forloop.counter}}">
+          <div class="section_menu">
+              Link to this section
+
+
+              <label for="section_{{forloop.counter}}">&times;</label>
+          </div>
           {% endif %}
         </label>
+
+
 
         {% if bulk_edit %}
           {% if forloop.first %}
           <textarea class="df_edit_bulk utf8-text" name="bulk_edit" rows="{{feature_list|length|add:'-1'}}">{{raw_text|safe}}</textarea>
           {% endif %}
-        {% elif dialects %}
+        {% elif dialects and not info.has_children %}
           {% for dialect in dialects %}
             {% if dialect.id in dialectfeatures.keys %}
               {% for dialect_id, dialectfeature in dialectfeatures.items %}
@@ -312,6 +331,31 @@
     width: 1px;
     overflow: hidden;
   }
+
+  .section_menu_icon {
+    position: relative;
+    float: right;
+    width: 20px;
+    opacity: 0.3;
+    cursor: pointer;
+    top: 0.5em;
+    font-size: 120%;
+  }
+  label:hover + .section_menu_icon { opacity: 1;}
+  .section_menu {
+    position: absolute;
+    left: 500px;
+    z-index: 2;
+    top: 0; right: 0;
+    width: 200px;
+    min-height: 100px;
+    border: 1px solid cyan;
+    background: #ffc;
+    padding: 0.5em;
+  }
+  .display_toggle_next_neighbour,
+  .display_toggle_next_neighbour + * {display:none;}
+  .display_toggle_next_neighbour:checked + * {display:block;}
   </style>
 
 
@@ -323,6 +367,12 @@
         {% if user.is_superuser %}
         <a class="button" href="{% url 'admin:grammar_feature_changelist' %}" target="_BLANK">Edit grammar feature tree</a>
         {% endif %}
+
+        {% if feature_list.0.0.fullheading %}
+        <br>
+        <a class="button" href="{% url 'dialects:download-feature-entries' feature_list.0.0.fullheading %}" target="_BLANK">Download all entries in {{feature_list.0.0.fullheading}} as CSV</a>
+        {% endif %}
+        <br>
         <a class="button" href="{% url 'grammar:coverage-check' 'grammar' %}" target="_BLANK">Download Grammar Coverage CSV</a>
         <a class="button" href="{% url 'grammar:coverage-check' 'dialects' %}" target="_BLANK">Download Dialects Coverage CSV</a>
       </div>
