@@ -296,11 +296,6 @@ def features_of_dialect(request, dialect_id_string, section=None):
     chosen_root  = get_section_root(section)
     base_path    = chosen_root.path if chosen_root else ''
 
-
-    # redirect editing of individual sections to the instance editing page
-    if len(feature_list) < 2 and is_bulk_edit:
-        return HttpResponseRedirect(reverse('dialects:dialect-feature-edit', args=(dialects[0].id, section)))
-
     # process bulk save if that's what's happening
     # todo - separate this out into a different function, with own url and pass feature id list
     #        through form so it doesn't rely on the above code
@@ -337,6 +332,10 @@ def features_of_dialect(request, dialect_id_string, section=None):
         return HttpResponseRedirect(reverse('dialects:dialect-grammar-section', args=(dialects[0].id, section)))
 
     feature_list = populate_feature_list(chosen_root, dialect_ids, is_bulk_edit=is_bulk_edit)
+
+    # redirect editing of individual sections to the instance editing page
+    if len(feature_list) < 2 and is_bulk_edit:
+        return HttpResponseRedirect(reverse('dialects:dialect-feature-edit', args=(dialects[0].id, section)))
 
     num_features = sum(len(x[2]) for x in feature_list)
 
