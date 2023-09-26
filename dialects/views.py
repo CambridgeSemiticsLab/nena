@@ -264,7 +264,7 @@ def populate_feature_list(section_root, dialect_ids, is_bulk_edit=False, max_dep
 
     for i, feature in enumerate(feature_list):
         info = feature[1]
-        info['has_children'] = len(feature_list) > i+1 and feature_list[i+1][1]['level'] != info['level']
+        info['has_children'] = len(feature_list) > i+1 and feature_list[i+1][1]['level'] > info['level']
         feature_list[i] = (feature[0], info, dialectfeatures_dict.get(feature[0].id, []))
 
     return feature_list
