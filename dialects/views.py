@@ -26,6 +26,7 @@ from dialects.forms import DialectFeatureForm
 def homepage(request):
     dialects = Dialect.objects.filter(longitude__isnull=False, latitude__isnull=False) \
                               .filter(group_id=request.session['dialect_group_id']) \
+                              .order_by("name") \
                               .values('id', 'name', 'community', 'longitude', 'latitude')
 
     map_data = [dialect_to_map_point(d) for d in dialects]
@@ -75,6 +76,7 @@ class DialectListView(ListView):
 
     def get_queryset(self):
         queryset = Dialect.objects.filter(group_id=self.request.session['dialect_group_id']) \
+                                  .order_by("name") \
                                   .annotate(num_features=Count('features'))
         if self.request.GET.get('community'):
             queryset = queryset.filter(community=self.request.GET.get('community'))
