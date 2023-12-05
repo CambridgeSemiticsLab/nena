@@ -60,24 +60,28 @@
             attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a> contributors',
             minZoom: 6,
             maxZoom: 11,
-            ext: 'png' });
+            ext: 'png',
+            crossOrigin: 'strict-origin-when-cross-origin' });
     var cities = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
             minZoom: 6,
             maxZoom: 11,
-            ext: 'png' });
+            ext: 'png',
+            crossOrigin: 'strict-origin-when-cross-origin' });
     var cities_and_terrain = new L.LayerGroup([normalmap, cities])
 
     var cities_and_terrain =  L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}.{ext}', {
               attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a> contributors',
               minZoom: 6,
               maxZoom: 11,
-              ext: 'png' });
+              ext: 'png',
+              crossOrigin: 'strict-origin-when-cross-origin' });
 
     var printmap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
             minZoom: 6,
-            maxZoom: 11 });
+            maxZoom: 11,
+            crossOrigin: 'strict-origin-when-cross-origin' });
 
     var baseLayers = {
         "Normal view": cities_and_terrain,
