@@ -148,17 +148,16 @@
         {% endif %}
         {% if with_without_unknown == 'unknown' %}
           <button class="button" id="mark_without">Mark as does not have this feature</button>
-
-          <select class="button" id="bulk_enter" style="height: initial; width: initial; font-family: monospace;">
-            <option>-- Bulk add entries for selected --</option>
-            <optgroup label="existing entries:">
-            {% for entry in unique_entries %}
-              <option value="{{entry}}">{{entry}}</option>
-            {% endfor %}
-            </optgroup>
-              <option value="NEW_ENTRY">(type new entry)</option>
-          </select>
         {% endif %}
+        <select class="button" id="bulk_enter" style="height: initial; width: initial; font-family: monospace;">
+          <option>-- Bulk add entries for selected dialects --</option>
+          <optgroup label="existing entries:">
+          {% for entry in unique_entries %}
+            <option value="{{entry}}">{{entry}}</option>
+          {% endfor %}
+          </optgroup>
+            <option value="NEW_ENTRY">(type new entry)</option>
+        </select>
       </div>
   </div>
   </div>

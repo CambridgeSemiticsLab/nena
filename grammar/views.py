@@ -53,34 +53,40 @@ def dialects_with_feature(request, pk):
     feature = Feature.objects.get(pk=pk)
     is_absent = request.GET.get('is_absent', 'False')=='true'
     prefetch_entries = Prefetch('entries', DialectFeatureEntry.objects.order_by('-frequency'))
-    queryset = DialectFeature.objects.filter(feature_id=feature.id, is_absent=is_absent,
-                                             dialect__group=request.session['dialect_group_id']) \
+    full_queryset = DialectFeature.objects.filter(feature_id=feature.id) \
                              .select_related('dialect') \
                              .prefetch_related(prefetch_entries) \
                              .order_by('dialect__name')
+
+    unique_entries = set(e.entry for df in full_queryset for e in df.entries.all())
+
+    queryset = full_queryset.filter(is_absent=is_absent,
+                                    dialect__group=request.session['dialect_group_id'])
     unfiltered_count = queryset.count()
 
-    unique_entries = set(e.entry for df in queryset for e in df.entries.all())
-
-
-    if request.method == "POST" and (request.GET.get('mark_without') or request.GET.get('bulk_enter')):
-        dialect_ids = list(int(x) for x in request.POST.getlist('checked_dialect_id'))
-        if DialectFeature.objects.filter(dialect_id__in=dialect_ids, feature=feature).count():
-            msg = 'Error: at least one of the submitted dialects already has an entry for this feature'
-            messages.add_message(request, messages.INFO, msg)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    dialect_ids = list(int(x) for x in request.POST.getlist('checked_dialect_id'))
+    if request.method == "POST" and request.GET.get('bulk_enter'):
         for dialect in Dialect.objects.filter(id__in=dialect_ids):
             if request.GET.get('bulk_enter'):
-                df = DialectFeature(dialect=dialect, feature=feature)
+                df = DialectFeature.objects.filter(dialect=dialect, feature=feature).first() or DialectFeature(dialect=dialect, feature=feature)
+                df.is_absent = False
                 df.save()
                 entry = request.GET.get('bulk_enter')
                 dfe = DialectFeatureEntry(feature=df, entry=entry)
                 dfe.save()
                 msg = '{} dialects given the entry {}'.format(len(dialect_ids), entry)
-            elif request.GET.get('mark_without'):
-                df = DialectFeature(dialect=dialect, feature=feature, is_absent=True)
-                df.save()
-                msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
+        messages.add_message(request, messages.INFO, msg)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    if request.method == "POST" and request.GET.get('mark_without'):
+        if DialectFeature.objects.filter(dialect_id__in=dialect_ids, feature=feature).count():
+            msg = 'Error: at least one of the submitted dialects already has an entry for this feature'
+            messages.add_message(request, messages.INFO, msg)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        for dialect in Dialect.objects.filter(id__in=dialect_ids):
+            df = DialectFeature(dialect=dialect, feature=feature, is_absent=True)
+            df.save()
+            msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
         messages.add_message(request, messages.INFO, msg)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
