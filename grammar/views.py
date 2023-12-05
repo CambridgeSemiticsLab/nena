@@ -67,14 +67,13 @@ def dialects_with_feature(request, pk):
     dialect_ids = list(int(x) for x in request.POST.getlist('checked_dialect_id'))
     if request.method == "POST" and request.GET.get('bulk_enter'):
         for dialect in Dialect.objects.filter(id__in=dialect_ids):
-            if request.GET.get('bulk_enter'):
-                df = DialectFeature.objects.filter(dialect=dialect, feature=feature).first() or DialectFeature(dialect=dialect, feature=feature)
-                df.is_absent = False
-                df.save()
-                entry = request.GET.get('bulk_enter')
-                dfe = DialectFeatureEntry(feature=df, entry=entry)
-                dfe.save()
-                msg = '{} dialects given the entry {}'.format(len(dialect_ids), entry)
+            df = DialectFeature.objects.filter(dialect=dialect, feature=feature).first() or DialectFeature(dialect=dialect, feature=feature)
+            df.is_absent = False
+            df.save()
+            entry = request.GET.get('bulk_enter')
+            dfe = DialectFeatureEntry(feature=df, entry=entry)
+            dfe.save()
+        msg = '{} dialects given the entry {}'.format(len(dialect_ids), entry)
         messages.add_message(request, messages.INFO, msg)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
@@ -86,7 +85,15 @@ def dialects_with_feature(request, pk):
         for dialect in Dialect.objects.filter(id__in=dialect_ids):
             df = DialectFeature(dialect=dialect, feature=feature, is_absent=True)
             df.save()
-            msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
+        msg = '{} dialects marked as not having this feature'.format(len(dialect_ids))
+        messages.add_message(request, messages.INFO, msg)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    if request.method == "POST" and request.GET.get('delete_entries'):
+        entry_ids = request.POST.getlist("checked_entry_id")
+        for entry in DialectFeatureEntry.objects.filter(id__in=entry_ids):
+            entry.delete()
+        msg = '{} entries deleted'.format(len(entry_ids))
         messages.add_message(request, messages.INFO, msg)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 

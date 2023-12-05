@@ -58,6 +58,7 @@
 
           {% for entry in dialect_feature.entries.all %}
             <div>
+              <input type="checkbox" class="chex" name="checked_entry_id" value="{{entry.id}}">
               <span class="entry">{{ entry.entry }}</span>
               {% if entry.entry == search_term %}
                 <span style="color:red;">&rarr; {{replacement}}</span>
@@ -145,6 +146,7 @@
             <input type="submit" class="button" value="Apply">
           {% endif %}
         </form>
+        <button class="button" id="delete_entries">Delete selected entries</button>
         {% endif %}
         {% if with_without_unknown == 'unknown' %}
           <button class="button" id="mark_without">Mark as does not have this feature</button>
@@ -210,6 +212,12 @@
 
 td.ar {text-align: right;}
 
+tr [name=checked_entry_id]:before,
+tr [name=checked_entry_id]:after {visibility: hidden;}
+tr [name=checked_entry_id]:checked:before,
+tr [name=checked_entry_id]:checked:after,
+tr:hover [name=checked_entry_id]:before,
+tr:hover [name=checked_entry_id]:after {visibility: visible;}
 </style>
 
 <script>
@@ -226,6 +234,12 @@ $(function(){
 
   $('#mark_without').on('click', function(){
     $('#table_form').attr('action', '?mark_without=true').submit()
+  })
+
+  $('#delete_entries').on('click', function(){
+    if(confirm("This is a destructive operation which cannot be undone. Do you wish to continue?")){
+      $('#table_form').attr('action', '?delete_entries=true').submit()
+    }
   })
 
   $('#bulk_enter').on('change', function(){
