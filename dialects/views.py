@@ -549,13 +549,16 @@ def problems(request):
         ('as_usual',         '^ *As usual *$'),
         ('penultiamte',      '^ *Penultimate *$'),
         ('assimilation',     '^ *Regular assimilation of L-suffix and resulting gemination of \/[rn]\/\. *$'),
+        ('brackets',         '[\(\)\{\}\[\]]'),
+        ('mascfem_comment',  '^\S+ [mf][. ]'),
+        ('bracketed_comment','^\S+?,? \(.+?\. .*?\)$'),
     ]
     os = DialectFeatureEntry.objects
     canfix = [
         (type,
          os.filter(entry__iregex=regex).count(),
          os.filter(entry__iregex=regex) \
-           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:30]
+           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:50]
         ) for type, regex in types
     ]
 
