@@ -9,6 +9,6 @@ ftfy==5.7
 django-ucamlookup==3.0.3
 django-ucamprojectlight==1.1
 django-ucamwebauth==1.5.0
-Pillow==10.0.1
+Pillow==10.2.0
 django-widget-tweaks==1.4.8
 git+https://github.com/jamespstrachan/django-github-push-deploy.git@43da910e17101152626c642849e2ac2e8cb98379
