@@ -14,14 +14,12 @@ services:
     environment:
       - DJANGO_DB_HOST=db
       - DJANGO_DB_PORT=3306
-      - DJANGO_DB_DEFAULT_USER=root
-      - DJANGO_DB_DEFAULT_PASSWORD=
-      - GS_PROJECT_ID=
     command: /usr/local/bin/gunicorn --bind=0.0.0.0:80 common.wsgi --reload
   db:
-    image: mariadb:10.1
+    image: mariadb:10.3.39
     volumes:
       - ./database:/docker-entrypoint-initdb.d  # Place init .sql file(s) here.
+      - ./database/conf:/etc/mysql/conf.d
       - mariadb_data:/var/lib/mysql
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=True
