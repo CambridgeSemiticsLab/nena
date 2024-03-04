@@ -552,6 +552,8 @@ def problems(request):
         ('brackets',         '[\(\)\{\}\[\]]'),
         ('mascfem_comment',  '^\S+ [mf][. ]'),
         ('bracketed_comment','^\S+?,? \(.+?\. .*?\)$'),
+        ('double_quotes',    '^.*?".*?$'),
+        ('single_quotes',    "^.*?'.*?$"),
     ]
     os = DialectFeatureEntry.objects
     canfix = [
