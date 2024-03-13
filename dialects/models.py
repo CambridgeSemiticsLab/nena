@@ -103,7 +103,7 @@ class DialectFeatureEntry(models.Model):
         verbose_name_plural = 'Dialect feature entries'
 
     def __str__(self):
-        return u"%s (%s)" % (self.feature, self.frequency)
+        return u"%s (%s) %s" % (self.entry, self.frequency, self.feature)
 
 class DialectFeatureExample(models.Model):
     feature = models.ForeignKey(DialectFeature, related_name='examples', on_delete=models.CASCADE)

@@ -25,7 +25,11 @@
       <p>
         <b>{{type}} appears {{num}} times</b>, eg:<br>
         {% for example in examples %}
-          {{example.0}} <a href="{% url 'dialects:dialect-feature' example.1 example.2 %}">view &raquo;</a><br>
+          {{example.0}} <a href="{% url 'dialects:dialect-feature' example.1 example.2 %}">view &raquo;</a>
+          {% if type == 'comma' %}
+            <a href="{% url 'dialects:split-entries' example.3 %}">split entries &raquo;</a>
+          {%endif%}
+          <br>
         {% endfor %}
       </p>
       {% endfor %}

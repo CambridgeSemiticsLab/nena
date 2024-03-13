@@ -554,13 +554,14 @@ def problems(request):
         ('bracketed_comment','^\S+?,? \(.+?\. .*?\)$'),
         ('double_quotes',    '^.*?".*?$'),
         ('single_quotes',    "^.*?'.*?$"),
+        ('comma',    ","),
     ]
     os = DialectFeatureEntry.objects
     canfix = [
         (type,
          os.filter(entry__iregex=regex).count(),
          os.filter(entry__iregex=regex) \
-           .values_list('entry', 'feature__dialect_id', 'feature_id')[0:50]
+           .values_list('entry', 'feature__dialect_id', 'feature_id', 'id')[0:50]
         ) for type, regex in types
     ]
 
@@ -575,3 +576,78 @@ def problems(request):
         # 'cantfix_count': cantfix.count(),
     }
     return render(request, 'dialects/problems.html', context)
+
+def split_entries(request, entry_id):
+    """ a staff-only view to split the provided entry into two entries across the comma
+    """
+    from django.forms import model_to_dict
+
+    if int(entry_id) > 0:
+        qs = DialectFeatureEntry.objects.filter(id=entry_id)
+    else:
+        qs = DialectFeatureEntry.objects.filter(entry__contains=",").exclude(entry__icontains="exemplified"
+        ).exclude(entry__icontains="independent genitive"
+        ).exclude(entry__icontains="pcs"
+        ).exclude(entry__icontains=" D,"
+        ).exclude(entry__contains=" N,"
+        ).exclude(entry__contains="I,"
+        ).exclude(entry__istartswith="D, "
+        ).exclude(entry__contains="‘"
+        ).exclude(entry__icontains="fossilized"
+        ).exclude(entry__icontains="very"
+        ).exclude(entry__icontains="as usual"
+        ).exclude(entry__icontains="uninflected"
+        ).exclude(entry__icontains="rarely"
+        ).exclude(entry__icontains="gemination"
+        ).exclude(entry__icontains="passive"
+        ).exclude(entry__icontains="inception"
+        ).exclude(entry__icontains="in context"
+        ).exclude(entry__icontains="to be pleased"
+        ).exclude(entry__icontains="Attributive"
+        ).exclude(entry__icontains="good,"
+        ).exclude(entry__icontains="bride,"
+        ).exclude(entry__icontains=", e.g."
+        ).exclude(entry__istartswith="ʾən"
+        ).exclude(entry__istartswith="cases of"
+        ).exclude(entry__istartswith="2:"
+        ).exclude(entry__istartswith="compound construction"
+        ).exclude(entry__icontains="loanwords"
+        ).exclude(entry__icontains="suffix"
+        ).exclude(entry__icontains="emphatic"
+        ).exclude(entry__istartswith="yes"
+        ).exclude(entry__istartswith="no"
+        ).exclude(entry__istartswith="when negated"
+        ).exclude(entry__icontains="pcp")[:5000]
+
+    befores, afters = [], []
+    for original_entry in qs:
+        original_copy = model_to_dict(original_entry, exclude=['id'])
+        text = original_entry.entry
+        if "," in text:
+            entry_texts = text.split(",")
+        elif text.startswith("[m]") or text.startswith("[b]"):
+            entry_texts = [text[1] + text[2:], text[2:]]
+        original_entry.entry = entry_texts[0].strip()
+        original_entry.frequency = "P"
+        entries = []
+        if not original_entry.feature.comment and original_entry.comment:
+            original_entry.feature.comment = original_entry.comment.strip()
+            original_entry.comment = None
+        #original_entry.save()
+        entries.append(original_entry)
+        for entry_text in entry_texts[1:]:
+            entry = DialectFeatureEntry(
+                feature=original_entry.feature,
+                entry=entry_text.strip(),
+                frequency="M"
+                )
+            #entry.save()
+            entries.append(entry)
+
+        befores.append(original_copy)
+        afters.append(entries)
+
+    context = {
+        "befores_and_afters": zip(befores, afters),
+    }
+    return render(request, 'dialects/split-entry.html', context)

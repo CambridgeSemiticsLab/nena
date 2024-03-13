@@ -1,0 +1,24 @@
+{% extends 'nena.html' %}
+
+{% block subtitle %}
+  Split Entry Tool
+{% endblock %}
+
+{% block page_content %}
+<table class="table">
+  <tr>
+    <th></th>
+    <th>before</th>
+    <th>after</th>
+  </tr>
+  {% for before, afters in befores_and_afters %}
+  <tr>
+    <td><a href="{% url 'dialects:dialect-feature' afters.0.feature.dialect_id afters.0.feature_id %}">{{ before.feature }}</a></td>
+    <td><pre>{{ before.entry }} ({{ before.frequency }}) "{{ before.comment|default:"" }}"</pre></td>
+    <td><pre>{% for after in afters %}{% spaceless %}{{ after.entry }} ({{ after.frequency }}) "{{ after.comment|default:"" }}"{% endspaceless %}
+{% endfor %}</pre></td>
+  </tr>
+  {% endfor %}
+</table>
+<a href="{% url 'dialects:split-entries' 0 %}">see all splittable &raquo;</a>
+{% endblock %}

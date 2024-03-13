@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^(?P<dialect>[0-9]+)/gallery$', gallery.views.DialectPhotoView.as_view(), name='dialect-gallery'),
     url(r'^(?P<dialect>[0-9]+)/audio$', audio.views.DialectAudioView.as_view(), name='dialect-audio'),
     url('build-dialects-json', dialects.views.build_dialects_json, name='build_dialects_json'),
+    url(r'^problems/split-entries/(?P<entry_id>[0-9]+)$', dialects.views.split_entries, name='split-entries'),
     url('problems', dialects.views.problems, name='problems'),
 ]
