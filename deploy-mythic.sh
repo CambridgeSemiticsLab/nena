@@ -25,5 +25,5 @@ else
     python manage.py collectstatic --no-input
     deactivate
     ./set-updated-date.sh
-    apache2ctl graceful
+    sudo /usr/sbin/apache2ctl graceful
 fi

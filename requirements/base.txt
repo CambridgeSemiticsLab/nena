@@ -1,5 +1,6 @@
 Django==3.2.24
 mysqlclient==1.4.6
+pyOpenSSL==24.2.1
 gunicorn==20.0.4
 django-environ==0.4.5
 django-storages[google]==1.9.1
@@ -8,7 +9,7 @@ django-treebeard==4.3.1
 ftfy==5.7
 django-ucamlookup==3.0.3
 django-ucamprojectlight==1.1
-django-ucamwebauth==1.5.0
+django-ucamwebauth==2.0.0
 Pillow==10.2.0
 django-widget-tweaks==1.4.8
 git+https://github.com/jamespstrachan/django-github-push-deploy.git@43da910e17101152626c642849e2ac2e8cb98379
