@@ -8,7 +8,7 @@
   {% if GOOGLE_ANALYTICS_REFERENCE %}
   <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{GOOGLE_ANALYTICS_REFERENCE}}"></script>
-    <script>
+    <script type="text/plain" data-category="analytics">
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -39,6 +39,9 @@
         <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
         <script type="text/javascript" src="{% static 'javascripts/libs/modernizr.js' %}"></script>
         <script type="text/javascript" src="{% static 'javascripts/apps-custom.js' %}"></script>
+
+        <!-- cookie consent -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.1.0/dist/cookieconsent.css" integrity="sha384-9KcNFt4axT+TNOVPHpwGHOm4Kv0UcMjdVya1kl+EPBQG+Vmqtz28cnx0f5PZYcnF" crossorigin="anonymous">
 
         {% block additional_head %}
             {# If you are using extensions to the base Project Light app template, in addition to your own app, #}
@@ -281,5 +284,57 @@
   {% block campl_foot_js %}
         {# lazy js loader #}
   {% endblock %}
+
+  <script src="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.1.0/dist/cookieconsent.umd.js" integrity="sha384-xOY5eqzqHsjfa8YYAomICWjVJ3g9q1C1tWgRF09ut5PzRJjLFSpKH7gCsIN3hKcA" crossorigin="anonymous"></script>
+  <script>
+  /**
+   * All config. options available here:
+   * https://cookieconsent.orestbida.com/reference/configuration-reference.html
+   */
+  CookieConsent.run({
+      categories: {
+          necessary: {
+              enabled: true,  // this category is enabled by default
+              readOnly: true  // this category cannot be disabled
+          },
+          analytics: {
+              enabled: true
+          }
+      },
+      language: {
+          default: 'en',
+          translations: {
+              en: {
+                  consentModal: {
+                      title: 'This site uses cookies',
+                      description: 'Cookies are saved to handle sessions if you log in or watch video content via Youtube, and we use Google Analytics to learn how users interact with the site.',
+                      acceptAllBtn: 'Accept all',
+                      acceptNecessaryBtn: 'Reject all',
+                      showPreferencesBtn: 'Manage Individual preferences'
+                  },
+                  preferencesModal: {
+                      title: 'Manage cookie preferences',
+                      acceptAllBtn: 'Accept all',
+                      acceptNecessaryBtn: 'Reject all',
+                      savePreferencesBtn: 'Accept current selection',
+                      closeIconLabel: 'Close modal',
+                      sections: [
+                          {
+                              title: 'Strictly Necessary cookies',
+                              description: 'These cookies are essential for the proper functioning of the website and cannot be disabled.',
+                              linkedCategory: 'necessary'
+                          },
+                          {
+                              title: 'Performance, Analytics and Video',
+                              description: 'These cookies collect information about how you use our website. All of the data is anonymized and cannot be used to identify you.',
+                              linkedCategory: 'analytics'
+                          }
+                      ]
+                  }
+              }
+          }
+      }
+  });
+  </script>
 </body>
 </html>
